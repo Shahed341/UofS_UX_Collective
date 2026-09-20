@@ -16,16 +16,32 @@ export default function BinaryBackground() {
     let obstacles = [];
 
     const getObstacleSelectors = () => [
-      '.flow-node',
+      '.stat-card',
+      '.stats-section',
       '.event-card',
+      '.home-gallery-card',
+      '.comment-card',
+      '.pipeline-section',
+      '.flow-node',
+      '.ping-result-box',
+      '.cal-main-card',
+      '.cal-inspector-sidebar',
+      '.inspector-event-card',
       '.about-card',
       '.gallery-card',
       '.contact-info-card',
       '.contact-form-card',
       '.hero-image-card',
-      '.pipeline-section',
       '.palette-ribbon',
-      '.ping-result-box',
+      '.btn-hero-primary',
+      '.btn-hero-secondary',
+      '.btn-hero-discord',
+      '.btn-primary',
+      '.btn-secondary',
+      '.btn-cal',
+      '.btn-ping',
+      '.cal-today-btn',
+      '.cal-nav-btn',
     ];
 
     const updateObstacles = () => {
@@ -34,7 +50,18 @@ export default function BinaryBackground() {
       elements.forEach((el, index) => {
         const rect = el.getBoundingClientRect();
         // Keep elements in or near viewport
-        if (rect.width > 20 && rect.height > 20 && rect.bottom > -50 && rect.top < height + 50) {
+        if (rect.width > 20 && rect.height > 15 && rect.bottom > -50 && rect.top < height + 50) {
+          const isButton = 
+            el.tagName === 'BUTTON' || 
+            el.tagName === 'A' ||
+            el.classList.contains('btn-hero-primary') || 
+            el.classList.contains('btn-hero-secondary') || 
+            el.classList.contains('btn-hero-discord') || 
+            el.classList.contains('btn-primary') || 
+            el.classList.contains('btn-secondary') ||
+            el.classList.contains('btn-cal') ||
+            el.classList.contains('btn-ping');
+
           newObs.push({
             id: index,
             left: rect.left,
@@ -43,6 +70,7 @@ export default function BinaryBackground() {
             bottom: rect.bottom,
             width: rect.width,
             height: rect.height,
+            isButton,
           });
         }
       });
@@ -266,50 +294,108 @@ export default function BinaryBackground() {
         // --- STATE: FALLING (AND FALLING BEHIND BOX TO BOTTOM) ---
         p.x += p.vx;
         p.y += p.speed + p.vy;
-        p.vx *= 0.92;
-        p.vy *= 0.92;
+        p.vx *= 0.94; // slight bounce conservation
+        p.vy *= 0.94;
 
-        // Steer x towards column slot
-        p.x += (p.colX - p.x) * 0.03;
+        // Steer x gently towards column slot
+        p.x += (p.colX - p.x) * 0.025;
 
-        // Clear ignore lock once particle is below the passed obstacle
-        if (p.state === 'falling_behind' && p.ignoreObsId !== null) {
+        // Clear ignore lock once particle has moved past the obstacle bounds
+        if (p.ignoreObsId !== null) {
           const pastObs = obstacles.find((o) => o.id === p.ignoreObsId);
-          if (!pastObs || p.y > pastObs.bottom + 10) {
-            p.state = 'falling';
+          if (
+            !pastObs || 
+            p.y > pastObs.bottom + 14 || 
+            p.y < pastObs.top - 25 || 
+            p.x < pastObs.left - 25 || 
+            p.x > pastObs.right + 25
+          ) {
             p.ignoreObsId = null;
+            if (p.state === 'falling_behind') {
+              p.state = 'falling';
+            }
           }
         }
 
-        // Check landing collision for interactive particles
+        // Check landing & corner bouncing collision for interactive particles
         if (p.state === 'falling' && p.layer === 'interactive') {
           for (let o = 0; o < obstacles.length; o++) {
             const obs = obstacles[o];
             if (obs.id === p.ignoreObsId) continue;
 
-            if (p.x >= obs.left - 4 && p.x <= obs.right + 4) {
-              const key = `${p.colIndex}_${obs.id}`;
-              const currentStack = stackCounters.get(key) || 0;
+            const isButton = obs.isButton;
+            const cornerWidth = Math.min(26, Math.max(12, obs.width * 0.22));
 
-              if (currentStack < MAX_STACK_PER_COL) {
-                const landingY = obs.top - 4 - currentStack * charHeight;
+            // A. TOP BOUNDARY COLLISION & CORNER BOUNCE
+            if (p.y >= obs.top - 6 && p.y <= obs.top + 12) {
+              // 1. LEFT CORNER BOUNCE: Bounces outward to the left & slightly upwards
+              if (p.x >= obs.left - 10 && p.x <= obs.left + cornerWidth) {
+                p.vx = - (1.5 + Math.random() * 1.8);
+                p.vy = - (1.1 + Math.random() * 1.4);
+                p.ignoreObsId = obs.id;
+                p.char = p.char === '1' ? '0' : '1'; // subtle digit flip on bounce
+                break;
+              }
 
-                if (p.y >= landingY && p.y <= landingY + 14) {
-                  // Land and attach relative to obstacle
-                  p.state = 'stacked';
-                  p.obsId = obs.id;
-                  p.relX = Math.max(8, Math.min(obs.width - 8, p.x - obs.left));
-                  p.stackIndex = currentStack;
-                  p.targetX = obs.left + p.relX;
-                  p.targetY = landingY;
-                  p.y = landingY;
-                  p.settledAt = now;
-                  stackCounters.set(key, currentStack + 1);
+              // 2. RIGHT CORNER BOUNCE: Bounces outward to the right & slightly upwards
+              if (p.x >= obs.right - cornerWidth && p.x <= obs.right + 10) {
+                p.vx = (1.5 + Math.random() * 1.8);
+                p.vy = - (1.1 + Math.random() * 1.4);
+                p.ignoreObsId = obs.id;
+                p.char = p.char === '1' ? '0' : '1';
+                break;
+              }
 
-                  // Spawn replacement particle at the top
-                  particles.push(createParticle(p.colIndex, null, 'interactive'));
+              // 3. CENTER FLAT IMPACT
+              if (p.x > obs.left + cornerWidth && p.x < obs.right - cornerWidth) {
+                if (isButton) {
+                  // Buttons: playful light bounce off the top
+                  p.vy = - (0.9 + Math.random() * 1.1);
+                  p.vx = (Math.random() - 0.5) * 1.4;
+                  p.ignoreObsId = obs.id;
+                  p.char = p.char === '1' ? '0' : '1';
                   break;
+                } else {
+                  // Boxes & Cards: Stack on top with slight landing dampening
+                  const key = `${p.colIndex}_${obs.id}`;
+                  const currentStack = stackCounters.get(key) || 0;
+
+                  if (currentStack < MAX_STACK_PER_COL) {
+                    const landingY = obs.top - 4 - currentStack * charHeight;
+                    if (p.y >= landingY && p.y <= landingY + 14) {
+                      p.state = 'stacked';
+                      p.obsId = obs.id;
+                      p.relX = Math.max(8, Math.min(obs.width - 8, p.x - obs.left));
+                      p.stackIndex = currentStack;
+                      p.targetX = obs.left + p.relX;
+                      p.targetY = landingY;
+                      p.y = landingY;
+                      p.vy = -0.4;
+                      p.settledAt = now;
+                      stackCounters.set(key, currentStack + 1);
+
+                      // Spawn replacement particle at top
+                      particles.push(createParticle(p.colIndex, null, 'interactive'));
+                      break;
+                    }
+                  }
                 }
+              }
+            }
+
+            // B. SIDE EDGES DEFLECTION BOUNCE (while falling beside boxes & buttons)
+            if (p.y > obs.top + 4 && p.y < obs.bottom) {
+              if (p.x >= obs.left - 6 && p.x <= obs.left + 3) {
+                p.vx = - (1.2 + Math.random() * 1.2);
+                p.ignoreObsId = obs.id;
+                p.char = p.char === '1' ? '0' : '1';
+                break;
+              }
+              if (p.x >= obs.right - 3 && p.x <= obs.right + 6) {
+                p.vx = (1.2 + Math.random() * 1.2);
+                p.ignoreObsId = obs.id;
+                p.char = p.char === '1' ? '0' : '1';
+                break;
               }
             }
           }
