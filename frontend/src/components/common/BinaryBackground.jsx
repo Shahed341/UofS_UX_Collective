@@ -16,8 +16,6 @@ export default function BinaryBackground() {
     let obstacles = [];
 
     const getObstacleSelectors = () => [
-      '.stat-card',
-      '.stats-section',
       '.event-card',
       '.home-gallery-card',
       '.comment-card',

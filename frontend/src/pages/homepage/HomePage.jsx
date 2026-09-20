@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import HeroSection from './HeroSection.jsx';
 import EventCalendarSection from './EventCalendarSection.jsx';
 import HomeGallerySection from './HomeGallerySection.jsx';
@@ -17,6 +17,51 @@ export default function HomePage({
   events,
   isLoadingEvents
 }) {
+  const [discordStats, setDiscordStats] = useState({
+    memberCount: 308,
+    onlineCount: 25,
+    isLoading: false
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDiscordStats = async () => {
+      try {
+        const res = await fetch('/api/discord-stats');
+        const data = await res.json();
+        if (isMounted && data && data.memberCount) {
+          setDiscordStats({
+            memberCount: data.memberCount,
+            onlineCount: data.onlineCount || 0,
+            isLoading: false
+          });
+        }
+      } catch (err) {
+        // Fallback directly to Discord API if proxy unavailable
+        try {
+          const directRes = await fetch('https://discord.com/api/v9/invites/Fx7BUvzdzT?with_counts=true');
+          const directData = await directRes.json();
+          if (isMounted && directData && directData.approximate_member_count) {
+            setDiscordStats({
+              memberCount: directData.approximate_member_count,
+              onlineCount: directData.approximate_presence_count || 0,
+              isLoading: false
+            });
+          }
+        } catch (e) {
+          // Keep default fallback
+        }
+      }
+    };
+
+    fetchDiscordStats();
+    const interval = setInterval(fetchDiscordStats, 30000); // 30s real-time poll
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
   const scrollToPipeline = () => {
     const el = document.getElementById('pipeline');
     if (el) {
@@ -30,30 +75,27 @@ export default function HomePage({
       <HeroSection />
 
       <div className="app-container">
-        {/* 2. Stat Section */}
+        {/* 2. Stat Section (Unboxed numbers: Total Members, Events Hosted, Helped Students, Leaders) */}
         <section className="stats-section">
-          <div>
-            <span className="stats-intro-tag">At A Glance</span>
-            <h2 className="stats-intro-title">
-              Empowering student designers & developers at UofS
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6' }}>
-              The University of Saskatchewan's first-ever design club connecting and educating students across product design, UX research, and frontend software engineering.
-            </p>
-          </div>
-
           <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-number gradient-text">119+</div>
-              <div className="stat-label">LinkedIn Community</div>
+            <div className="stat-item">
+              <div className="stat-number gradient-text">{discordStats.memberCount}+</div>
+              <div className="stat-label">Total Members</div>
             </div>
-            <div className="stat-card">
+
+            <div className="stat-item">
+              <div className="stat-number gradient-text">12+</div>
+              <div className="stat-label">Events Hosted</div>
+            </div>
+
+            <div className="stat-item">
+              <div className="stat-number gradient-text">250+</div>
+              <div className="stat-label">Helped Students</div>
+            </div>
+
+            <div className="stat-item">
               <div className="stat-number gradient-text">7</div>
               <div className="stat-label">Executive Leaders</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number gradient-text">5+</div>
-              <div className="stat-label">Campus Tech Partners</div>
             </div>
           </div>
         </section>

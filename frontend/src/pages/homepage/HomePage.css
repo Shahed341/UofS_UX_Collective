@@ -164,64 +164,51 @@
   transform: translateY(-2px);
 }
 
-/* Stats / Community Highlights Section */
+/* Stats / Community Highlights Section (Unboxed) */
 .stats-section {
-  display: grid;
-  grid-template-columns: 1.2fr 2fr;
-  gap: 32px;
-  align-items: center;
-  background: #FFFFFF;
-  border: 1px solid #EBEBEB;
-  border-radius: var(--radius-lg);
-  padding: 36px 40px;
-  margin-bottom: 56px;
-  box-shadow: var(--shadow-sm);
-}
-
-.stats-intro-tag {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--primary-pink);
-  margin-bottom: 8px;
-  display: block;
-}
-
-.stats-intro-title {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--text-dark);
-  line-height: 1.25;
-  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 72px;
+  box-shadow: none;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  width: 100%;
+  padding: 8px 0;
+  border: none;
 }
 
-.stat-card {
-  background: #FAFAFA;
-  border: 1px solid #EEEEEE;
-  border-radius: var(--radius-md);
-  padding: 20px 16px;
-  text-align: center;
+.stat-item {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  text-align: left;
+  box-shadow: none;
 }
 
 .stat-number {
-  font-size: 30px;
+  font-size: 52px;
   font-weight: 800;
   color: var(--text-dark);
-  line-height: 1.1;
-  margin-bottom: 4px;
+  line-height: 1.05;
+  margin-bottom: 8px;
+  letter-spacing: -1.5px;
 }
 
 .stat-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
 /* Event Calendar Section on Homepage */
@@ -1125,12 +1112,9 @@
   .hero-fullscreen-desc {
     font-size: 15px;
   }
-  .stats-section {
-    grid-template-columns: 1fr;
-    padding: 24px;
-  }
   .stats-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
   }
   .pipeline-grid {
     grid-template-columns: 1fr;

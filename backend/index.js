@@ -70,6 +70,27 @@ app.get('/api/status', async (req, res) => {
   res.status(dbStatus.connected ? 200 : 503).json(fullStatus);
 });
 
+// Retrieve live Discord member count in real-time
+app.get('/api/discord-stats', async (req, res) => {
+  try {
+    const response = await fetch('https://discord.com/api/v9/invites/Fx7BUvzdzT?with_counts=true');
+    const data = await response.json();
+    res.json({
+      success: true,
+      memberCount: data.approximate_member_count || 308,
+      onlineCount: data.approximate_presence_count || 25,
+      guildName: data.guild?.name || 'U of S UX Collective'
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      memberCount: 308,
+      onlineCount: 25,
+      error: error.message
+    });
+  }
+});
+
 // Retrieve UX Collective events from database
 app.get('/api/events', async (req, res) => {
   try {
