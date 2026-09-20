@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Calendar as CalendarIcon, 
   MapPin, 
@@ -8,7 +9,6 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Clock, 
-  Sparkles,
   CalendarDays,
   Info
 } from 'lucide-react';
@@ -71,7 +71,8 @@ function formatEventTime(dateStr) {
   return cleanStr;
 }
 
-export default function EventCalendarSection({ events = [], isLoadingEvents, setActivePage }) {
+export default function EventCalendarSection({ events = [], isLoadingEvents }) {
+  const navigate = useNavigate();
   const today = new Date();
   const todayYear = today.getFullYear();
   const todayMonth = today.getMonth();
@@ -151,22 +152,24 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
     return new Date(selectedDate.year, selectedDate.month, selectedDate.day).getTime();
   }, [selectedDate]);
 
-  // Events strictly BEFORE the currently selected date
+  // Events strictly BEFORE the currently selected date (max 2 nearest prior events)
   const priorActiveEvents = useMemo(() => {
     if (!selectedDateTimestamp) return [];
-    return sortedEvents.filter((e) => {
+    const allPrior = sortedEvents.filter((e) => {
       const t = new Date(e.parsedDate.year, e.parsedDate.month, e.parsedDate.day).getTime();
       return t < selectedDateTimestamp;
     });
+    return allPrior.slice(-2); // Stack max 2 nearest prior events on top
   }, [sortedEvents, selectedDateTimestamp]);
 
-  // Events strictly AFTER the currently selected date
+  // Events strictly AFTER the currently selected date (max 3 upcoming events)
   const nextActiveEvents = useMemo(() => {
-    if (!selectedDateTimestamp) return sortedEvents;
-    return sortedEvents.filter((e) => {
+    if (!selectedDateTimestamp) return sortedEvents.slice(0, 3);
+    const allNext = sortedEvents.filter((e) => {
       const t = new Date(e.parsedDate.year, e.parsedDate.month, e.parsedDate.day).getTime();
       return t > selectedDateTimestamp;
     });
+    return allNext.slice(0, 3); // Keep max 3 next events at bottom
   }, [sortedEvents, selectedDateTimestamp]);
 
   const handleSelectEvent = (ev) => {
@@ -218,15 +221,6 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
     setViewYear(todayYear);
     setViewMonth(todayMonth);
     setSelectedDate({ year: todayYear, month: todayMonth, day: todayDay });
-  };
-
-  const handleJumpToUpcoming = () => {
-    if (parsedEvents.length > 0 && parsedEvents[0].parsedDate) {
-      const target = parsedEvents[0].parsedDate;
-      setViewYear(target.year);
-      setViewMonth(target.month);
-      setSelectedDate(target);
-    }
   };
 
   // Google Calendar Link generator
@@ -327,18 +321,10 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
           <span className="section-tag">Interactive Schedule</span>
           <h3 className="section-title">Club Calendar & Event Highlights</h3>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            className="btn-secondary"
-            onClick={handleJumpToUpcoming}
-            title="Browse months with active club events"
-          >
-            <Sparkles size={14} color="#E81D88" />
-            Jump to Active Events
-          </button>
+        <div>
           <button 
             className="btn-secondary" 
-            onClick={() => setActivePage('events')}
+            onClick={() => navigate('/events')}
           >
             View All Events List <ArrowRight size={15} />
           </button>
@@ -527,7 +513,7 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
                           <button
                             type="button"
                             className="btn-readmore-inline"
-                            onClick={() => setActivePage && setActivePage('events')}
+                            onClick={() => navigate('/events')}
                             title="Read full event details on Events page"
                           >
                             Read More <ArrowRight size={12} />

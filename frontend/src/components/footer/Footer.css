@@ -90,6 +90,7 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
   transition: color 0.2s ease;
   display: inline-flex;
   align-items: center;

@@ -1,8 +1,9 @@
 import React from 'react';
-import { MapPin, Mail, MessageSquare, ExternalLink, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MapPin, Mail, MessageSquare, ExternalLink } from 'lucide-react';
 import './Footer.css';
 
-export default function Footer({ setActivePage }) {
+export default function Footer() {
   return (
     <footer className="footer-wrapper">
       <div className="footer-content">
@@ -38,20 +39,30 @@ export default function Footer({ setActivePage }) {
         <div>
           <h4 className="footer-col-title">Navigation</h4>
           <ul className="footer-links-list">
-            <li className="footer-link-item" onClick={() => { setActivePage('homepage'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-              Home
+            <li>
+              <Link to="/" className="footer-link-item">
+                Home
+              </Link>
             </li>
-            <li className="footer-link-item" onClick={() => { setActivePage('about'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-              About Us & Executive Team
+            <li>
+              <Link to="/about" className="footer-link-item">
+                About Us & Executive Team
+              </Link>
             </li>
-            <li className="footer-link-item" onClick={() => { setActivePage('events'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-              Upcoming Events & Sprints
+            <li>
+              <Link to="/events" className="footer-link-item">
+                Upcoming Events & Sprints
+              </Link>
             </li>
-            <li className="footer-link-item" onClick={() => { setActivePage('gallery'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-              Visual Gallery & Showcase
+            <li>
+              <Link to="/gallery" className="footer-link-item">
+                Visual Gallery & Showcase
+              </Link>
             </li>
-            <li className="footer-link-item" onClick={() => { setActivePage('contact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-              Contact & Inquiries
+            <li>
+              <Link to="/contact" className="footer-link-item">
+                Contact & Inquiries
+              </Link>
             </li>
           </ul>
         </div>

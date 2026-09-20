@@ -1,31 +1,27 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Info, Calendar, Image, Mail, Menu, X } from 'lucide-react';
 import './Navbar.css';
 
-export default function Navbar({ activePage, setActivePage, isConnected }) {
+export default function Navbar({ isConnected }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const navItems = [
-    { id: 'about', label: 'About', icon: Info },
-    { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'gallery', label: 'Gallery', icon: Image },
-    { id: 'contact', label: 'Contact', icon: Mail },
+    { path: '/about', label: 'About', icon: Info },
+    { path: '/events', label: 'Events', icon: Calendar },
+    { path: '/gallery', label: 'Gallery', icon: Image },
+    { path: '/contact', label: 'Contact', icon: Mail },
   ];
-
-  const handleNavClick = (id) => {
-    setActivePage(id);
-    setIsMobileMenuOpen(false);
-  };
 
   return (
     <header className="navbar-wrapper">
       <nav className="navbar-content">
-        {/* Left Side: Brand Logo acts as Main Page (Homepage) Button */}
-        <div 
+        {/* Left Side: Brand Logo acts as Main Page (Homepage) Link */}
+        <Link 
+          to="/"
           className="brand-section" 
-          onClick={() => handleNavClick('homepage')}
-          role="button"
-          tabIndex={0}
+          onClick={() => setIsMobileMenuOpen(false)}
           title="Return to Main Page"
         >
           <img 
@@ -38,23 +34,23 @@ export default function Navbar({ activePage, setActivePage, isConnected }) {
             <h1 className="brand-title">UX Collective</h1>
             <p className="brand-subtitle">University of Saskatchewan</p>
           </div>
-        </div>
+        </Link>
 
         {/* Right Side: Desktop Nav Links */}
         <div className="nav-right-container">
           <div className="nav-links">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isSelected = activePage === item.id;
+              const isSelected = location.pathname === item.path;
               return (
-                <button
-                  key={item.id}
+                <Link
+                  key={item.path}
+                  to={item.path}
                   className={`nav-btn ${isSelected ? 'active-box' : ''}`}
-                  onClick={() => handleNavClick(item.id)}
                 >
                   <Icon size={15} />
                   <span>{item.label}</span>
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -76,16 +72,17 @@ export default function Navbar({ activePage, setActivePage, isConnected }) {
           <div className="mobile-nav-links">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isSelected = activePage === item.id;
+              const isSelected = location.pathname === item.path;
               return (
-                <button
-                  key={item.id}
+                <Link
+                  key={item.path}
+                  to={item.path}
                   className={`mobile-nav-btn ${isSelected ? 'active-box' : ''}`}
-                  onClick={() => handleNavClick(item.id)}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Icon size={18} />
                   <span>{item.label}</span>
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -94,3 +91,4 @@ export default function Navbar({ activePage, setActivePage, isConnected }) {
     </header>
   );
 }
+

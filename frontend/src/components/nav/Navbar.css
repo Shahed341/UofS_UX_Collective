@@ -32,6 +32,7 @@
   background: transparent;
   border: none;
   padding: 0;
+  text-decoration: none;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
@@ -96,6 +97,7 @@
   align-items: center;
   gap: 7px;
   cursor: pointer;
+  text-decoration: none;
   transition: all 0.2s ease;
   box-shadow: none;
 }
@@ -176,6 +178,7 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
+  text-decoration: none;
   transition: all 0.2s ease;
   width: 100%;
   text-align: left;

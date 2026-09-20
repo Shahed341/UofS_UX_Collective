@@ -1,77 +1,71 @@
 import React from 'react';
-import { MessageSquareQuote, Star, UserCheck, Sparkles } from 'lucide-react';
 
-const STUDENT_COMMENTS = [
+const PAST_STUDENT_COMMENTS = [
   {
     id: 1,
     name: 'Alex Patel',
-    role: '3rd Year Computer Science',
-    badge: 'Tech Intern',
-    quote: 'UXCO bridged the gap between my CS coursework and production product design. Collaborating on Figma component libraries and design tokens gave me the exact portfolio edge I needed for my summer internship!',
-    rating: 5,
-    tag: 'Career Growth'
+    role: 'Computer Science • Tech Intern',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    initial: 'A',
+    quote: '“UXCO makes finding design mentors and tech workshops so easy! I was able to build real-world Figma prototypes and collaborate directly with developer peers. Highly recommend!”'
   },
   {
     id: 2,
     name: 'Maya Kowalski',
-    role: '4th Year Interactive Systems Design',
-    badge: 'UI/UX Lead',
-    quote: 'Having an active community on campus focused on user research, usability testing, and design sprints has been transformative. It’s inspiring to work alongside passionate peers across disciplines.',
-    rating: 5,
-    tag: 'Design Community'
+    role: 'Interactive Systems • UI/UX Lead',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    initial: 'M',
+    quote: '“Our team needed a flexible workshop space and hands-on portfolio feedback. UXCO delivered exactly what we needed to refine our case studies and land our first design internships!”'
   },
   {
     id: 3,
-    name: 'Liam Davies',
-    role: '2nd Year Software Engineering',
-    badge: 'Developer',
-    quote: 'The collaborative events with CSSS and Cybersecurity Club opened my eyes to real design-to-development handoffs. Building with React and Docker connected theory directly to real-world code.',
-    rating: 5,
-    tag: 'Developer Hand-off'
-  },
-  {
-    id: 4,
     name: 'Jessica Tran',
-    role: '3rd Year Computer Science',
-    badge: 'Workshop Attendee',
-    quote: 'The portfolio critique night was invaluable. Senior student mentors gave me honest, constructive feedback that helped me completely redesign my mobile case studies before applying for jobs.',
-    rating: 5,
-    tag: 'Portfolio Review'
+    role: 'Software Engineering • Frontend Mentee',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+    initial: 'J',
+    quote: '“I love the variety of collaborative events available! Whether I need a peer design critique or an interactive sprint session, UXCO always has the perfect community support.”'
   }
 ];
 
 export default function StudentComments() {
   return (
-    <section className="comments-section">
-      <div className="section-header-centered">
-        <span className="section-tag">Student Voices</span>
-        <h3 className="section-title">What Students Say About UXCO</h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '15px', maxWidth: '640px', margin: '6px auto 0 auto' }}>
-          Hear from student designers, researchers, and software developers across the University of Saskatchewan campus.
+    <section className="testimonials-unified-section">
+      {/* Center Header */}
+      <div className="testimonials-header-block">
+        <span className="testimonials-badge-pill">Testimonials</span>
+        <h2 className="testimonials-main-title">
+          Trusted by creatives and leaders
+        </h2>
+        <p className="testimonials-sub-title">
+          from student designers, developers & researchers across USask
         </p>
       </div>
 
-      <div className="comments-grid">
-        {STUDENT_COMMENTS.map((item) => (
-          <div key={item.id} className="comment-card">
-            <div className="comment-header">
-              <div className="comment-stars">
-                {[...Array(item.rating)].map((_, i) => (
-                  <Star key={i} size={14} fill="#FA9B7A" color="#FA9B7A" />
-                ))}
-              </div>
-              <span className="comment-tag">{item.tag}</span>
-            </div>
+      {/* 3-Column Reviews (No Star, Clean Quotes & Authors) */}
+      <div className="testimonials-reviews-grid">
+        {PAST_STUDENT_COMMENTS.map((item) => (
+          <div key={item.id} className="testimonial-quote-card">
+            <p className="testimonial-quote-text">
+              {item.quote}
+            </p>
 
-            <p className="comment-quote">"{item.quote}"</p>
-
-            <div className="comment-author">
-              <div className="author-avatar">
-                {item.name.charAt(0)}
+            <div className="testimonial-author-row">
+              <img 
+                src={item.avatar} 
+                alt={item.name} 
+                className="testimonial-author-avatar"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  const fallback = e.target.parentElement.querySelector('.testimonial-fallback-avatar');
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+              <div className="testimonial-fallback-avatar" style={{ display: 'none' }}>
+                {item.initial}
               </div>
-              <div>
-                <h4 className="author-name">{item.name}</h4>
-                <p className="author-role">🎓 {item.role}</p>
+              <div className="testimonial-author-info">
+                <h4 className="testimonial-author-name">{item.name}</h4>
+                <p className="testimonial-author-role">{item.role}</p>
               </div>
             </div>
           </div>

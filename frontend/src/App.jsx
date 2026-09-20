@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import BinaryBackground from './components/common/BinaryBackground.jsx';
+import ScrollToTop from './components/common/ScrollToTop.jsx';
 import Navbar from './components/nav/Navbar.jsx';
 import Footer from './components/footer/Footer.jsx';
 
@@ -12,7 +14,6 @@ import ContactPage from './pages/contact/ContactPage.jsx';
 import './App.css';
 
 export default function App() {
-  const [activePage, setActivePage] = useState('homepage');
   const [statusData, setStatusData] = useState(null);
   const [events, setEvents] = useState([]);
   const [logs, setLogs] = useState([]);
@@ -113,59 +114,77 @@ export default function App() {
 
   return (
     <>
+      <ScrollToTop />
       {/* High-quality dropping 0 and 1 interactive background */}
       <BinaryBackground />
 
-      <Navbar 
-        activePage={activePage} 
-        setActivePage={setActivePage} 
-        isConnected={isConnected} 
-      />
+      <Navbar isConnected={isConnected} />
 
       <main className="main-viewport">
-        {activePage === 'homepage' && (
-          <HomePage 
-            statusData={statusData}
-            isLoadingStatus={isLoadingStatus}
-            onRefreshStatus={fetchStatus}
-            onPing={handlePing}
-            isPinging={isPinging}
-            pingResult={pingResult}
-            setActivePage={setActivePage}
-            events={events}
-            isLoadingEvents={isLoadingEvents}
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <HomePage 
+                statusData={statusData}
+                isLoadingStatus={isLoadingStatus}
+                onRefreshStatus={fetchStatus}
+                onPing={handlePing}
+                isPinging={isPinging}
+                pingResult={pingResult}
+                events={events}
+                isLoadingEvents={isLoadingEvents}
+              />
+            } 
           />
-        )}
-
-        {activePage === 'about' && (
-          <div className="app-container page-padded">
-            <AboutPage />
-          </div>
-        )}
-
-        {activePage === 'events' && (
-          <div className="app-container page-padded">
-            <EventsPage 
-              events={events}
-              isLoadingEvents={isLoadingEvents}
-            />
-          </div>
-        )}
-
-        {activePage === 'gallery' && (
-          <div className="app-container page-padded">
-            <GalleryPage />
-          </div>
-        )}
-
-        {activePage === 'contact' && (
-          <div className="app-container page-padded">
-            <ContactPage />
-          </div>
-        )}
+          <Route 
+            path="/home" 
+            element={<Navigate to="/" replace />} 
+          />
+          <Route 
+            path="/about" 
+            element={
+              <div className="app-container page-padded">
+                <AboutPage />
+              </div>
+            } 
+          />
+          <Route 
+            path="/events" 
+            element={
+              <div className="app-container page-padded">
+                <EventsPage 
+                  events={events}
+                  isLoadingEvents={isLoadingEvents}
+                />
+              </div>
+            } 
+          />
+          <Route 
+            path="/gallery" 
+            element={
+              <div className="app-container page-padded">
+                <GalleryPage />
+              </div>
+            } 
+          />
+          <Route 
+            path="/contact" 
+            element={
+              <div className="app-container page-padded">
+                <ContactPage />
+              </div>
+            } 
+          />
+          {/* Fallback for unknown routes */}
+          <Route 
+            path="*" 
+            element={<Navigate to="/" replace />} 
+          />
+        </Routes>
       </main>
 
-      <Footer setActivePage={setActivePage} />
+      <Footer />
     </>
   );
 }

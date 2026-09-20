@@ -104,13 +104,10 @@ export default function HomePage({
         <EventCalendarSection 
           events={events}
           isLoadingEvents={isLoadingEvents}
-          setActivePage={setActivePage}
         />
 
         {/* 4. Gallery Section */}
-        <HomeGallerySection 
-          setActivePage={setActivePage}
-        />
+        <HomeGallerySection />
 
         {/* 5. Student Comments / Testimonials Section */}
         <StudentComments />
