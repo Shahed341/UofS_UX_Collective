@@ -7,8 +7,6 @@ import {
   ArrowRight, 
   ChevronLeft, 
   ChevronRight, 
-  ChevronsLeft, 
-  ChevronsRight, 
   Clock, 
   Sparkles,
   CalendarDays,
@@ -23,7 +21,7 @@ const MONTH_NAMES = [
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Helper to parse event date strings from MySQL
-export function parseEventDate(dateStr) {
+function parseEventDate(dateStr) {
   if (!dateStr) return null;
 
   const monthMap = {
@@ -61,6 +59,16 @@ export function parseEventDate(dateStr) {
   }
 
   return null;
+}
+
+// Helper to format clean event time (stripping redundant date & utf8 artifacts)
+function formatEventTime(dateStr) {
+  if (!dateStr) return '';
+  const cleanStr = dateStr.replace(/â€¢/g, '•');
+  if (cleanStr.includes('•')) {
+    return cleanStr.split('•')[1]?.trim() || cleanStr;
+  }
+  return cleanStr;
 }
 
 export default function EventCalendarSection({ events = [], isLoadingEvents, setActivePage }) {
@@ -300,71 +308,33 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
         <div className="cal-layout-container">
           {/* Left Column: Full Month Calendar */}
           <div className="cal-main-card">
-            {/* Calendar Controls & Month/Year Browse Bar */}
-            <div className="cal-nav-bar">
-              <div className="cal-browse-left">
-                <button 
-                  className="cal-nav-btn" 
-                  onClick={handlePrevYear} 
-                  title="Previous Year"
-                  aria-label="Previous Year"
-                >
-                  <ChevronsLeft size={16} />
-                </button>
-                <button 
-                  className="cal-nav-btn" 
-                  onClick={handlePrevMonth} 
-                  title="Previous Month"
-                  aria-label="Previous Month"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-
-                <div className="cal-picker-group">
-                  <select 
-                    value={viewMonth} 
-                    onChange={handleMonthChange}
-                    className="cal-select cal-month-select"
+            {/* Unified Clean Calendar Month & Controls Header */}
+            <div className="cal-header-bar">
+              <div className="cal-header-left">
+                <h4 className="cal-month-title">
+                  {MONTH_NAMES[viewMonth]} <span className="gradient-text">{viewYear}</span>
+                </h4>
+                <div className="cal-nav-arrows">
+                  <button 
+                    className="cal-nav-btn" 
+                    onClick={handlePrevMonth} 
+                    title="Previous Month"
+                    aria-label="Previous Month"
                   >
-                    {MONTH_NAMES.map((name, idx) => (
-                      <option key={name} value={idx}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select 
-                    value={viewYear} 
-                    onChange={handleYearChange}
-                    className="cal-select cal-year-select"
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button 
+                    className="cal-nav-btn" 
+                    onClick={handleNextMonth} 
+                    title="Next Month"
+                    aria-label="Next Month"
                   >
-                    {[2024, 2025, 2026, 2027, 2028].map((yr) => (
-                      <option key={yr} value={yr}>
-                        {yr}
-                      </option>
-                    ))}
-                  </select>
+                    <ChevronRight size={18} />
+                  </button>
                 </div>
-
-                <button 
-                  className="cal-nav-btn" 
-                  onClick={handleNextMonth} 
-                  title="Next Month"
-                  aria-label="Next Month"
-                >
-                  <ChevronRight size={16} />
-                </button>
-                <button 
-                  className="cal-nav-btn" 
-                  onClick={handleNextYear} 
-                  title="Next Year"
-                  aria-label="Next Year"
-                >
-                  <ChevronsRight size={16} />
-                </button>
               </div>
 
-              <div className="cal-browse-right">
+              <div className="cal-header-right">
                 <button className="cal-today-btn" onClick={handleJumpToToday}>
                   Today
                 </button>
@@ -372,16 +342,6 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
                   {eventsInCurrentMonth.length} Event{eventsInCurrentMonth.length === 1 ? '' : 's'}
                 </span>
               </div>
-            </div>
-
-            {/* Calendar Month & Year Big Header */}
-            <div className="cal-month-display">
-              <h4 className="cal-month-title">
-                {MONTH_NAMES[viewMonth]} <span className="gradient-text">{viewYear}</span>
-              </h4>
-              <p className="cal-month-subtitle">
-                Click any highlighted date below to view session details, locations, and Google Calendar sync.
-              </p>
             </div>
 
             {/* 7-Day Calendar Grid Header */}
@@ -438,7 +398,6 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
                             className="cal-event-dot-item"
                             title={`${ev.title} (${ev.category})`}
                           >
-                            <span className="cal-event-dot" />
                             <span className="cal-event-mini-title">{ev.title}</span>
                           </div>
                         ))}
@@ -489,16 +448,14 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
                   <div key={event.id} className="inspector-event-card">
                     <div className="inspector-card-top">
                       <span className="event-tag">{event.category}</span>
-                      <span className="event-db-pill">DB #{event.id}</span>
                     </div>
 
                     <h5 className="inspector-event-title">{event.title}</h5>
-                    <p className="inspector-event-desc">{event.description}</p>
 
                     <div className="event-details">
                       <div className="detail-row">
                         <Clock size={15} color="#FA9B7A" />
-                        <span>{event.date}</span>
+                        <span>{formatEventTime(event.date)}</span>
                       </div>
                       <div className="detail-row">
                         <MapPin size={15} color="#E81D88" />
@@ -511,7 +468,7 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn-cal"
-                      style={{ marginTop: '14px', width: '100%', justifyContent: 'center' }}
+                      style={{ marginTop: '10px', width: '100%', justifyContent: 'center' }}
                     >
                       <CalendarPlus size={15} />
                       Add to Google Calendar
