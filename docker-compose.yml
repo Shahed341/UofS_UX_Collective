@@ -1,0 +1,68 @@
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: uxco_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: uxco_db
+      MYSQL_USER: uxco_user
+      MYSQL_PASSWORD: uxco_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - uxco_network
+
+  # Node.js Express Backend API Service
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: uxco_server
+    restart: unless-stopped
+    environment:
+      PORT: 5000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: uxco_user
+      DB_PASSWORD: uxco_password
+      DB_NAME: uxco_db
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - uxco_network
+
+  # React Frontend (Nginx Production Server)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: uxco_client
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - uxco_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  uxco_network:
+    driver: bridge

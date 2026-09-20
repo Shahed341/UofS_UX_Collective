@@ -1,0 +1,5 @@
+Homepage
+Hero section: (Thorvaldson image), ux moto, join button
+Upcoming events : calendar with add to google calendar button
+work section: (recent events with photo)
+
