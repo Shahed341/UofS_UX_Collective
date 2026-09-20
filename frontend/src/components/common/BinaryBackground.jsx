@@ -138,7 +138,9 @@ export default function BinaryBackground() {
     const charHeight = 16;
     const fontSize = 14;
     const PILE_LIFETIME_MS = 10000; // 10 seconds before slipping behind box
+    const FLOOR_PILE_LIFETIME_MS = 20000; // 20 seconds before bottom tower digits disappear
     const MAX_STACK_PER_COL = 7;
+    const MAX_FLOOR_STACK = 8; // Max tower height at bottom
 
     let particles = [];
 
@@ -159,11 +161,11 @@ export default function BinaryBackground() {
         color: colorObj,
         weight: Math.random() > 0.6 ? '700' : '500',
         flipTimer: 50 + Math.floor(Math.random() * 100),
-        state: 'falling', // 'falling' | 'stacked' | 'falling_behind'
+        state: 'falling', // 'falling' | 'stacked' | 'falling_behind' | 'stacked_bottom'
         settledAt: null,
         obsId: null,
         relX: 0, // Relative X offset inside the obstacle box
-        stackIndex: 0, // Vertical position in pile
+        stackIndex: 0, // Vertical position in pile/tower
         ignoreObsId: null,
         layer,
       };
@@ -192,7 +194,7 @@ export default function BinaryBackground() {
       // Filter out-of-bounds particles
       particles = particles.filter((p) => p.x <= width + 50 && p.colIndex <= currentCols + 1);
 
-      // Re-anchor stacked particles to obstacle's new bounding box
+      // Re-anchor stacked particles to obstacle's new bounding box / floor
       particles.forEach((p) => {
         // Recalculate colX based on column width
         p.colX = p.colIndex * columnWidth + columnWidth / 2;
@@ -211,6 +213,11 @@ export default function BinaryBackground() {
             p.obsId = null;
             p.settledAt = null;
           }
+        } else if (p.state === 'stacked_bottom') {
+          p.targetX = p.colX;
+          p.targetY = height - 16 - p.stackIndex * charHeight;
+          p.x = p.targetX;
+          p.y = p.targetY;
         }
       });
 
@@ -229,6 +236,16 @@ export default function BinaryBackground() {
       ctx.clearRect(0, 0, width, height);
       const now = Date.now();
       const stackCounters = new Map();
+      const floorStackCounters = new Map();
+
+      // Pre-calculate existing floor towers per column
+      for (let j = 0; j < particles.length; j++) {
+        const pt = particles[j];
+        if (pt.state === 'stacked_bottom') {
+          const cur = floorStackCounters.get(pt.colIndex) || 0;
+          floorStackCounters.set(pt.colIndex, Math.max(cur, pt.stackIndex + 1));
+        }
+      }
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
@@ -254,7 +271,46 @@ export default function BinaryBackground() {
           }
         }
 
-        // --- STATE: STACKED ON TOP OF A BOX ---
+        // --- STATE: STACKED AT BOTTOM OF SCREEN (FOOTER TOWER) ---
+        if (p.state === 'stacked_bottom') {
+          const age = now - p.settledAt;
+
+          // Stay for 20 seconds before disappearing
+          if (age >= FLOOR_PILE_LIFETIME_MS) {
+            particles.splice(i, 1);
+            i--;
+            continue;
+          }
+
+          // Maintain bottom tower position
+          p.targetX = p.colX;
+          p.targetY = height - 16 - p.stackIndex * charHeight;
+
+          // Physics spring to maintain tower brick position
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.88;
+          p.vy *= 0.88;
+          p.x += (p.targetX - p.x) * 0.16;
+          p.y += (p.targetY - p.y) * 0.16;
+
+          // Smooth fade-out in final 2.5 seconds of the 20s duration
+          let alpha = p.color.a;
+          const fadeWindow = 2500;
+          if (age > FLOOR_PILE_LIFETIME_MS - fadeWindow) {
+            const remainingRatio = (FLOOR_PILE_LIFETIME_MS - age) / fadeWindow;
+            alpha = p.color.a * Math.max(0, Math.min(1, remainingRatio));
+          }
+
+          // Draw stacked floor tower digit
+          ctx.font = `${p.weight} ${fontSize}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
+          ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${alpha})`;
+          ctx.textAlign = 'center';
+          ctx.fillText(p.char, p.x, p.y);
+          continue;
+        }
+
+        // --- STATE: STACKED ON TOP OF A BOX / CARD ---
         if (p.state === 'stacked') {
           const obs = obstacles.find((o) => o.id === p.obsId);
           const age = now - p.settledAt;
@@ -408,9 +464,38 @@ export default function BinaryBackground() {
           }
         }
 
+        // --- BOTTOM FLOOR / FOOTER TOWER STACKING COLLISION ---
+        if (p.state === 'falling' && (p.layer === 'interactive' || Math.random() > 0.5)) {
+          const curFloorCount = floorStackCounters.get(p.colIndex) || 0;
+          if (curFloorCount < MAX_FLOOR_STACK) {
+            const floorLandingY = height - 16 - curFloorCount * charHeight;
+            if (p.y >= floorLandingY - 8 && p.y <= floorLandingY + 14) {
+              p.state = 'stacked_bottom';
+              p.settledAt = now;
+              p.stackIndex = curFloorCount;
+              p.targetX = p.colX;
+              p.targetY = floorLandingY;
+              p.x = p.colX;
+              p.y = floorLandingY;
+              p.vy = -0.3; // soft landing dampener
+              floorStackCounters.set(p.colIndex, curFloorCount + 1);
+
+              // Spawn replacement falling particle from the top
+              particles.push(createParticle(p.colIndex, null, p.layer));
+
+              // Draw settled bottom digit
+              ctx.font = `${p.weight} ${fontSize}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
+              ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.color.a})`;
+              ctx.textAlign = 'center';
+              ctx.fillText(p.char, p.x, p.y);
+              continue;
+            }
+          }
+        }
+
         // Recycle when falling past bottom of screen
         if (p.y > height + 30) {
-          const maxAllowed = Math.ceil(width / columnWidth) * 4;
+          const maxAllowed = Math.ceil(width / columnWidth) * 4.5;
           if (particles.length > maxAllowed) {
             particles.splice(i, 1);
             i--;

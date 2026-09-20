@@ -1,8 +1,8 @@
 import React from 'react';
-import { MapPin, Mail, Instagram, Linkedin, ExternalLink } from 'lucide-react';
+import { Mail, Instagram, Linkedin } from 'lucide-react';
 import './Footer.css';
 
-function DiscordIcon({ size = 18, color = 'currentColor' }) {
+function DiscordIcon({ size = 20, color = 'currentColor' }) {
   return (
     <svg 
       width={size} 
@@ -22,127 +22,71 @@ export default function Footer() {
 
   return (
     <footer className="footer-wrapper">
-      <div className="footer-content">
-        {/* Col 1: Brand, Motto & Location */}
-        <div className="footer-brand-col">
-          <div className="footer-brand-header">
-            <img 
-              src="/logo.jpg" 
-              alt="UX Collective Logo" 
-              className="footer-logo"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <div>
-              <h3 className="footer-title">UX Collective</h3>
-              <p className="footer-subtitle">University of Saskatchewan</p>
-            </div>
-          </div>
-
-          <p className="footer-motto-text">
-            Connecting and educating students in product & digital design across USask.
-          </p>
-
-          <div className="footer-location-row">
-            <MapPin size={15} color="#E81D88" style={{ flexShrink: 0 }} />
-            <span>Thorvaldson Building • Saskatoon, SK</span>
-          </div>
-
-          {/* Quick Social Icon Row */}
-          <div className="footer-social-icons-row">
-            <a 
-              href="https://www.instagram.com/uofs_uxcollective/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="footer-icon-btn instagram"
-              title="Follow us on Instagram"
-              aria-label="Instagram"
-            >
-              <Instagram size={18} />
-            </a>
-
-            <a 
-              href="https://www.linkedin.com/company/uofs-ux-collective/posts/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="footer-icon-btn linkedin"
-              title="Connect on LinkedIn"
-              aria-label="LinkedIn"
-            >
-              <Linkedin size={18} />
-            </a>
-
-            <a 
-              href="https://discord.gg/Fx7BUvzdzT" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="footer-icon-btn discord"
-              title="Join Community Discord"
-              aria-label="Discord"
-            >
-              <DiscordIcon size={18} />
-            </a>
-
-            <a 
-              href="mailto:usaskuxcollective@ussu.ca" 
-              className="footer-icon-btn email"
-              title="Send us an Email"
-              aria-label="Email"
-            >
-              <Mail size={18} />
-            </a>
+      <div className="footer-content-minimal">
+        {/* Logo & Title */}
+        <div className="footer-brand-header">
+          <img 
+            src="/logo.jpg" 
+            alt="UX Collective Logo" 
+            className="footer-logo"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+          <div>
+            <h3 className="footer-title">UX Collective</h3>
+            <p className="footer-subtitle">University of Saskatchewan</p>
           </div>
         </div>
 
-        {/* Col 2: Social & Contact Channels */}
-        <div className="footer-connect-col">
-          <h4 className="footer-col-title">Connect With Us</h4>
-          <ul className="footer-links-list">
-            <li>
-              <a 
-                href="https://www.instagram.com/uofs_uxcollective/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="footer-link-item social-link-insta"
-              >
-                <Instagram size={16} color="#E1306C" />
-                <span>Instagram</span>
-                <ExternalLink size={12} className="footer-link-ext" />
-              </a>
-            </li>
-            <li>
-              <a 
-                href="https://www.linkedin.com/company/uofs-ux-collective/posts/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="footer-link-item social-link-linkedin"
-              >
-                <Linkedin size={16} color="#0A66C2" />
-                <span>LinkedIn</span>
-                <ExternalLink size={12} className="footer-link-ext" />
-              </a>
-            </li>
-            <li>
-              <a 
-                href="https://discord.gg/Fx7BUvzdzT" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="footer-link-item social-link-discord"
-              >
-                <DiscordIcon size={16} color="#5865F2" />
-                <span>Discord Server</span>
-                <ExternalLink size={12} className="footer-link-ext" />
-              </a>
-            </li>
-            <li>
-              <a 
-                href="mailto:usaskuxcollective@ussu.ca" 
-                className="footer-link-item"
-              >
-                <Mail size={16} color="#FA9B7A" />
-                <span>usaskuxcollective@ussu.ca</span>
-              </a>
-            </li>
-          </ul>
+        {/* 3-Line About Club */}
+        <p className="footer-about-3lines">
+          The University of Saskatchewan’s first-ever design club connecting and educating students in product & digital design.
+          We foster human-centered experiences through hands-on workshops, design sprints, and tech mentorship.
+          A ratified USSU student organization open to all students across campus.
+        </p>
+
+        {/* Contact Icons Only */}
+        <div className="footer-contact-icons-row">
+          <a 
+            href="https://www.instagram.com/uofs_uxcollective/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="footer-icon-btn instagram"
+            title="Follow us on Instagram: @uofs_uxcollective"
+            aria-label="Instagram"
+          >
+            <Instagram size={20} />
+          </a>
+
+          <a 
+            href="https://www.linkedin.com/company/uofs-ux-collective/posts/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="footer-icon-btn linkedin"
+            title="Connect on LinkedIn: UX Collective"
+            aria-label="LinkedIn"
+          >
+            <Linkedin size={20} />
+          </a>
+
+          <a 
+            href="https://discord.gg/Fx7BUvzdzT" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="footer-icon-btn discord"
+            title="Join Community Discord"
+            aria-label="Discord"
+          >
+            <DiscordIcon size={20} />
+          </a>
+
+          <a 
+            href="mailto:usaskuxcollective@ussu.ca" 
+            className="footer-icon-btn email"
+            title="Email us: usaskuxcollective@ussu.ca"
+            aria-label="Email"
+          >
+            <Mail size={20} />
+          </a>
         </div>
       </div>
 
@@ -151,7 +95,7 @@ export default function Footer() {
           © {currentYear} University of Saskatchewan UX Collective • USSU Ratified Club
         </div>
         <div>
-          Containerized with React 18 • Node.js Express • MySQL 8.0
+          Developed by Md Shahed
         </div>
       </div>
     </footer>
