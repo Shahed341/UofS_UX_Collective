@@ -143,11 +143,7 @@ export default function App() {
           />
           <Route 
             path="/about" 
-            element={
-              <div className="app-container page-padded">
-                <AboutPage />
-              </div>
-            } 
+            element={<AboutPage />} 
           />
           <Route 
             path="/events" 

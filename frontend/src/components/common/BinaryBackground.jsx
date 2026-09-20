@@ -45,6 +45,9 @@ export default function BinaryBackground() {
       '.btn-ping',
       '.cal-today-btn',
       '.cal-nav-btn',
+      '.montage-photo-card',
+      '.exec-3d-card',
+      '.exec-nav-arrow-btn',
     ];
 
     const updateObstacles = () => {
