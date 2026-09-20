@@ -134,6 +134,51 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
     return eventsByDateKey[key] || [];
   }, [selectedDate, eventsByDateKey]);
 
+  // All parsed events sorted chronologically
+  const sortedEvents = useMemo(() => {
+    return [...parsedEvents]
+      .filter((e) => e.parsedDate)
+      .sort((a, b) => {
+        const dateA = new Date(a.parsedDate.year, a.parsedDate.month, a.parsedDate.day).getTime();
+        const dateB = new Date(b.parsedDate.year, b.parsedDate.month, b.parsedDate.day).getTime();
+        return dateA - dateB;
+      });
+  }, [parsedEvents]);
+
+  // Selected date timestamp for chronological comparison
+  const selectedDateTimestamp = useMemo(() => {
+    if (!selectedDate) return 0;
+    return new Date(selectedDate.year, selectedDate.month, selectedDate.day).getTime();
+  }, [selectedDate]);
+
+  // Events strictly BEFORE the currently selected date
+  const priorActiveEvents = useMemo(() => {
+    if (!selectedDateTimestamp) return [];
+    return sortedEvents.filter((e) => {
+      const t = new Date(e.parsedDate.year, e.parsedDate.month, e.parsedDate.day).getTime();
+      return t < selectedDateTimestamp;
+    });
+  }, [sortedEvents, selectedDateTimestamp]);
+
+  // Events strictly AFTER the currently selected date
+  const nextActiveEvents = useMemo(() => {
+    if (!selectedDateTimestamp) return sortedEvents;
+    return sortedEvents.filter((e) => {
+      const t = new Date(e.parsedDate.year, e.parsedDate.month, e.parsedDate.day).getTime();
+      return t > selectedDateTimestamp;
+    });
+  }, [sortedEvents, selectedDateTimestamp]);
+
+  const handleSelectEvent = (ev) => {
+    if (ev && ev.parsedDate) {
+      setSelectedDate(ev.parsedDate);
+      if (ev.parsedDate.month !== viewMonth || ev.parsedDate.year !== viewYear) {
+        setViewMonth(ev.parsedDate.month);
+        setViewYear(ev.parsedDate.year);
+      }
+    }
+  };
+
   // Calendar navigation
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
@@ -425,97 +470,132 @@ export default function EventCalendarSection({ events = [], isLoadingEvents, set
             </div>
           </div>
 
-          {/* Right Column: Day Detail Inspector & Upcoming Month Agenda */}
+          {/* Right Column: Separate Cards for Prior, Main, and Next Events */}
           <div className="cal-inspector-sidebar">
-            <div className="inspector-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CalendarDays size={18} color="#E81D88" />
-                <h4 className="inspector-title">
-                  {selectedDateFormatted || 'Select a Date'}
-                </h4>
+            {/* Box 1: Prior Active Events (Event Date & Title) */}
+            {priorActiveEvents.length > 0 && (
+              <div className="inspector-prior-card">
+                {priorActiveEvents.map((ev) => (
+                  <button
+                    key={ev.id}
+                    type="button"
+                    className="prior-chip-btn"
+                    onClick={() => handleSelectEvent(ev)}
+                    title={`Jump to ${ev.title}`}
+                  >
+                    <span className="prior-chip-date">
+                      {MONTH_NAMES[ev.parsedDate.month].slice(0, 3)} {ev.parsedDate.day}
+                    </span>
+                    <span className="prior-chip-title">{ev.title}</span>
+                    <ArrowRight size={13} className="prior-chip-arrow" />
+                  </button>
+                ))}
               </div>
-              {selectedDateEvents.length > 0 && (
-                <span className="event-tag" style={{ margin: 0 }}>
-                  {selectedDateEvents.length} Event{selectedDateEvents.length > 1 ? 's' : ''}
-                </span>
+            )}
+
+            {/* Box 2: Current Selected Day Event Details (Separate Main Card) */}
+            <div className="inspector-main-card">
+              <div className="inspector-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CalendarDays size={18} color="#E81D88" />
+                  <h4 className="inspector-title">
+                    {selectedDateFormatted || 'Select a Date'}
+                  </h4>
+                </div>
+                {selectedDateEvents.length > 0 && (
+                  <span className="event-tag" style={{ margin: 0 }}>
+                    {selectedDateEvents.length} Event{selectedDateEvents.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+
+              {selectedDateEvents.length > 0 ? (
+                <div className="inspector-events-list">
+                  {selectedDateEvents.map((event) => (
+                    <div key={event.id} className="inspector-event-card">
+                      <div className="inspector-card-top">
+                        <span className="event-tag">{event.category}</span>
+                      </div>
+
+                      <h5 className="inspector-event-title">{event.title}</h5>
+
+                      {event.description && (
+                        <div className="inspector-desc-wrap">
+                          <p className="inspector-event-desc-2line">
+                            {event.description}
+                          </p>
+                          <button
+                            type="button"
+                            className="btn-readmore-inline"
+                            onClick={() => setActivePage && setActivePage('events')}
+                            title="Read full event details on Events page"
+                          >
+                            Read More <ArrowRight size={12} />
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="event-details">
+                        <div className="detail-row">
+                          <Clock size={15} color="#FA9B7A" />
+                          <span>{formatEventTime(event.date)}</span>
+                        </div>
+                        <div className="detail-row">
+                          <MapPin size={15} color="#E81D88" />
+                          <span>{event.location}</span>
+                        </div>
+                      </div>
+
+                      <a 
+                        href={getGoogleCalendarUrl(event)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-cal-colorful"
+                        style={{ width: '100%', justifyContent: 'center', marginTop: '6px' }}
+                      >
+                        <CalendarPlus size={15} />
+                        Add to Google Calendar
+                        <ExternalLink size={12} style={{ opacity: 0.8 }} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="inspector-empty-state">
+                  <div className="empty-icon-circle">
+                    <CalendarIcon size={24} color="#999" />
+                  </div>
+                  <h5 className="empty-title">No Events on this Date</h5>
+                  <p className="empty-desc">
+                    There are no club sessions scheduled for {selectedDateFormatted}.
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Selected Day Event Cards */}
-            {selectedDateEvents.length > 0 ? (
-              <div className="inspector-events-list">
-                {selectedDateEvents.map((event) => (
-                  <div key={event.id} className="inspector-event-card">
-                    <div className="inspector-card-top">
-                      <span className="event-tag">{event.category}</span>
-                    </div>
-
-                    <h5 className="inspector-event-title">{event.title}</h5>
-
-                    <div className="event-details">
-                      <div className="detail-row">
-                        <Clock size={15} color="#FA9B7A" />
-                        <span>{formatEventTime(event.date)}</span>
-                      </div>
-                      <div className="detail-row">
-                        <MapPin size={15} color="#E81D88" />
-                        <span>{event.location}</span>
-                      </div>
-                    </div>
-
-                    <a 
-                      href={getGoogleCalendarUrl(event)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-cal"
-                      style={{ marginTop: '10px', width: '100%', justifyContent: 'center' }}
-                    >
-                      <CalendarPlus size={15} />
-                      Add to Google Calendar
-                      <ExternalLink size={12} style={{ opacity: 0.6 }} />
-                    </a>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="inspector-empty-state">
-                <div className="empty-icon-circle">
-                  <CalendarIcon size={24} color="#999" />
+            {/* Box 3: Next Events (Separate Bottom Box) */}
+            {nextActiveEvents.length > 0 && (
+              <div className="inspector-next-card">
+                <div className="next-box-header">
+                  <span className="next-box-title">Next Events</span>
+                  <span className="next-box-count">{nextActiveEvents.length} upcoming</span>
                 </div>
-                <h5 className="empty-title">No Events on this Date</h5>
-                <p className="empty-desc">
-                  There are no club sessions scheduled for {selectedDateFormatted}. 
-                  Browse other highlighted dates in this month below:
-                </p>
-
-                {/* Quick list of other events in current month */}
-                {eventsInCurrentMonth.length > 0 && (
-                  <div className="month-quick-events">
-                    <span className="quick-events-title">
-                      Scheduled in {MONTH_NAMES[viewMonth]} {viewYear}:
-                    </span>
-                    <div className="quick-events-list">
-                      {eventsInCurrentMonth.map((ev) => (
-                        <button
-                          key={ev.id}
-                          type="button"
-                          className="quick-event-item"
-                          onClick={() => {
-                            if (ev.parsedDate) {
-                              setSelectedDate(ev.parsedDate);
-                            }
-                          }}
-                        >
-                          <span className="quick-event-date">
-                            {ev.parsedDate ? `${MONTH_NAMES[ev.parsedDate.month].slice(0, 3)} ${ev.parsedDate.day}` : 'Event'}
-                          </span>
-                          <span className="quick-event-name">{ev.title}</span>
-                          <ArrowRight size={13} color="#E81D88" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <div className="next-events-list">
+                  {nextActiveEvents.map((ev) => (
+                    <button
+                      key={ev.id}
+                      type="button"
+                      className="next-event-row"
+                      onClick={() => handleSelectEvent(ev)}
+                    >
+                      <span className="next-event-date">
+                        {MONTH_NAMES[ev.parsedDate.month].slice(0, 3)} {ev.parsedDate.day}
+                      </span>
+                      <span className="next-event-title">{ev.title}</span>
+                      <ArrowRight size={13} className="next-event-arrow" />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
