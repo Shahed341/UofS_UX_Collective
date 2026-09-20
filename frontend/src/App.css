@@ -1,0 +1,110 @@
+.main-viewport {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  z-index: 1;
+}
+
+.homepage-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 80px 24px;
+  background-color: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.page-padded {
+  padding-top: 100px; /* Space under fixed frosted navbar */
+  min-height: calc(100vh - 160px);
+}
+
+/* Common gradient text */
+.gradient-text {
+  background: var(--uxco-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Common buttons */
+.btn-primary {
+  background: var(--uxco-gradient);
+  color: #FFFFFF;
+  padding: 13px 26px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 18px rgba(232, 29, 136, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(232, 29, 136, 0.45);
+}
+
+.btn-secondary {
+  background: #FFFFFF;
+  color: var(--text-dark);
+  border: 1px solid #E5E7EB;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.btn-secondary:hover {
+  background: #FFFDF9;
+  border-color: #FA9B7A;
+  color: var(--primary-pink);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(232, 29, 136, 0.12);
+}
+
+/* Page Section Common Headers */
+.page-header {
+  text-align: center;
+  padding: 24px 0 36px 0;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.page-tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--primary-pink);
+  margin-bottom: 8px;
+  padding: 4px 12px;
+  background: var(--badge-bg);
+  border-radius: 20px;
+}
+
+.page-title {
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--text-dark);
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+.page-subtitle {
+  font-size: 16px;
+  color: var(--text-muted);
+}

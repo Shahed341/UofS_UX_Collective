@@ -1,0 +1,371 @@
+import React, { useEffect, useRef } from 'react';
+
+export default function BinaryBackground() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let animationFrameId;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    // Track obstacles relative to current viewport in real-time
+    let obstacles = [];
+
+    const getObstacleSelectors = () => [
+      '.flow-node',
+      '.event-card',
+      '.about-card',
+      '.gallery-card',
+      '.contact-info-card',
+      '.contact-form-card',
+      '.hero-image-card',
+      '.pipeline-section',
+      '.palette-ribbon',
+      '.ping-result-box',
+    ];
+
+    const updateObstacles = () => {
+      const elements = document.querySelectorAll(getObstacleSelectors().join(', '));
+      const newObs = [];
+      elements.forEach((el, index) => {
+        const rect = el.getBoundingClientRect();
+        // Keep elements in or near viewport
+        if (rect.width > 20 && rect.height > 20 && rect.bottom > -50 && rect.top < height + 50) {
+          newObs.push({
+            id: index,
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            width: rect.width,
+            height: rect.height,
+          });
+        }
+      });
+      obstacles = newObs;
+    };
+
+    // High DPI Canvas resize handler
+    const updateSize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.scale(dpr, dpr);
+      updateObstacles();
+    };
+
+    updateSize();
+
+    // Mouse interaction
+    const mouse = {
+      x: -1000,
+      y: -1000,
+      radius: 130,
+      isActive: false,
+    };
+
+    const handleMouseMove = (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.isActive = true;
+    };
+
+    const handleMouseLeave = () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+      mouse.isActive = false;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('scroll', updateObstacles, { passive: true });
+
+    // UXCO Brand Colors
+    const paletteColors = [
+      { r: 232, g: 29, b: 136, a: 0.5 },  // Primary Pink
+      { r: 244, g: 111, b: 194, a: 0.45 }, // Medium Pink
+      { r: 250, g: 155, b: 122, a: 0.5 },  // Orange-Coral
+      { r: 51, g: 51, b: 51, a: 0.65 },    // Deep Grey Accent
+      { r: 100, g: 100, b: 100, a: 0.4 },  // Medium Grey
+      { r: 160, g: 160, b: 160, a: 0.25 }, // Subtle Grey
+      { r: 200, g: 200, b: 200, a: 0.18 }, // Light Tint
+    ];
+
+    const columnWidth = 22;
+    const charHeight = 16;
+    const fontSize = 14;
+    const PILE_LIFETIME_MS = 10000; // 10 seconds before slipping behind box
+    const MAX_STACK_PER_COL = 7;
+
+    let particles = [];
+
+    const createParticle = (colIndex, startY = null, layer = 'interactive') => {
+      const colX = colIndex * columnWidth + columnWidth / 2;
+      const colorObj = paletteColors[Math.floor(Math.random() * paletteColors.length)];
+      return {
+        colIndex,
+        colX,
+        x: colX,
+        y: startY !== null ? startY : -20 - Math.random() * 80,
+        targetX: colX,
+        targetY: null,
+        vx: 0,
+        vy: 0,
+        speed: 0.38 + Math.random() * 0.42,
+        char: Math.random() > 0.5 ? '1' : '0',
+        color: colorObj,
+        weight: Math.random() > 0.6 ? '700' : '500',
+        flipTimer: 50 + Math.floor(Math.random() * 100),
+        state: 'falling', // 'falling' | 'stacked' | 'falling_behind'
+        settledAt: null,
+        obsId: null,
+        relX: 0, // Relative X offset inside the obstacle box
+        stackIndex: 0, // Vertical position in pile
+        ignoreObsId: null,
+        layer,
+      };
+    };
+
+    const initParticles = () => {
+      const columnsCount = Math.ceil(width / columnWidth) + 1;
+      particles = [];
+      for (let c = 0; c < columnsCount; c++) {
+        particles.push(createParticle(c, Math.random() * height, 'interactive'));
+        particles.push(createParticle(c, Math.random() * (height / 2), 'interactive'));
+        particles.push(createParticle(c, Math.random() * height, 'ambient'));
+        if (Math.random() > 0.4) {
+          particles.push(createParticle(c, (height / 2) + Math.random() * (height / 2), 'ambient'));
+        }
+      }
+    };
+
+    initParticles();
+
+    // Re-anchor and reconcile particles on window resize
+    const handleResize = () => {
+      updateSize();
+      const currentCols = Math.ceil(width / columnWidth) + 1;
+
+      // Filter out-of-bounds particles
+      particles = particles.filter((p) => p.x <= width + 50 && p.colIndex <= currentCols + 1);
+
+      // Re-anchor stacked particles to obstacle's new bounding box
+      particles.forEach((p) => {
+        // Recalculate colX based on column width
+        p.colX = p.colIndex * columnWidth + columnWidth / 2;
+
+        if (p.state === 'stacked' && p.obsId !== null) {
+          const obs = obstacles.find((o) => o.id === p.obsId);
+          if (obs) {
+            p.targetX = obs.left + p.relX;
+            p.targetY = obs.top - 4 - p.stackIndex * charHeight;
+            // Snap position to prevent floating off-screen
+            p.x = p.targetX;
+            p.y = p.targetY;
+          } else {
+            // Obstacle vanished or shifted offscreen, resume falling
+            p.state = 'falling';
+            p.obsId = null;
+            p.settledAt = null;
+          }
+        }
+      });
+
+      // Refill ambient streams if window widened
+      while (particles.length < currentCols * 3.5) {
+        const randomCol = Math.floor(Math.random() * currentCols);
+        particles.push(createParticle(randomCol, Math.random() * height, 'ambient'));
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    const obsInterval = setInterval(updateObstacles, 800);
+
+    // Animation Render Loop
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+      const now = Date.now();
+      const stackCounters = new Map();
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        // Character flipping (0 <-> 1)
+        p.flipTimer--;
+        if (p.flipTimer <= 0) {
+          p.char = p.char === '1' ? '0' : '1';
+          p.flipTimer = 60 + Math.floor(Math.random() * 120);
+        }
+
+        // Mouse distraction physics
+        if (mouse.isActive) {
+          const dx = p.x - mouse.x;
+          const dy = p.y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < mouse.radius && dist > 0) {
+            const force = (1 - dist / mouse.radius) * 2.2;
+            const angle = Math.atan2(dy, dx);
+            p.vx += Math.cos(angle) * force;
+            p.vy += Math.sin(angle) * force * 0.7;
+          }
+        }
+
+        // --- STATE: STACKED ON TOP OF A BOX ---
+        if (p.state === 'stacked') {
+          const obs = obstacles.find((o) => o.id === p.obsId);
+          const age = now - p.settledAt;
+
+          // If obstacle is gone (e.g. page navigated / layout changed), fall down
+          if (!obs) {
+            p.state = 'falling';
+            p.obsId = null;
+            p.settledAt = null;
+          } else if (age >= PILE_LIFETIME_MS) {
+            // AFTER 10s: Slip behind the box and continue raining to bottom!
+            p.state = 'falling_behind';
+            p.ignoreObsId = p.obsId;
+            p.obsId = null;
+            p.settledAt = null;
+            p.speed = 0.35 + Math.random() * 0.4;
+            p.vx = (Math.random() - 0.5) * 0.3;
+          } else {
+            // Dynamically recalculate target position from live obstacle box
+            p.targetX = obs.left + p.relX;
+            p.targetY = obs.top - 4 - p.stackIndex * charHeight;
+
+            // Physics spring to maintain position attached to the box
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vx *= 0.88;
+            p.vy *= 0.88;
+            p.x += (p.targetX - p.x) * 0.15;
+            p.y += (p.targetY - p.y) * 0.15;
+
+            const key = `${p.colIndex}_${p.obsId}`;
+            const curCount = stackCounters.get(key) || 0;
+            stackCounters.set(key, curCount + 1);
+
+            // Draw stacked number
+            ctx.font = `${p.weight} ${fontSize}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
+            ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.color.a})`;
+            ctx.textAlign = 'center';
+            ctx.fillText(p.char, p.x, p.y);
+            continue;
+          }
+        }
+
+        // --- STATE: FALLING (AND FALLING BEHIND BOX TO BOTTOM) ---
+        p.x += p.vx;
+        p.y += p.speed + p.vy;
+        p.vx *= 0.92;
+        p.vy *= 0.92;
+
+        // Steer x towards column slot
+        p.x += (p.colX - p.x) * 0.03;
+
+        // Clear ignore lock once particle is below the passed obstacle
+        if (p.state === 'falling_behind' && p.ignoreObsId !== null) {
+          const pastObs = obstacles.find((o) => o.id === p.ignoreObsId);
+          if (!pastObs || p.y > pastObs.bottom + 10) {
+            p.state = 'falling';
+            p.ignoreObsId = null;
+          }
+        }
+
+        // Check landing collision for interactive particles
+        if (p.state === 'falling' && p.layer === 'interactive') {
+          for (let o = 0; o < obstacles.length; o++) {
+            const obs = obstacles[o];
+            if (obs.id === p.ignoreObsId) continue;
+
+            if (p.x >= obs.left - 4 && p.x <= obs.right + 4) {
+              const key = `${p.colIndex}_${obs.id}`;
+              const currentStack = stackCounters.get(key) || 0;
+
+              if (currentStack < MAX_STACK_PER_COL) {
+                const landingY = obs.top - 4 - currentStack * charHeight;
+
+                if (p.y >= landingY && p.y <= landingY + 14) {
+                  // Land and attach relative to obstacle
+                  p.state = 'stacked';
+                  p.obsId = obs.id;
+                  p.relX = Math.max(8, Math.min(obs.width - 8, p.x - obs.left));
+                  p.stackIndex = currentStack;
+                  p.targetX = obs.left + p.relX;
+                  p.targetY = landingY;
+                  p.y = landingY;
+                  p.settledAt = now;
+                  stackCounters.set(key, currentStack + 1);
+
+                  // Spawn replacement particle at the top
+                  particles.push(createParticle(p.colIndex, null, 'interactive'));
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        // Recycle when falling past bottom of screen
+        if (p.y > height + 30) {
+          const maxAllowed = Math.ceil(width / columnWidth) * 4;
+          if (particles.length > maxAllowed) {
+            particles.splice(i, 1);
+            i--;
+            continue;
+          } else {
+            particles[i] = createParticle(p.colIndex, null, p.layer);
+            continue;
+          }
+        }
+
+        // Draw falling number
+        ctx.font = `${p.weight} ${fontSize}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
+        ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.color.a})`;
+        ctx.textAlign = 'center';
+        ctx.fillText(p.char, p.x, p.y);
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      clearInterval(obsInterval);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', updateObstacles);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        backgroundColor: '#FFFFFF',
+      }}
+      aria-hidden="true"
+    />
+  );
+}

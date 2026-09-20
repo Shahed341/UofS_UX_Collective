@@ -1,8 +1,8 @@
 services:
   # MySQL Database Service
-  db:
+  database:
     image: mysql:8.0
-    container_name: uxco_mysql
+    container_name: uxco_database
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root_password
@@ -13,7 +13,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
       interval: 5s
@@ -23,39 +23,50 @@ services:
     networks:
       - uxco_network
 
-  # Node.js Express Backend API Service
-  server:
+  # Node.js Express Backend API Service (with Hot-Reload Watch Mode)
+  backend:
     build:
-      context: ./server
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: uxco_server
+    container_name: uxco_backend
     restart: unless-stopped
     environment:
       PORT: 5000
-      DB_HOST: db
+      DB_HOST: database
       DB_PORT: 3306
       DB_USER: uxco_user
       DB_PASSWORD: uxco_password
       DB_NAME: uxco_db
+      NODE_ENV: development
     ports:
       - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     depends_on:
-      db:
+      database:
         condition: service_healthy
     networks:
       - uxco_network
 
-  # React Frontend (Nginx Production Server)
-  client:
+  # React Frontend (Vite Dev Server with HMR Hot Module Reloading)
+  frontend:
     build:
-      context: ./client
+      context: ./frontend
       dockerfile: Dockerfile
-    container_name: uxco_client
+    container_name: uxco_frontend
     restart: unless-stopped
+    environment:
+      VITE_API_URL: http://backend:5000
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     ports:
-      - "3000:80"
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
-      - server
+      - backend
     networks:
       - uxco_network
 
