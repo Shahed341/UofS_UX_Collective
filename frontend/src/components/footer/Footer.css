@@ -2,25 +2,25 @@
   width: 100%;
   background: #FAFAFA;
   border-top: 1px solid #EEEEEE;
-  padding: 56px 0 36px 0;
+  padding: 48px 0 32px 0;
   margin-top: 60px;
   position: relative;
   z-index: 10;
 }
 
 .footer-content {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 24px;
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr 1fr;
   gap: 40px;
 }
 
 .footer-brand-col {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .footer-brand-header {
@@ -30,11 +30,11 @@
 }
 
 .footer-logo {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
   object-fit: cover;
-  box-shadow: 0 4px 12px rgba(232, 29, 136, 0.2);
+  box-shadow: 0 4px 12px rgba(232, 29, 136, 0.15);
 }
 
 .footer-title {
@@ -52,30 +52,86 @@
   letter-spacing: 0.8px;
 }
 
-.footer-about-text {
+.footer-motto-text {
   font-size: 13.5px;
   color: var(--text-muted);
-  line-height: 1.65;
-  max-width: 420px;
+  line-height: 1.55;
+  max-width: 360px;
+  margin: 0;
 }
 
-.footer-address-box {
+.footer-location-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-dark);
   font-weight: 600;
-  line-height: 1.5;
+}
+
+/* Quick Social Icon Buttons */
+.footer-social-icons-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.footer-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  color: var(--text-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.footer-icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.footer-icon-btn.instagram:hover {
+  background: #E1306C;
+  color: #FFFFFF;
+  border-color: #E1306C;
+  box-shadow: 0 6px 16px rgba(225, 48, 108, 0.35);
+}
+
+.footer-icon-btn.linkedin:hover {
+  background: #0A66C2;
+  color: #FFFFFF;
+  border-color: #0A66C2;
+  box-shadow: 0 6px 16px rgba(10, 102, 194, 0.35);
+}
+
+.footer-icon-btn.discord:hover {
+  background: #5865F2;
+  color: #FFFFFF;
+  border-color: #5865F2;
+  box-shadow: 0 6px 16px rgba(88, 101, 242, 0.35);
+}
+
+.footer-icon-btn.email:hover {
+  background: #E81D88;
+  color: #FFFFFF;
+  border-color: #E81D88;
+  box-shadow: 0 6px 16px rgba(232, 29, 136, 0.35);
 }
 
 .footer-col-title {
   font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   color: var(--text-dark);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .footer-links-list {
@@ -83,28 +139,40 @@
   flex-direction: column;
   gap: 10px;
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .footer-link-item {
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .footer-link-item:hover {
   color: var(--primary-pink);
+  transform: translateX(2px);
+}
+
+.footer-link-ext {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.footer-link-item:hover .footer-link-ext {
+  opacity: 1;
 }
 
 .footer-bottom-bar {
-  max-width: 1200px;
-  margin: 36px auto 0 auto;
-  padding: 24px 24px 0 24px;
+  max-width: 1100px;
+  margin: 32px auto 0 auto;
+  padding: 20px 24px 0 24px;
   border-top: 1px solid #EBEBEB;
   display: flex;
   justify-content: space-between;
@@ -112,12 +180,13 @@
   font-size: 12px;
   color: var(--text-light);
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 
 @media (max-width: 860px) {
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 28px;
   }
 }
+
