@@ -19,7 +19,7 @@ export default function EventsPage({ events, isLoadingEvents }) {
         <span className="page-tag">Events & Workshops</span>
         <h2 className="page-title">Campus Panels, Workshops & Sprints</h2>
         <p className="page-subtitle">
-          All events below are stored and queried directly from our MySQL <code>uxco_events</code> table via the Node.js Express backend.
+          Connecting University of Saskatchewan students with hands-on design sprints, industry portfolio reviews, tech panels, and collaborative hackathons.
         </p>
       </div>
 
@@ -49,11 +49,11 @@ export default function EventsPage({ events, isLoadingEvents }) {
 
       {isLoadingEvents ? (
         <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 0' }}>
-          Querying MySQL database for events...
+          Loading scheduled events...
         </p>
       ) : events.length === 0 ? (
         <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 0' }}>
-          No scheduled events found in the database.
+          No scheduled events found at this time.
         </p>
       ) : (
         <div className="events-grid">
@@ -62,9 +62,6 @@ export default function EventsPage({ events, isLoadingEvents }) {
               <div>
                 <div className="event-header">
                   <span className="event-tag">{event.category}</span>
-                  <span style={{ fontSize: '11px', color: '#999', fontFamily: 'monospace' }}>
-                    DB #{event.id}
-                  </span>
                 </div>
                 <h3 className="event-title">{event.title}</h3>
                 <p className="event-desc">{event.description}</p>

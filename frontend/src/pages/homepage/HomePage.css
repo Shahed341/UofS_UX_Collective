@@ -162,6 +162,149 @@
   }
 }
 
+/* ==========================================================
+   ABOUT UXCO 3D SHOWCASE & PHOTO COLLAGE (Matching Design)
+   ========================================================== */
+.home-about-showcase-section {
+  margin-top: 24px;
+  margin-bottom: 72px;
+}
+
+.about-showcase-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: stretch;
+  gap: 36px;
+}
+
+/* 3D Red Card */
+.about-3d-red-card {
+  background: #C40E40;
+  border-radius: 36px;
+  padding: 44px 40px;
+  box-shadow: 0 14px 0 #6B001B, 0 22px 36px rgba(107, 0, 27, 0.28);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  color: #FFFFFF;
+  position: relative;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.about-3d-red-card:hover {
+  transform: translateY(-2px);
+}
+
+.about-3d-title {
+  font-size: clamp(34px, 4vw, 46px);
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0 0 24px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.about-3d-content-block {
+  margin-bottom: 20px;
+}
+
+.about-3d-subtitle {
+  font-size: clamp(18px, 1.9vw, 22px);
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
+}
+
+.about-3d-paragraph {
+  font-size: clamp(14.5px, 1.4vw, 16px);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.6;
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.about-3d-readmore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #C40E40;
+  background: #FFFFFF;
+  text-decoration: none;
+  padding: 10px 22px;
+  border-radius: 20px;
+  margin-top: 8px;
+  transition: all 0.22s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.about-3d-readmore-btn:hover {
+  background: #FFE8EF;
+  color: #A30832;
+  transform: translateX(3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+/* Photo Collage (Right Column) */
+.about-photo-collage-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.about-photo-top-row {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 200px;
+}
+
+.about-collage-photo {
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+  background: #F3F4F6;
+}
+
+.about-collage-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.about-collage-photo:hover img {
+  transform: scale(1.04);
+}
+
+.photo-bottom-wide {
+  height: 190px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 960px) {
+  .about-showcase-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .about-3d-red-card {
+    padding: 36px 28px;
+  }
+  .photo-bottom-wide {
+    height: 180px;
+  }
+}
+
 /* Stats / Community Highlights Section (Unboxed) */
 .stats-section {
   display: flex;
@@ -193,12 +336,22 @@
 }
 
 .stat-number {
-  font-size: 52px;
-  font-weight: 800;
-  color: var(--text-dark);
+  font-size: clamp(48px, 5.2vw, 64px);
+  font-weight: 900;
   line-height: 1.05;
   margin-bottom: 8px;
-  letter-spacing: -1.5px;
+  letter-spacing: -2px;
+  display: inline-block;
+  background: linear-gradient(135deg, #E81D88 0%, #FA842A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 0 #C40E40) drop-shadow(0 8px 16px rgba(196, 14, 64, 0.25));
+  transition: transform 0.22s ease, filter 0.22s ease;
+}
+
+.stat-item:hover .stat-number {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 6px 0 #C40E40) drop-shadow(0 12px 20px rgba(196, 14, 64, 0.32));
 }
 
 .stat-label {

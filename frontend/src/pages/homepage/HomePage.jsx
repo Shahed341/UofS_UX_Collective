@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Sparkles, Users, ArrowRight } from 'lucide-react';
 import HeroSection from './HeroSection.jsx';
 import EventCalendarSection from './EventCalendarSection.jsx';
 import HomeGallerySection from './HomeGallerySection.jsx';
@@ -60,7 +62,64 @@ export default function HomePage({
       <HeroSection />
 
       <div className="app-container">
-        {/* 2. Stat Section (Unboxed numbers: Total Members, Events Hosted, Helped Students, Leaders) */}
+        {/* 2. About UXCO Section (3D Red Card + Photo Collage) */}
+        <section className="home-about-showcase-section">
+          <div className="about-showcase-grid">
+            {/* Left Column: 3D Red Card */}
+            <div className="about-3d-red-card">
+              <h2 className="about-3d-title">About UXCO</h2>
+
+              <div className="about-3d-content-block">
+                <h3 className="about-3d-subtitle">Design with Purpose</h3>
+                <p className="about-3d-paragraph">
+                  The University of Saskatchewan’s first-ever student design club connecting and educating students in product and digital design. We foster human-centered experiences through hands-on workshops, design sprints, and tech mentorship.
+                </p>
+              </div>
+
+              <div className="about-3d-content-block">
+                <h3 className="about-3d-subtitle">Community & Growth</h3>
+                <p className="about-3d-paragraph">
+                  Open to all USask students across Computer Science, Interactive Design, Business, Arts, and Engineering. No prior design or coding experience required — just curiosity and a passion for creating meaningful digital products.
+                </p>
+              </div>
+
+              <Link to="/about" className="about-3d-readmore-btn">
+                <span>Explore Full Story & Team</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            {/* Right Column: 3-Photo Rounded Collage */}
+            <div className="about-photo-collage-container">
+              <div className="about-photo-top-row">
+                <div className="about-collage-photo photo-top-left">
+                  <img 
+                    src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80" 
+                    alt="Students in UX Workshop"
+                    onError={(e) => { e.target.src = '/welcome.jpg'; }}
+                  />
+                </div>
+                <div className="about-collage-photo photo-top-right">
+                  <img 
+                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=700&q=80" 
+                    alt="UXCO Team Collaboration"
+                    onError={(e) => { e.target.src = '/thorvaldson_preview.jpg'; }}
+                  />
+                </div>
+              </div>
+
+              <div className="about-collage-photo photo-bottom-wide">
+                <img 
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1100&q=80" 
+                  alt="Student Designers Working Together"
+                  onError={(e) => { e.target.src = '/welcome.jpg'; }}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. Stat Section (Unboxed numbers: Total Members, Events Hosted, Helped Students, Leaders) */}
         <section className="stats-section">
           <div className="stats-grid">
             <div className="stat-item">
@@ -152,7 +211,6 @@ function FAQSection() {
   return (
     <section className="faq-section" id="faq">
       <div className="faq-header-block">
-        <span className="faq-badge">Got Questions?</span>
         <h2 className="faq-title">Frequently Asked Questions</h2>
         <p className="faq-subtitle">
           Everything you need to know about joining, events, and getting involved with UXCO.

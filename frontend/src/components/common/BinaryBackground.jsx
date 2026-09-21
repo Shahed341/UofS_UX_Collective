@@ -52,6 +52,9 @@ export default function BinaryBackground() {
       '.hero-join-link',
       '.collab-link',
       '.faq-pill-btn',
+      '.about-3d-red-card',
+      '.about-collage-photo',
+      '.about-3d-readmore-btn',
     ];
 
     const updateObstacles = () => {

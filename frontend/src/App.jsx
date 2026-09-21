@@ -13,40 +13,87 @@ import ContactPage from './pages/contact/ContactPage.jsx';
 
 import './App.css';
 
+export const INITIAL_REAL_EVENTS = [
+  {
+    id: 1,
+    title: 'Tech Internship Panel: Landing Your First Role',
+    category: 'Panel & Networking',
+    date: 'Friday, Sep 25, 2026 • 5:00 PM - 7:00 PM',
+    location: 'Arts 146, UofS Campus',
+    description: 'Teaming up with the Computer Science Student Society (CSSS), USask Cybersecurity Club, AWS Student Builder Group, and USask Game Dev Club for a panel with past interns, open Q&A, and networking with snacks funded by USSU.',
+    calendar_link: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Tech+Internship+Panel+How+to+Land+Your+First+Role&location=Arts+146'
+  },
+  {
+    id: 2,
+    title: 'USask Cybersecurity Fall Semester Meeting',
+    category: 'Club Collab & Talk',
+    date: 'Wednesday, Sep 16, 2026 • 6:00 PM',
+    location: 'Thorvaldson S311 (Spinks 3rd Floor)',
+    description: 'Beginner-friendly first talk covering cybersecurity fundamentals, semester workshops, and upcoming CTF competitions.',
+    calendar_link: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=USask+Cybersecurity+Club+Meeting&location=Thorvaldson+S311'
+  },
+  {
+    id: 3,
+    title: 'Fall UX Design Sprint & Portfolio Night',
+    category: 'Workshop & Critique',
+    date: 'Wednesday, Oct 14, 2026 • 5:30 PM - 7:30 PM',
+    location: 'Thorvaldson Hall 105',
+    description: 'Interactive workshop exploring design systems, Figma variable logic, component architecture, and 1-on-1 portfolio feedback from senior designers.',
+    calendar_link: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fall+UX+Design+Sprint&location=Thorvaldson+Hall+105'
+  },
+  {
+    id: 4,
+    title: 'Executive Team Meet & Greet',
+    category: 'Community Social',
+    date: 'Thursday, Oct 29, 2026 • 4:30 PM - 6:30 PM',
+    location: 'Collaborative Science Hub',
+    description: 'Meet the 2026/27 UXCO Executive Team, learn how to get involved in club projects, and pitch your ideas for campus design workshops and initiatives.',
+    calendar_link: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=UXCO+Executive+Meet+and+Greet&location=Collaborative+Science+Hub'
+  },
+  {
+    id: 5,
+    title: 'Figma to Code: Building Responsive UI with React',
+    category: 'Hands-on Workshop',
+    date: 'Wednesday, Nov 11, 2026 • 5:00 PM - 7:00 PM',
+    location: 'Spinks Computer Lab 202',
+    description: 'Learn how to translate design tokens and Figma prototypes into modular, accessible React components and CSS styling in this interactive lab.',
+    calendar_link: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Figma+to+Code+Workshop&location=Spinks+202'
+  },
+  {
+    id: 6,
+    title: 'Winter Design Jam & Community Showcase',
+    category: 'Design Sprint & Showcase',
+    date: 'Saturday, Nov 28, 2026 • 10:00 AM - 5:00 PM',
+    location: 'Arts & Science Student Lounge',
+    description: 'Annual 1-day collaborative design sprint addressing local community challenges, with feedback from industry guest mentors and prizes for top projects.',
+    calendar_link: 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Winter+Design+Jam&location=Arts+Student+Lounge'
+  }
+];
+
 export default function App() {
   const [statusData, setStatusData] = useState(null);
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState(INITIAL_REAL_EVENTS);
   const [logs, setLogs] = useState([]);
-  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [isPinging, setIsPinging] = useState(false);
   const [pingResult, setPingResult] = useState(null);
 
-  // Fetch full system health & connection status across React, Node, MySQL
+  // Fetch full system health & connection status when backend is running
   const fetchStatus = useCallback(async () => {
-    setIsLoadingStatus(true);
     try {
       const res = await fetch('/api/status');
-      if (!res.ok) {
-        throw new Error(`Status check returned ${res.status}`);
+      if (res.ok) {
+        const data = await res.json();
+        setStatusData(data);
       }
-      const data = await res.json();
-      setStatusData(data);
     } catch (err) {
-      console.error('Failed to fetch status:', err);
-      setStatusData({
-        service: 'UX Collective System Monitor',
-        backend: null,
-        database: { connected: false, error: err.message }
-      });
-    } finally {
-      setIsLoadingStatus(false);
+      // Backend not running (e.g. Vercel static demo)
     }
   }, []);
 
-  // Fetch seeded events & connection logs from MySQL
+  // Fetch live events from database if backend is connected
   const fetchEventsAndLogs = useCallback(async () => {
-    setIsLoadingEvents(true);
     try {
       const [eventsRes, logsRes] = await Promise.all([
         fetch('/api/events'),
@@ -55,7 +102,9 @@ export default function App() {
 
       if (eventsRes.ok) {
         const eventsData = await eventsRes.json();
-        setEvents(eventsData.data || []);
+        if (Array.isArray(eventsData.data) && eventsData.data.length > 0) {
+          setEvents(eventsData.data);
+        }
       }
 
       if (logsRes.ok) {
@@ -63,9 +112,7 @@ export default function App() {
         setLogs(logsData.data || []);
       }
     } catch (err) {
-      console.error('Error fetching database records:', err);
-    } finally {
-      setIsLoadingEvents(false);
+      // Seamlessly keep real pre-bundled events on Vercel deployment
     }
   }, []);
 
