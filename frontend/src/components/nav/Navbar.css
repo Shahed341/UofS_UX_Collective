@@ -3,19 +3,35 @@
   top: 0;
   left: 0;
   width: 100%;
-  background: linear-gradient(135deg, rgba(232, 29, 136, 0.95) 0%, rgba(244, 111, 194, 0.92) 40%, rgba(250, 155, 122, 0.95) 100%);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
   z-index: 100;
-  box-shadow: 0 4px 30px rgba(232, 29, 136, 0.22);
-  transition: all 0.3s ease;
+  transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              backdrop-filter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Transparent mode over Hero Section */
+.navbar-wrapper.navbar-transparent {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid transparent;
+  box-shadow: none;
+}
+
+/* Solid mode matching exact Hero sunset gradient */
+.navbar-wrapper.navbar-solid {
+  background: linear-gradient(90deg, rgba(191, 17, 84, 0.95) 0%, rgba(216, 27, 96, 0.95) 26%, rgba(250, 117, 56, 0.92) 50%, rgba(216, 30, 107, 0.95) 76%, rgba(168, 10, 72, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 24px rgba(191, 17, 84, 0.25);
 }
 
 .navbar-content {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: 16px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -39,6 +55,26 @@
 .brand-section:hover {
   opacity: 0.92;
   transform: translateY(-1px);
+}
+
+.brand-uxco-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 0.88;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  user-select: none;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  padding: 2px 4px;
+}
+
+.brand-uxco-badge span {
+  display: block;
 }
 
 .logo-img {
@@ -79,7 +115,7 @@
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: transparent;
   border: none;
   padding: 0;
@@ -87,11 +123,11 @@
 
 .nav-btn {
   background: transparent;
-  color: rgba(255, 255, 255, 0.92);
-  padding: 8px 16px;
-  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.94);
+  padding: 8px 18px;
+  border-radius: 12px;
   border: 1px solid transparent;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -104,18 +140,18 @@
 
 .nav-btn:hover {
   color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.18);
   transform: translateY(-1px);
 }
 
 /* On Select: Put a distinct white box (except logo) */
 .nav-btn.active-box {
   background: #FFFFFF !important;
-  color: var(--primary-pink) !important;
+  color: #C21356 !important;
   border: 1px solid #FFFFFF !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18) !important;
   font-weight: 800;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 /* Mobile 3-Bar Toggle Button */
@@ -138,10 +174,10 @@
   border-color: rgba(255, 255, 255, 0.7);
 }
 
-/* Mobile Drawer */
+/* Mobile Drawer with matching Hero gradient */
 .mobile-drawer {
   display: block;
-  background: linear-gradient(180deg, rgba(232, 29, 136, 0.98) 0%, rgba(250, 155, 122, 0.98) 100%);
+  background: linear-gradient(135deg, rgba(191, 17, 84, 0.98) 0%, rgba(250, 117, 56, 0.96) 50%, rgba(216, 30, 107, 0.98) 100%);
   border-top: 1px solid rgba(255, 255, 255, 0.22);
   padding: 16px 24px 24px 24px;
   backdrop-filter: blur(24px);

@@ -49,6 +49,9 @@ export default function BinaryBackground() {
       '.exec-3d-card',
       '.exec-nav-arrow-btn',
       '.footer-icon-btn',
+      '.hero-join-link',
+      '.collab-link',
+      '.faq-pill-btn',
     ];
 
     const updateObstacles = () => {

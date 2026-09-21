@@ -22,81 +22,127 @@ export default function Footer() {
 
   return (
     <footer className="footer-wrapper">
-      <div className="footer-content-minimal">
-        {/* Logo & Title */}
-        <div className="footer-brand-header">
-          <img 
-            src="/logo.jpg" 
-            alt="UX Collective Logo" 
-            className="footer-logo"
-            onError={(e) => { e.target.style.display = 'none'; }}
-          />
-          <div>
-            <h3 className="footer-title">UX Collective</h3>
-            <p className="footer-subtitle">University of Saskatchewan</p>
+      <div className="footer-mesh-overlay" />
+
+      <div className="footer-content-container">
+        {/* Left / Center Column: Brand, 3-Line About, Social Icons */}
+        <div className="footer-main-col">
+          <div className="footer-brand-header">
+            <div className="brand-uxco-badge footer-uxco-badge">
+              <span>UX</span>
+              <span>CO</span>
+            </div>
+            <div>
+              <h3 className="footer-title">UX Collective</h3>
+              <p className="footer-subtitle">University of Saskatchewan</p>
+            </div>
+          </div>
+
+          <p className="footer-about-3lines">
+            The University of Saskatchewan’s first-ever design club connecting and educating students in product & digital design.
+            We foster human-centered experiences through hands-on workshops, design sprints, and tech mentorship.
+            A ratified USSU student organization open to all students across campus.
+          </p>
+
+          <div className="footer-contact-icons-row">
+            <a 
+              href="https://www.instagram.com/uofs_uxcollective/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="footer-icon-btn instagram"
+              title="Follow us on Instagram: @uofs_uxcollective"
+              aria-label="Instagram"
+            >
+              <Instagram size={20} />
+            </a>
+
+            <a 
+              href="https://www.linkedin.com/company/uofs-ux-collective/posts/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="footer-icon-btn linkedin"
+              title="Connect on LinkedIn: UX Collective"
+              aria-label="LinkedIn"
+            >
+              <Linkedin size={20} />
+            </a>
+
+            <a 
+              href="https://discord.gg/Fx7BUvzdzT" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="footer-icon-btn discord"
+              title="Join Community Discord"
+              aria-label="Discord"
+            >
+              <DiscordIcon size={20} />
+            </a>
+
+            <a 
+              href="mailto:usaskuxcollective@ussu.ca" 
+              className="footer-icon-btn email"
+              title="Email us: usaskuxcollective@ussu.ca"
+              aria-label="Email"
+            >
+              <Mail size={20} />
+            </a>
           </div>
         </div>
 
-        {/* 3-Line About Club */}
-        <p className="footer-about-3lines">
-          The University of Saskatchewan’s first-ever design club connecting and educating students in product & digital design.
-          We foster human-centered experiences through hands-on workshops, design sprints, and tech mentorship.
-          A ratified USSU student organization open to all students across campus.
-        </p>
-
-        {/* Contact Icons Only */}
-        <div className="footer-contact-icons-row">
-          <a 
-            href="https://www.instagram.com/uofs_uxcollective/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="footer-icon-btn instagram"
-            title="Follow us on Instagram: @uofs_uxcollective"
-            aria-label="Instagram"
-          >
-            <Instagram size={20} />
-          </a>
-
-          <a 
-            href="https://www.linkedin.com/company/uofs-ux-collective/posts/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="footer-icon-btn linkedin"
-            title="Connect on LinkedIn: UX Collective"
-            aria-label="LinkedIn"
-          >
-            <Linkedin size={20} />
-          </a>
-
-          <a 
-            href="https://discord.gg/Fx7BUvzdzT" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="footer-icon-btn discord"
-            title="Join Community Discord"
-            aria-label="Discord"
-          >
-            <DiscordIcon size={20} />
-          </a>
-
-          <a 
-            href="mailto:usaskuxcollective@ussu.ca" 
-            className="footer-icon-btn email"
-            title="Email us: usaskuxcollective@ussu.ca"
-            aria-label="Email"
-          >
-            <Mail size={20} />
-          </a>
+        {/* Right Column: Our Collaborators */}
+        <div className="footer-collaborators-col">
+          <h4 className="footer-collaborators-title">Our Collaborators</h4>
+          <ul className="footer-collaborators-list">
+            <li>
+              <a 
+                href="https://csss.usask.ca/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="collab-link collab-underline"
+                title="Computer Science Student Society"
+              >
+                CSSS
+              </a>
+            </li>
+            <li>
+              <a 
+                href="https://zu.com/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="collab-link collab-underline"
+                title="zu - Product Design & Strategy Agency"
+              >
+                zu
+              </a>
+            </li>
+            <li>
+              <a 
+                href="https://ussu.ca/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="collab-link collab-italic"
+                title="University of Saskatchewan Students' Union"
+              >
+                USSU
+              </a>
+            </li>
+            <li>
+              <a 
+                href="mailto:usaskuxcollective@ussu.ca?subject=Collaboration%20Inquiry%20with%20UXCO" 
+                className="collab-link collab-italic"
+                title="Partner or Collaborate with UX Collective"
+              >
+                Company Here
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
 
       <div className="footer-bottom-bar">
-        <div>
+        <p className="footer-copyright-text">
           © {currentYear} University of Saskatchewan UX Collective • USSU Ratified Club
-        </div>
-        <div>
-          Developed by Md Shahed
-        </div>
+        </p>
       </div>
     </footer>
   );

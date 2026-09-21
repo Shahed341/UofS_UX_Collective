@@ -126,12 +126,6 @@ export default function App() {
             path="/" 
             element={
               <HomePage 
-                statusData={statusData}
-                isLoadingStatus={isLoadingStatus}
-                onRefreshStatus={fetchStatus}
-                onPing={handlePing}
-                isPinging={isPinging}
-                pingResult={pingResult}
                 events={events}
                 isLoadingEvents={isLoadingEvents}
               />

@@ -1,21 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Info, Calendar, Image, Mail, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import './Navbar.css';
 
-export default function Navbar({ isConnected }) {
+export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
+  const isHomePage = location.pathname === '/' || location.pathname === '/home';
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 30) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const navItems = [
-    { path: '/about', label: 'About', icon: Info },
-    { path: '/events', label: 'Events', icon: Calendar },
-    { path: '/gallery', label: 'Gallery', icon: Image },
-    { path: '/contact', label: 'Contact', icon: Mail },
+    { path: '/', label: 'Home' },
+    { path: '/about', label: 'About' },
+    { path: '/events', label: 'Events' },
+    { path: '/gallery', label: 'Gallery' },
+    { path: '/contact', label: 'Contact' },
   ];
 
+  const isTransparent = isHomePage && !isScrolled && !isMobileMenuOpen;
+
   return (
-    <header className="navbar-wrapper">
+    <header className={`navbar-wrapper ${isTransparent ? 'navbar-transparent' : 'navbar-solid'}`}>
       <nav className="navbar-content">
         {/* Left Side: Brand Logo acts as Main Page (Homepage) Link */}
         <Link 
@@ -24,13 +44,11 @@ export default function Navbar({ isConnected }) {
           onClick={() => setIsMobileMenuOpen(false)}
           title="Return to Main Page"
         >
-          <img 
-            src="/logo.jpg" 
-            alt="UX Collective Logo" 
-            className="logo-img" 
-            onError={(e) => { e.target.style.display = 'none'; }}
-          />
-          <div>
+          <div className="brand-uxco-badge">
+            <span>UX</span>
+            <span>CO</span>
+          </div>
+          <div className="brand-text-block">
             <h1 className="brand-title">UX Collective</h1>
             <p className="brand-subtitle">University of Saskatchewan</p>
           </div>
@@ -40,7 +58,6 @@ export default function Navbar({ isConnected }) {
         <div className="nav-right-container">
           <div className="nav-links">
             {navItems.map((item) => {
-              const Icon = item.icon;
               const isSelected = location.pathname === item.path;
               return (
                 <Link
@@ -48,7 +65,6 @@ export default function Navbar({ isConnected }) {
                   to={item.path}
                   className={`nav-btn ${isSelected ? 'active-box' : ''}`}
                 >
-                  <Icon size={15} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -71,7 +87,6 @@ export default function Navbar({ isConnected }) {
         <div className="mobile-drawer">
           <div className="mobile-nav-links">
             {navItems.map((item) => {
-              const Icon = item.icon;
               const isSelected = location.pathname === item.path;
               return (
                 <Link
@@ -80,7 +95,6 @@ export default function Navbar({ isConnected }) {
                   className={`mobile-nav-btn ${isSelected ? 'active-box' : ''}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Icon size={18} />
                   <span>{item.label}</span>
                 </Link>
               );
