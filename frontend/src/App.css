@@ -38,73 +38,80 @@
 .btn-primary {
   background: var(--uxco-gradient);
   color: #FFFFFF;
-  padding: 13px 26px;
-  border-radius: 12px;
+  padding: 13px 28px;
+  border-radius: 14px;
   font-weight: 700;
   font-size: 15px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 18px rgba(232, 29, 136, 0.35);
+  box-shadow: 0 4px 18px rgba(194, 19, 86, 0.35);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(232, 29, 136, 0.45);
+  box-shadow: 0 8px 26px rgba(194, 19, 86, 0.45);
 }
 
 .btn-secondary {
   background: #FFFFFF;
   color: var(--text-dark);
   border: 1px solid #E5E7EB;
-  padding: 12px 22px;
-  border-radius: 12px;
+  padding: 12px 24px;
+  border-radius: 14px;
   font-weight: 600;
   font-size: 15px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .btn-secondary:hover {
   background: #FFFDF9;
-  border-color: #FA9B7A;
+  border-color: #FA7538;
   color: var(--primary-pink);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(232, 29, 136, 0.12);
+  box-shadow: 0 4px 14px rgba(194, 19, 86, 0.12);
 }
 
 /* Page Section Common Headers */
 .page-header {
   text-align: center;
   padding: 24px 0 36px 0;
-  max-width: 760px;
+  max-width: 780px;
   margin: 0 auto;
 }
 
 .page-tag {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--primary-pink);
-  margin-bottom: 8px;
-  padding: 4px 12px;
-  background: var(--badge-bg);
+  margin-bottom: 10px;
+  padding: 5px 14px;
+  background: #FFF0F5;
+  border: 1px solid rgba(194, 19, 86, 0.14);
   border-radius: 20px;
 }
 
 .page-title {
-  font-size: 38px;
+  font-size: clamp(30px, 3.8vw, 44px);
   font-weight: 800;
   color: var(--text-dark);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
   margin-bottom: 12px;
 }
 
 .page-subtitle {
-  font-size: 16px;
+  font-size: 15.5px;
   color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 620px;
+  margin: 0 auto;
 }

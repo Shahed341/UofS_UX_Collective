@@ -1,78 +1,104 @@
 import React from 'react';
-import { Target, Compass, Users, Sparkles } from 'lucide-react';
+import { Target, Users, Sparkles, Compass, ArrowUpRight } from 'lucide-react';
 import ExecutiveShowcase from '../../components/team/ExecutiveShowcase.jsx';
 import './AboutPage.css';
 
 export default function AboutPage() {
   return (
     <div className="about-page-wrapper">
-      {/* 1. Contained Top Section: Header & Mission Grid */}
-      <div className="app-container page-padded" style={{ paddingBottom: '20px' }}>
+      {/* 1. Header & Concise 3D Pillar Cards */}
+      <div className="app-container page-padded" style={{ paddingBottom: '16px' }}>
         <div className="page-header">
-          <span className="page-tag">About Us</span>
-          <h2 className="page-title">University of Saskatchewan UX Collective</h2>
+          <span className="page-tag">About UXCO</span>
+          <h1 className="page-title">Design with Purpose. Build with Empathy.</h1>
           <p className="page-subtitle">
-            The University of Saskatchewan’s first-ever design club connecting and educating students in product and digital design. 📱✨
+            The University of Saskatchewan’s first student-led product & digital design community, educating and connecting creators since 2022.
           </p>
         </div>
 
-        <div className="about-grid">
-          <div className="about-card">
-            <h3 className="about-card-title">
-              <Target size={22} color="#E81D88" />
-              Our Mission & Purpose
-            </h3>
-            <p className="about-card-text">
-              <strong>"Design with purpose, build with empathy."</strong><br />
-              UXCO provides a creative platform where student designers, developers, and researchers collaborate on real-world digital experiences. Whether you are interested in Figma prototyping, UX research, usability testing, or front-end engineering, everyone is welcome — no prior experience required!
+        {/* 3D Pillars Grid with Sunset Palette & Minimal Text */}
+        <div className="about-pillars-grid">
+          {/* Card 1: Mission (3D Crimson Card) */}
+          <div className="about-pillar-card pillar-crimson">
+            <div className="pillar-icon-box">
+              <Sparkles size={22} color="#FFFFFF" />
+            </div>
+            <h3 className="pillar-title">Our Mission</h3>
+            <p className="pillar-text">
+              Empowering USask students to turn creative ideas into polished digital products through hands-on design sprints, Figma prototyping, and mentorship.
             </p>
-            <ul className="values-list">
-              <li className="values-item">
-                <span className="values-bullet" />
-                <span><strong>Product & Digital Design:</strong> Hands-on workshops covering design systems, mobile app design, and wireframing.</span>
-              </li>
-              <li className="values-item">
-                <span className="values-bullet" />
-                <span><strong>Campus Tech Collaboration:</strong> Partnering with CSSS, USask Cybersecurity Club, AWS Student Builder Group, and USask Game Dev.</span>
-              </li>
-              <li className="values-item">
-                <span className="values-bullet" />
-                <span><strong>Industry & Career Prep:</strong> Tech internship panels, portfolio critiques, and mentorship opportunities.</span>
-              </li>
-            </ul>
+            <div className="pillar-chips">
+              <span className="pillar-chip">✨ UI/UX Design</span>
+              <span className="pillar-chip">🎨 Figma Sprints</span>
+              <span className="pillar-chip">🚀 Portfolio Prep</span>
+            </div>
           </div>
 
-          <div className="about-card">
-            <h3 className="about-card-title">
-              <Compass size={22} color="#FA9B7A" />
-              Community & Campus Hub
-            </h3>
-            <p className="about-card-text">
-              Official student design organization operating under the University of Saskatchewan Students’ Union (USSU):
+          {/* Card 2: Community (3D Sunset Coral/Orange Card) */}
+          <div className="about-pillar-card pillar-coral">
+            <div className="pillar-icon-box">
+              <Users size={22} color="#FFFFFF" />
+            </div>
+            <h3 className="pillar-title">Inclusive Community</h3>
+            <p className="pillar-text">
+              100% open to all USask students across Computer Science, Design, Business, Arts, and Engineering. Zero prior experience needed to join.
             </p>
-            <ul className="values-list">
-              <li className="values-item">
-                <span className="values-bullet" />
-                <span><strong>Location:</strong> University of Saskatchewan, Saskatoon, Saskatchewan, Canada.</span>
-              </li>
-              <li className="values-item">
-                <span className="values-bullet" />
-                <span><strong>Official Email:</strong> <code>usaskuxcollective@ussu.ca</code></span>
-              </li>
-              <li className="values-item">
-                <span className="values-bullet" />
-                <span><strong>Community Discord:</strong> Active discussions, design feedback, and workshop notifications.</span>
-              </li>
-              <li className="values-item">
-                <span className="values-bullet" />
-                <span><strong>Tech Stack:</strong> Containerized Docker platform with React 18, Node.js Express, and MySQL 8.0.</span>
-              </li>
-            </ul>
+            <div className="pillar-chips">
+              <span className="pillar-chip">🤝 300+ Members</span>
+              <span className="pillar-chip">📍 USask Saskatoon</span>
+              <span className="pillar-chip">🏛️ USSU Ratified</span>
+            </div>
+          </div>
+
+          {/* Card 3: Collaborations (3D Sunset Amber Card) */}
+          <div className="about-pillar-card pillar-amber">
+            <div className="pillar-icon-box">
+              <Compass size={22} color="#FFFFFF" />
+            </div>
+            <h3 className="pillar-title">Campus Partners</h3>
+            <p className="pillar-text">
+              Partnered with CSSS, USask Cybersecurity, AWS Builders, and USask Game Dev to host multi-club tech hackathons and industry networking mixers.
+            </p>
+            <div className="pillar-chips">
+              <span className="pillar-chip">⚡ CSSS & zu</span>
+              <span className="pillar-chip">🛡️ Cyber Club</span>
+              <span className="pillar-chip">🎮 Game Dev</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Sunset Stats Banner */}
+        <div className="about-quick-banner">
+          <div className="quick-banner-item">
+            <span className="quick-banner-val">2022</span>
+            <span className="quick-banner-lbl">Founded</span>
+          </div>
+          <div className="quick-banner-sep" />
+          <div className="quick-banner-item">
+            <span className="quick-banner-val">300+</span>
+            <span className="quick-banner-lbl">Active Members</span>
+          </div>
+          <div className="quick-banner-sep" />
+          <div className="quick-banner-item">
+            <span className="quick-banner-val">100%</span>
+            <span className="quick-banner-lbl">Free to Join</span>
+          </div>
+          <div className="quick-banner-sep" />
+          <div className="quick-banner-item">
+            <a 
+              href="https://discord.gg/Fx7BUvzdzT" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="quick-banner-link"
+            >
+              <span>Join on Discord</span>
+              <ArrowUpRight size={16} />
+            </a>
           </div>
         </div>
       </div>
 
-      {/* 2. Full-Width 3D Executive Leadership Showcase Across Laptops & Desktops */}
+      {/* 2. Full-Width 3D Executive Leadership Showcase */}
       <section className="about-fullwidth-team-section">
         <ExecutiveShowcase />
       </section>

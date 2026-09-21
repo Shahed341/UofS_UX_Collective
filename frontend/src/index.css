@@ -1,31 +1,35 @@
 :root {
-  --primary-pink: #E81D88;
-  --secondary-pink: #F46FC2;
-  --accent-coral-pink: #FB8AA2;
-  --accent-orange-coral: #FA9B7A;
+  --primary-pink: #C21356;
+  --secondary-pink: #D81B60;
+  --accent-coral-pink: #D81E6B;
+  --accent-orange-coral: #FA7538;
   --accent-peach: #FDCEA1;
+  --hero-crimson: #C40E40;
+  --hero-dark-shadow: #6B001B;
   
   --bg-white: #FFFFFF;
-  --text-dark: #333333;
+  --text-dark: #222222;
   --text-muted: #666666;
   --text-light: #8E8E93;
   
   --card-bg: #FFFFFF;
-  --card-border: #EEEEEE;
-  --card-hover-border: #FA9B7A;
-  --badge-bg: #FFF0F6;
+  --card-border: #EFEFEF;
+  --card-hover-border: #FA7538;
+  --badge-bg: #FFF0F5;
   --success-color: #10B981;
   --warning-color: #F59E0B;
   --error-color: #EF4444;
 
-  --uxco-gradient: linear-gradient(135deg, #E81D88 0%, #F46FC2 40%, #FA9B7A 100%);
-  --uxco-subtle-gradient: linear-gradient(135deg, rgba(232, 29, 136, 0.05) 0%, rgba(250, 155, 122, 0.08) 100%);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 6px 20px rgba(232, 29, 136, 0.08);
-  --shadow-lg: 0 12px 32px rgba(232, 29, 136, 0.12);
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --uxco-gradient: linear-gradient(135deg, #C21356 0%, #FA7538 50%, #D81E6B 100%);
+  --uxco-sunset-mesh: linear-gradient(135deg, #BF1154 0%, #D81B60 26%, #FA7538 50%, #D81E6B 76%, #A80A48 100%);
+  --uxco-subtle-gradient: linear-gradient(135deg, rgba(194, 19, 86, 0.06) 0%, rgba(250, 117, 56, 0.08) 100%);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(194, 19, 86, 0.12);
+  --shadow-lg: 0 16px 36px rgba(194, 19, 86, 0.18);
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
 }
 
 * {
