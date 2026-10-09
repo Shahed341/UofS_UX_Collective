@@ -17,6 +17,17 @@ export default function BinaryBackground() {
 
     const getObstacleSelectors = () => [
       '.event-card',
+      '.spotlight-ticket-inner',
+      '.event-principle-card',
+      '.event-ticket-row',
+      '.track-pill-btn',
+      '.ticket-cal-button',
+      '.spotlight-cal-btn',
+      '.featured-game-card',
+      '.arcade-teaser-card',
+      '.setting-btn',
+      '.btn-launch-game',
+      '.results-modal-card',
       '.home-gallery-card',
       '.comment-card',
       '.cal-main-card',

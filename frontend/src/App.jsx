@@ -10,6 +10,7 @@ import AboutPage from './pages/about/AboutPage.jsx';
 import EventsPage from './pages/events/EventsPage.jsx';
 import GalleryPage from './pages/gallery/GalleryPage.jsx';
 import ContactPage from './pages/contact/ContactPage.jsx';
+import FunPage from './pages/fun/FunPage.jsx';
 
 import './App.css';
 
@@ -212,6 +213,10 @@ export default function App() {
                 <ContactPage />
               </div>
             } 
+          />
+          <Route 
+            path="/fun" 
+            element={<FunPage />} 
           />
           {/* Fallback for unknown routes */}
           <Route 

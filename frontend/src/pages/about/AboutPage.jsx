@@ -8,12 +8,10 @@ export default function AboutPage() {
     <div className="about-page-wrapper">
       {/* 1. Header & Concise 3D Pillar Cards */}
       <div className="app-container page-padded" style={{ paddingBottom: '16px' }}>
-        <div className="page-header">
-          <span className="page-tag">About UXCO</span>
-          <h1 className="page-title">Design with Purpose. Build with Empathy.</h1>
-          <p className="page-subtitle">
+        <div className="about-header-block">
+          <h1 className="about-lead-heading">
             The University of Saskatchewan’s first student-led product & digital design community, educating and connecting creators since 2022.
-          </p>
+          </h1>
         </div>
 
         {/* 3D Pillars Grid with Sunset Palette & Minimal Text */}

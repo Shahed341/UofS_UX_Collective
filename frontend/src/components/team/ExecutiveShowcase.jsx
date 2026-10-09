@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles, GraduationCap } from 'lucide-react';
 import './ExecutiveShowcase.css';
 
@@ -80,10 +80,20 @@ const EXECUTIVES = [
 export default function ExecutiveShowcase() {
   // Center President by default (index 3)
   const [activeIndex, setActiveIndex] = useState(3);
-  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
 
-  const effectiveIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
-  const currentExec = EXECUTIVES[effectiveIndex];
+  const currentExec = EXECUTIVES[activeIndex];
+
+  // Auto-rotate pictures every 1 second (pauses gently when mouse hovers over showcase)
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev < EXECUTIVES.length - 1 ? prev + 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev > 0 ? prev - 1 : EXECUTIVES.length - 1));
@@ -93,15 +103,35 @@ export default function ExecutiveShowcase() {
     setActiveIndex((prev) => (prev < EXECUTIVES.length - 1 ? prev + 1 : 0));
   };
 
+  const minSwipeDistance = 40;
+
+  const onTouchStart = (e) => {
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    const distance = touchStartX - touchEndX;
+    if (distance > minSwipeDistance) {
+      handleNext();
+    } else if (distance < -minSwipeDistance) {
+      handlePrev();
+    }
+  };
+
   return (
-    <div className="exec-showcase-wrapper">
+    <div 
+      className="exec-showcase-wrapper"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Dynamic Header Info */}
       <div className="exec-header-block">
-        <div className="exec-badge-pill">
-          <Sparkles size={14} color="#E81D88" />
-          <span>2026/27 Executive Leadership</span>
-        </div>
-
         <h3 className="exec-active-name">{currentExec.name}</h3>
         <p className="exec-active-role">
           <span className="exec-role-highlight">{currentExec.role}</span>
@@ -115,48 +145,64 @@ export default function ExecutiveShowcase() {
         </div>
       </div>
 
-      {/* 3D Curved Perspective Cards Track */}
-      <div className="exec-carousel-stage">
+      {/* 3D Curved Perspective Cards Track with Infinite Circular Wrap */}
+      <div 
+        className="exec-carousel-stage"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="exec-cards-container">
           {EXECUTIVES.map((exec, idx) => {
-            const diff = idx - effectiveIndex;
+            // Shortest circular wrap-around distance relative to activeIndex
+            const total = EXECUTIVES.length;
+            let diff = idx - activeIndex;
+            const half = Math.floor(total / 2);
+            while (diff > half) diff -= total;
+            while (diff < -half) diff += total;
+
             const absDiff = Math.abs(diff);
             const isCenter = diff === 0;
+            const flexOrder = diff + half; // Visual order with center card always in middle
 
             // Calculate 3D perspective rotation and scale
             let rotateY = 0;
             let scale = 1;
-            let zIndex = 20 - absDiff;
+            let zIndex = 25 - absDiff * 2;
             let opacity = 1;
 
             if (isCenter) {
               rotateY = 0;
-              scale = 1.16;
-              zIndex = 30;
+              scale = 1.28; // Prominent large selected card
+              zIndex = 40;
               opacity = 1;
             } else if (diff < 0) {
               // Left side cards: smooth arc rotation inwards
-              rotateY = Math.min(30, 14 + absDiff * 5.5);
-              scale = Math.max(0.82, 1 - absDiff * 0.055);
-              opacity = Math.max(0.74, 1 - absDiff * 0.08);
+              rotateY = Math.min(32, 14 + absDiff * 5.5);
+              scale = Math.max(0.72, 0.9 - absDiff * 0.06);
+              opacity = Math.max(0.62, 1 - absDiff * 0.1);
             } else {
               // Right side cards: smooth arc rotation inwards
-              rotateY = -Math.min(30, 14 + absDiff * 5.5);
-              scale = Math.max(0.82, 1 - absDiff * 0.055);
-              opacity = Math.max(0.74, 1 - absDiff * 0.08);
+              rotateY = -Math.min(32, 14 + absDiff * 5.5);
+              scale = Math.max(0.72, 0.9 - absDiff * 0.06);
+              opacity = Math.max(0.62, 1 - absDiff * 0.1);
             }
+
+            let distanceClass = 'is-side';
+            if (isCenter) distanceClass = 'is-focused';
+            else if (absDiff === 2) distanceClass = 'is-outer';
+            else if (absDiff >= 3) distanceClass = 'is-far-outer';
 
             return (
               <div
                 key={exec.id}
-                className={`exec-3d-card ${isCenter ? 'is-focused' : 'is-side'}`}
+                className={`exec-3d-card ${distanceClass}`}
                 style={{
+                  order: flexOrder,
                   transform: `perspective(1400px) rotateY(${rotateY}deg) scale(${scale})`,
                   zIndex: zIndex,
                   opacity: opacity,
                 }}
-                onMouseEnter={() => setHoveredIndex(idx)}
-                onMouseLeave={() => setHoveredIndex(null)}
                 onClick={() => setActiveIndex(idx)}
                 title={`${exec.name} — ${exec.role}`}
               >
@@ -190,7 +236,7 @@ export default function ExecutiveShowcase() {
           {EXECUTIVES.map((exec, idx) => (
             <button
               key={exec.id}
-              className={`exec-dot ${idx === effectiveIndex ? 'active' : ''}`}
+              className={`exec-dot ${idx === activeIndex ? 'active' : ''}`}
               onClick={() => setActiveIndex(idx)}
               aria-label={`Select ${exec.name}`}
               title={`${exec.name} (${exec.role})`}

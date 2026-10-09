@@ -30,6 +30,7 @@ export default function Navbar() {
     { path: '/events', label: 'Events' },
     { path: '/gallery', label: 'Gallery' },
     { path: '/contact', label: 'Contact' },
+    { path: '/fun', label: 'Fun' },
   ];
 
   const isTransparent = isHomePage && !isScrolled && !isMobileMenuOpen;
