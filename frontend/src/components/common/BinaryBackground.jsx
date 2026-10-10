@@ -24,6 +24,8 @@ export default function BinaryBackground() {
       '.ticket-cal-button',
       '.spotlight-cal-btn',
       '.featured-game-card',
+      '.leaderboard-mini-card',
+      '.leaderboard-modal-container',
       '.arcade-teaser-card',
       '.setting-btn',
       '.btn-launch-game',
@@ -130,20 +132,20 @@ export default function BinaryBackground() {
     window.addEventListener('mouseleave', handleMouseLeave);
     window.addEventListener('scroll', updateObstacles, { passive: true });
 
-    // UXCO Brand Colors
+    // UXCO Brand Colors (Faded / Softer alpha values for subtle elegance)
     const paletteColors = [
-      { r: 232, g: 29, b: 136, a: 0.5 },  // Primary Pink
-      { r: 244, g: 111, b: 194, a: 0.45 }, // Medium Pink
-      { r: 250, g: 155, b: 122, a: 0.5 },  // Orange-Coral
-      { r: 51, g: 51, b: 51, a: 0.65 },    // Deep Grey Accent
-      { r: 100, g: 100, b: 100, a: 0.4 },  // Medium Grey
-      { r: 160, g: 160, b: 160, a: 0.25 }, // Subtle Grey
-      { r: 200, g: 200, b: 200, a: 0.18 }, // Light Tint
+      { r: 232, g: 29, b: 136, a: 0.32 },  // Primary Pink (faded)
+      { r: 244, g: 111, b: 194, a: 0.28 }, // Medium Pink (faded)
+      { r: 250, g: 155, b: 122, a: 0.30 }, // Orange-Coral (faded)
+      { r: 51, g: 51, b: 51, a: 0.35 },    // Deep Grey Accent (faded)
+      { r: 100, g: 100, b: 100, a: 0.24 }, // Medium Grey (faded)
+      { r: 160, g: 160, b: 160, a: 0.16 }, // Subtle Grey (faded)
+      { r: 200, g: 200, b: 200, a: 0.12 }, // Light Tint (faded)
     ];
 
-    const columnWidth = 22;
+    const columnWidth = 25; // Adjusted column spacing for ~10% lower density
     const charHeight = 16;
-    const fontSize = 14;
+    const fontSize = 13.5;
     const PILE_LIFETIME_MS = 10000; // 10 seconds before slipping behind box
     const FLOOR_PILE_LIFETIME_MS = 20000; // 20 seconds before bottom tower digits disappear
     const MAX_STACK_PER_COL = 7;
@@ -185,7 +187,7 @@ export default function BinaryBackground() {
         particles.push(createParticle(c, Math.random() * height, 'interactive'));
         particles.push(createParticle(c, Math.random() * (height / 2), 'interactive'));
         particles.push(createParticle(c, Math.random() * height, 'ambient'));
-        if (Math.random() > 0.4) {
+        if (Math.random() > 0.55) {
           particles.push(createParticle(c, (height / 2) + Math.random() * (height / 2), 'ambient'));
         }
       }
@@ -229,7 +231,7 @@ export default function BinaryBackground() {
       });
 
       // Refill ambient streams if window widened
-      while (particles.length < currentCols * 3.5) {
+      while (particles.length < currentCols * 3.0) {
         const randomCol = Math.floor(Math.random() * currentCols);
         particles.push(createParticle(randomCol, Math.random() * height, 'ambient'));
       }
@@ -502,7 +504,7 @@ export default function BinaryBackground() {
 
         // Recycle when falling past bottom of screen
         if (p.y > height + 30) {
-          const maxAllowed = Math.ceil(width / columnWidth) * 4.5;
+          const maxAllowed = Math.ceil(width / columnWidth) * 3.8;
           if (particles.length > maxAllowed) {
             particles.splice(i, 1);
             i--;

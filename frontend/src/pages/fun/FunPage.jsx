@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  Gamepad2, 
   Sparkles, 
   Flame, 
   Target, 
+  CircleDot,
+  Circle,
+  XCircle,
   Trophy, 
   Zap, 
   Clock, 
-  CheckCircle2, 
   RotateCcw, 
   ArrowLeft, 
   Share2, 
@@ -15,13 +16,36 @@ import {
   VolumeX,
   Award,
   Crosshair,
-  TrendingUp,
   Layers,
   ChevronRight,
-  HelpCircle,
-  Activity
+  CheckCircle2,
+  X,
+  Medal,
+  Users,
+  ChevronDown
 } from 'lucide-react';
 import './FunPage.css';
+
+const TOTAL_DOTS = 15;
+
+// Default Seeded Community Leaderboard
+const DEFAULT_LEADERBOARD = [
+  { id: 'seed-1', name: 'Palima S.', score: 43, accuracy: 100, totalTime: 6.82, avgReaction: 242, date: 'Top Rank' },
+  { id: 'seed-2', name: 'Nina S.', score: 41, accuracy: 93, totalTime: 7.45, avgReaction: 278, date: 'Top Rank' },
+  { id: 'seed-3', name: 'Trushank L.', score: 39, accuracy: 93, totalTime: 8.12, avgReaction: 310, date: 'Top Rank' },
+  { id: 'seed-4', name: 'Shahed M.', score: 38, accuracy: 87, totalTime: 8.44, avgReaction: 325, date: 'Top Rank' },
+  { id: 'seed-5', name: 'Jason M.', score: 35, accuracy: 87, totalTime: 9.15, avgReaction: 360, date: 'Top Rank' },
+  { id: 'seed-6', name: 'Ayodeji D.', score: 33, accuracy: 80, totalTime: 9.80, avgReaction: 390, date: 'Top Rank' },
+];
+
+// Ranking Algorithm: 1. Highest Score/Points -> 2. Highest Accuracy -> 3. Fastest Total Time
+const sortLeaderboard = (list) => {
+  return [...list].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+    return a.totalTime - b.totalTime;
+  });
+};
 
 // Web Audio Synthesizer for instant sound effects
 class SoundFX {
@@ -144,10 +168,9 @@ const sfx = new SoundFX();
 
 export default function FunPage() {
   const [gameState, setGameState] = useState('lobby'); // 'lobby' | 'countdown' | 'playing' | 'gameover'
-  const [targetCountGoal, setTargetCountGoal] = useState(20); // 15, 20, 30
-  const [sizeMode, setSizeMode] = useState('dynamic'); // 'dynamic' | 'small' | 'medium' | 'large'
 
-  // Live Game State
+  // Live Game State (15 Dots Fixed Challenge)
+  const [dotsCompleted, setDotsCompleted] = useState(0);
   const [currentHitCount, setCurrentHitCount] = useState(0);
   const [totalClicks, setTotalClicks] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
@@ -166,15 +189,22 @@ export default function FunPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [copiedNotification, setCopiedNotification] = useState(false);
 
-  // High score tracking
-  const [bestStats, setBestStats] = useState(() => {
+  // Leaderboard States
+  const [leaderboard, setLeaderboard] = useState(() => {
     try {
-      const saved = localStorage.getItem('uxco_aim_high_score');
-      return saved ? JSON.parse(saved) : { score: 0, accuracy: 0, avgReaction: 0, centerHits: 0 };
-    } catch (e) {
-      return { score: 0, accuracy: 0, avgReaction: 0, centerHits: 0 };
-    }
+      const saved = localStorage.getItem('uxco_aim_leaderboard');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return sortLeaderboard(parsed);
+      }
+    } catch (e) {}
+    return sortLeaderboard(DEFAULT_LEADERBOARD);
   });
+
+  const [isLeaderboardExpanded, setIsLeaderboardExpanded] = useState(false);
+  const [playerNameInput, setPlayerNameInput] = useState('');
+  const [hasSubmittedScore, setHasSubmittedScore] = useState(false);
+  const [userRankResult, setUserRankResult] = useState(null);
 
   const arenaRef = useRef(null);
 
@@ -185,15 +215,11 @@ export default function FunPage() {
     sfx.enabled = next;
   };
 
-  // Determine dynamic size for next spawned circle
+  // Determine dynamic random size for each spawned circle
   const getNextTargetSize = useCallback(() => {
-    if (sizeMode === 'small') return 48;
-    if (sizeMode === 'medium') return 64;
-    if (sizeMode === 'large') return 80;
-    // Dynamic Mode: Randomly varies between 42px (precise small), 60px (mid), and 82px (large)
-    const sizes = [44, 52, 64, 76, 84];
+    const sizes = [42, 50, 62, 74, 84];
     return sizes[Math.floor(Math.random() * sizes.length)];
-  }, [sizeMode]);
+  }, []);
 
   // Spawn random target inside safe bounds
   const spawnNextTarget = useCallback(() => {
@@ -216,6 +242,7 @@ export default function FunPage() {
   // Start game with 3-2-1 Countdown
   const handleStartGame = () => {
     sfx.init();
+    setIsLeaderboardExpanded(false);
     setGameState('countdown');
     setCountdownNum(3);
     sfx.playCountdown();
@@ -229,6 +256,7 @@ export default function FunPage() {
       } else {
         clearInterval(timer);
         // Reset and begin Playing
+        setDotsCompleted(0);
         setCurrentHitCount(0);
         setTotalClicks(0);
         setCurrentStreak(0);
@@ -237,6 +265,9 @@ export default function FunPage() {
         setZoneCounts({ center: 0, middle: 0, outer: 0, miss: 0 });
         setTotalScoreAcc(0);
         setFloatingPoints([]);
+        setHasSubmittedScore(false);
+        setPlayerNameInput('');
+        setUserRankResult(null);
         setGameState('playing');
         setGameStartTime(performance.now());
         setTimeout(() => {
@@ -246,15 +277,57 @@ export default function FunPage() {
     }, 800);
   };
 
-  // 3-Zone Target Click Handler
+  // Complete the round when all 15 dots are finished
+  const finishGame = (finalScore, completedHitCount, updatedRecords, updatedZoneCounts, now) => {
+    const totalTimeSec = (now - (gameStartTime || now)) / 1000;
+    setFinalDuration(totalTimeSec);
+    setGameState('gameover');
+    sfx.playVictory();
+  };
+
+  // Save Player Name & Score to Leaderboard
+  const handleSaveLeaderboardScore = (e) => {
+    if (e) e.preventDefault();
+    if (hasSubmittedScore) return;
+
+    const finalName = playerNameInput.trim() || 'Unknown';
+    const finalAccuracy = TOTAL_DOTS > 0 ? Math.round((currentHitCount / TOTAL_DOTS) * 100) : 100;
+    const finalAvgReaction = reactionRecords.length > 0
+      ? Math.round(reactionRecords.reduce((a, b) => a + b.reaction, 0) / reactionRecords.length)
+      : 0;
+
+    const newEntry = {
+      id: Date.now().toString(),
+      name: finalName,
+      score: totalScoreAcc,
+      accuracy: finalAccuracy,
+      totalTime: Number(finalDuration.toFixed(2)),
+      avgReaction: finalAvgReaction,
+      date: 'Just now'
+    };
+
+    const updated = sortLeaderboard([...leaderboard, newEntry]);
+    const newRank = updated.findIndex((item) => item.id === newEntry.id) + 1;
+
+    setLeaderboard(updated);
+    setHasSubmittedScore(true);
+    setUserRankResult(newRank);
+
+    try {
+      localStorage.setItem('uxco_aim_leaderboard', JSON.stringify(updated.slice(0, 50)));
+    } catch (err) {}
+  };
+
+  // 3-Zone Target Click Handler: Center (+3), Middle (+2), Outer (+1)
   const handleTargetClick = (e) => {
     e.stopPropagation();
     const now = performance.now();
-    const hitNumber = currentHitCount + 1;
+    const newCompleted = dotsCompleted + 1;
+    const newHits = currentHitCount + 1;
     const newTotalClicks = totalClicks + 1;
-    const reaction = targetSpawnTime ? Math.round(now - targetSpawnTime) : 280;
+    const reaction = targetSpawnTime ? Math.round(now - targetSpawnTime) : 250;
 
-    // Calculate exact radial click distance from center of the target
+    // Radial distance calculation from target center
     const targetEl = e.currentTarget.getBoundingClientRect();
     const centerX = targetEl.left + targetEl.width / 2;
     const centerY = targetEl.top + targetEl.height / 2;
@@ -265,42 +338,37 @@ export default function FunPage() {
     );
     const ratio = Math.min(1, clickDist / radius);
 
-    // 3 Concentric Zones: Center (<=33%), Middle (34%-66%), Outer (67%-100%)
+    // Scoring: Center = 3, Middle = 2, Side (Outer) = 1
     let zone = 'outer';
     let zoneLabel = 'OUTER EDGE';
-    let zonePoints = 100;
-    let zoneColor = '#FA7538';
-    let pitchMultiplier = 1;
+    let zonePoints = 1;
+    let pitchMultiplier = 0.95;
 
     if (ratio <= 0.33) {
       zone = 'center';
       zoneLabel = '🎯 BULLSEYE!';
-      zonePoints = 300;
-      zoneColor = '#FFD700';
+      zonePoints = 3;
       pitchMultiplier = 1.35;
     } else if (ratio <= 0.66) {
       zone = 'middle';
       zoneLabel = '✨ MID RING';
-      zonePoints = 200;
-      zoneColor = '#FF6B4A';
+      zonePoints = 2;
       pitchMultiplier = 1.15;
     } else {
       zone = 'outer';
-      zoneLabel = '⚡ OUTER RING';
-      zonePoints = 100;
-      zoneColor = '#E81D88';
+      zoneLabel = '⚡ SIDE RING';
+      zonePoints = 1;
       pitchMultiplier = 0.95;
     }
 
+    const newScore = totalScoreAcc + zonePoints;
     const newStreak = currentStreak + 1;
     const newMaxStreak = Math.max(maxStreak, newStreak);
-    const streakBonus = Math.floor((newStreak - 1) * 25);
-    const earnedPoints = zonePoints + streakBonus;
 
     // Play pitch-shifted pop sound
     sfx.playPop(pitchMultiplier + (newStreak - 1) * 0.05);
 
-    // Add floating feedback at click point
+    // Floating feedback at click point
     const arenaRect = arenaRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
     const clickX = e.clientX - arenaRect.left;
     const clickY = e.clientY - arenaRect.top;
@@ -311,62 +379,43 @@ export default function FunPage() {
         id: Date.now() + Math.random(),
         x: clickX,
         y: clickY,
-        text: `+${earnedPoints} (${zoneLabel})`,
+        text: `+${zonePoints} (${zoneLabel})`,
         reaction: `${reaction}ms`,
         zone,
         streak: newStreak > 2 ? `🔥 ${newStreak}x` : null
       }
     ]);
 
-    const newRecord = { reaction, zone, points: earnedPoints, distRatio: ratio };
+    const newRecord = { reaction, zone, points: zonePoints, distRatio: ratio };
     const updatedRecords = [...reactionRecords, newRecord];
+    const updatedZoneCounts = { ...zoneCounts, [zone]: zoneCounts[zone] + 1 };
 
-    setCurrentHitCount(hitNumber);
+    setDotsCompleted(newCompleted);
+    setCurrentHitCount(newHits);
     setTotalClicks(newTotalClicks);
     setCurrentStreak(newStreak);
     setMaxStreak(newMaxStreak);
     setReactionRecords(updatedRecords);
-    setTotalScoreAcc((prev) => prev + earnedPoints);
-    setZoneCounts((prev) => ({ ...prev, [zone]: prev[zone] + 1 }));
+    setTotalScoreAcc(newScore);
+    setZoneCounts(updatedZoneCounts);
 
-    if (hitNumber >= targetCountGoal) {
-      // Game Complete
-      const totalTimeSec = (now - gameStartTime) / 1000;
-      setFinalDuration(totalTimeSec);
-      setGameState('gameover');
-      sfx.playVictory();
-
-      // Final score calculation
-      const avgReaction = Math.round(
-        updatedRecords.reduce((a, b) => a + b.reaction, 0) / hitNumber
-      );
-      const accuracy = Math.round((hitNumber / newTotalClicks) * 100);
-      const finalScore = totalScoreAcc + earnedPoints + Math.round(accuracy * 15) - Math.round(avgReaction * 1.2);
-
-      if (finalScore > (bestStats.score || 0)) {
-        const newBest = {
-          score: Math.max(100, finalScore),
-          accuracy,
-          avgReaction,
-          centerHits: (zoneCounts.center + (zone === 'center' ? 1 : 0))
-        };
-        setBestStats(newBest);
-        try {
-          localStorage.setItem('uxco_aim_high_score', JSON.stringify(newBest));
-        } catch (err) {}
-      }
+    if (newCompleted >= TOTAL_DOTS) {
+      finishGame(newScore, newHits, updatedRecords, updatedZoneCounts, now);
     } else {
       spawnNextTarget();
     }
   };
 
-  // Arena Miss Handler
+  // Arena Miss Handler: Click outside dot loses 1 point (-1) and advances to next dot
   const handleArenaMiss = (e) => {
     if (gameState !== 'playing') return;
+    const now = performance.now();
+    const newCompleted = dotsCompleted + 1;
+    const newTotalClicks = totalClicks + 1;
+    const newScore = totalScoreAcc - 1;
+
     sfx.playMiss();
-    setTotalClicks((prev) => prev + 1);
     setCurrentStreak(0);
-    setZoneCounts((prev) => ({ ...prev, miss: prev.miss + 1 }));
 
     const rect = arenaRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
     const clickX = e.clientX - rect.left;
@@ -378,10 +427,23 @@ export default function FunPage() {
         id: Date.now() + Math.random(),
         x: clickX,
         y: clickY,
-        text: '✕ Miss (Outside)',
+        text: '-1 (Missed)',
         isMiss: true
       }
     ]);
+
+    const updatedZoneCounts = { ...zoneCounts, miss: zoneCounts.miss + 1 };
+
+    setDotsCompleted(newCompleted);
+    setTotalClicks(newTotalClicks);
+    setTotalScoreAcc(newScore);
+    setZoneCounts(updatedZoneCounts);
+
+    if (newCompleted >= TOTAL_DOTS) {
+      finishGame(newScore, currentHitCount, reactionRecords, updatedZoneCounts, now);
+    } else {
+      spawnNextTarget();
+    }
   };
 
   // Clean floating points
@@ -403,25 +465,19 @@ export default function FunPage() {
     ? Math.min(...reactionRecords.map(r => r.reaction))
     : 0;
 
-  const currentAccuracy = totalClicks > 0
-    ? Math.round((currentHitCount / totalClicks) * 100)
+  const currentAccuracy = TOTAL_DOTS > 0
+    ? Math.round((currentHitCount / TOTAL_DOTS) * 100)
     : 100;
 
-  const finalComputedScore = Math.max(
-    100,
-    totalScoreAcc + Math.round(currentAccuracy * 15) - Math.round(avgReactionTime * 1.2) + (maxStreak * 25)
-  );
-
-  // Rank Badge based on Zone Precision & Speed
+  // Rank Badge based on Score & Speed
   const getRankBadge = () => {
-    const centerRatio = currentHitCount > 0 ? (zoneCounts.center / currentHitCount) : 0;
-    if (currentAccuracy >= 95 && avgReactionTime < 340 && centerRatio >= 0.5) {
+    if (totalScoreAcc >= 38 && avgReactionTime < 380) {
       return { rank: 'S+', title: '⚡ Godlike Bullseye Master', color: '#FA7538' };
     }
-    if (currentAccuracy >= 90 && avgReactionTime < 420) {
+    if (totalScoreAcc >= 30 && avgReactionTime < 460) {
       return { rank: 'A', title: '🎨 Figma Precision Master', color: '#C21356' };
     }
-    if (currentAccuracy >= 80 && avgReactionTime < 520) {
+    if (totalScoreAcc >= 20) {
       return { rank: 'B', title: '🎯 Pro UI Designer', color: '#D81E6B' };
     }
     return { rank: 'C', title: '✨ Quick Cursor Learner', color: '#E81D88' };
@@ -431,7 +487,8 @@ export default function FunPage() {
 
   // Share score
   const handleShareScore = () => {
-    const text = `🎯 UXCO Aim Precision Score: ${finalComputedScore.toLocaleString()} pts | 🎯 ${zoneCounts.center} Bullseyes | ⚡ ${avgReactionTime}ms Reaction | ⏱️ ${finalDuration.toFixed(2)}s Total Time | ${currentAccuracy}% Accuracy! Try it at UX Collective! 🚀`;
+    const name = playerNameInput.trim() || 'Unknown';
+    const text = `🎯 UXCO Reflex Aim Score: ${totalScoreAcc} pts / 45 by ${name} | 🎯 ${zoneCounts.center} Bullseyes | ⚡ ${avgReactionTime}ms Avg Reaction | ⏱️ ${finalDuration.toFixed(2)}s Total Time | ${currentAccuracy}% Accuracy! Try it on UX Collective! 🚀`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text);
       setCopiedNotification(true);
@@ -448,114 +505,86 @@ export default function FunPage() {
         <div className="app-container page-padded">
           {/* Header */}
           <div className="fun-header-block">
-            <h1 className="fun-main-title">Speed, Precision & 3-Zone Reflex Lab</h1>
-            <p className="fun-main-subtitle">
-              Targets are divided into 3 zones: <strong>Bullseye (Center)</strong>, <strong>Mid Ring</strong>, and <strong>Outer Edge</strong>. Test how fast and accurate your cursor is!
-            </p>
+            <h1 className="fun-main-title">UXCO Gameboard</h1>
           </div>
 
           {/* Featured 3D Game Card */}
           <div className="featured-game-card">
             <div className="game-card-mesh-bg" />
-            <div className="game-card-content">
-              <div className="game-status-badge">
-                <Flame size={14} />
-                <span>Featured Game • 3-Zone Concentric Tracking</span>
-              </div>
-
-              <div className="game-info-row">
+            <div className="game-card-content game-card-2col-layout">
+              {/* Left Column */}
+              <div className="game-card-main-col">
                 <div>
                   <h2 className="game-title">Sunset 3-Zone Precision Aim Lab</h2>
                   <p className="game-description">
-                    Circles pop up dynamically across your screen with <strong>varying sizes</strong>. Every click is tracked down to the pixel: hit the <strong>Bullseye Center</strong> for max score, fast reaction time, and combo multipliers!
+                    15 circles pop up rapidly with <strong>random dynamic sizes</strong>. Hit the <strong>Center</strong> (+3 pts), <strong>Middle</strong> (+2 pts), or <strong>Side</strong> (+1 pt). Clicking outside counts as a miss (-1 pt) and skips immediately to the next dot!
                   </p>
                 </div>
 
-                {bestStats.score > 0 && (
-                  <div className="high-score-chip">
-                    <Trophy size={22} color="#FFD700" />
-                    <div>
-                      <span className="high-score-label">Personal Best</span>
-                      <span className="high-score-val">{bestStats.score.toLocaleString()} pts</span>
-                      <span className="high-score-sub">{bestStats.avgReaction}ms • {bestStats.accuracy}%</span>
+                {/* 3-Zone & Miss Scoring Visual Pill Banner (Distinct Icons + Points Only) */}
+                <div className="zone-explainer-banner">
+                  <div className="zone-explain-item center">
+                    <Target size={18} color="#FFD700" />
+                    <span className="zone-pts">+3 Pts</span>
+                  </div>
+                  <div className="zone-explain-item mid">
+                    <CircleDot size={18} color="#FFB199" />
+                    <span className="zone-pts">+2 Pts</span>
+                  </div>
+                  <div className="zone-explain-item outer">
+                    <Circle size={18} color="#FFA6D5" />
+                    <span className="zone-pts">+1 Pt</span>
+                  </div>
+                  <div className="zone-explain-item miss">
+                    <XCircle size={18} color="#FCA5A5" />
+                    <span className="zone-pts">-1 Pt</span>
+                  </div>
+                </div>
+
+                {/* Launch Action */}
+                <div className="game-launch-row">
+                  <button 
+                    type="button" 
+                    className="btn-launch-game"
+                    onClick={handleStartGame}
+                  >
+                    <Crosshair size={20} />
+                    <span>Start Precision Challenge</span>
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column: Full-Height Leaderboard Card */}
+              <div 
+                className="leaderboard-mini-card full-height"
+                onClick={() => setIsLeaderboardExpanded(true)}
+                title="Click to view full Leaderboard"
+              >
+                <div className="leaderboard-mini-header">
+                  <div className="leaderboard-mini-title-wrap">
+                    <Trophy size={16} color="#FFD700" />
+                    <span className="leaderboard-mini-title">Leaderboard</span>
+                  </div>
+                  <span className="leaderboard-expand-pill">Top 4 ▾</span>
+                </div>
+
+                <div className="leaderboard-mini-list">
+                  {leaderboard.slice(0, 4).map((entry, idx) => (
+                    <div key={entry.id || idx} className={`leaderboard-mini-row rank-${idx + 1}`}>
+                      <div className="mini-row-left">
+                        <span className={`mini-rank-num rank-${idx + 1}`}>#{idx + 1}</span>
+                        <span className="mini-player-name">{entry.name || 'Unknown'}</span>
+                      </div>
+                      <div className="mini-row-right">
+                        <span className="mini-player-score">{entry.score} pts</span>
+                        <span className="mini-player-time">{entry.totalTime}s</span>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 3-Zone Scoring Visual Pill Banner */}
-              <div className="zone-explainer-banner">
-                <div className="zone-explain-item center">
-                  <span className="zone-pill center">🎯 Center Bullseye (≤33%)</span>
-                  <span className="zone-pts">+300 Pts</span>
-                </div>
-                <div className="zone-explain-item mid">
-                  <span className="zone-pill mid">✨ Mid Ring (34%-66%)</span>
-                  <span className="zone-pts">+200 Pts</span>
-                </div>
-                <div className="zone-explain-item outer">
-                  <span className="zone-pill outer">⚡ Outer Edge (67%-100%)</span>
-                  <span className="zone-pts">+100 Pts</span>
-                </div>
-              </div>
-
-              {/* Settings Bar */}
-              <div className="game-settings-bar">
-                <div className="setting-group">
-                  <span className="setting-label">Target Count:</span>
-                  <div className="setting-options">
-                    {[15, 20, 30].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        className={`setting-btn ${targetCountGoal === num ? 'active' : ''}`}
-                        onClick={() => setTargetCountGoal(num)}
-                      >
-                        {num} Targets
-                      </button>
-                    ))}
-                  </div>
+                  ))}
                 </div>
 
-                <div className="setting-group">
-                  <span className="setting-label">Circle Sizing:</span>
-                  <div className="setting-options">
-                    {[
-                      { id: 'dynamic', label: '🎲 Dynamic (Random Sizes)' },
-                      { id: 'large', label: 'Large (80px)' },
-                      { id: 'medium', label: 'Medium (64px)' },
-                      { id: 'small', label: 'Small (48px)' }
-                    ].map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        className={`setting-btn ${sizeMode === opt.id ? 'active' : ''}`}
-                        onClick={() => setSizeMode(opt.id)}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Launch Action */}
-              <div className="game-launch-row">
-                <button 
-                  type="button" 
-                  className="btn-launch-game"
-                  onClick={handleStartGame}
-                >
-                  <Crosshair size={20} />
-                  <span>Start Precision Challenge</span>
-                  <ChevronRight size={18} />
-                </button>
-
-                <div className="game-perks-list">
-                  <span>⚡ Reaction speed in milliseconds</span>
-                  <span>🎯 3-Zone accuracy & radial tracking</span>
-                  <span>⏱️ Exact elapsed time</span>
-                </div>
+                <div className="leaderboard-click-hint">Click to expand full ranking ↗</div>
               </div>
             </div>
           </div>
@@ -588,20 +617,103 @@ export default function FunPage() {
       )}
 
       {/* ========================================================
-          2. COUNTDOWN OVERLAY
+          EXPANDED FULL LEADERBOARD MODAL / DRAWER
           ======================================================== */}
-      {gameState === 'countdown' && (
-        <div className="game-countdown-screen">
-          <div className="countdown-content">
-            <span className="countdown-subtitle">Get Ready! Aim for the Bullseye...</span>
-            <div className="countdown-number-display">{countdownNum}</div>
-            <p className="countdown-tip">Tip: Clicking the inner golden core grants 3x points and maximum precision rank!</p>
+      {isLeaderboardExpanded && (
+        <div className="leaderboard-modal-overlay" onClick={() => setIsLeaderboardExpanded(false)}>
+          <div className="leaderboard-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="leaderboard-modal-header">
+              <div className="leaderboard-modal-title-group">
+                <div className="trophy-badge-icon">
+                  <Trophy size={24} color="#FFD700" />
+                </div>
+                <div>
+                  <h2 className="leaderboard-modal-title">UXCO Aim Lab Leaderboard</h2>
+                  <p className="leaderboard-modal-subtitle">
+                    Ranked by <strong>Precision Score</strong> (+3 Center, +2 Mid, +1 Side, -1 Miss) and <strong>Fastest Elapsed Time</strong>.
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="leaderboard-close-btn"
+                onClick={() => setIsLeaderboardExpanded(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="leaderboard-table-wrap">
+              <table className="leaderboard-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Precision Score</th>
+                    <th>Accuracy</th>
+                    <th>Total Time</th>
+                    <th>Avg Speed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboard.map((player, idx) => (
+                    <tr key={player.id || idx} className={`leaderboard-row rank-${idx + 1}`}>
+                      <td>
+                        <span className={`rank-badge rank-${idx + 1}`}>
+                          {idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`}
+                        </span>
+                      </td>
+                      <td className="player-cell">
+                        <strong>{player.name || 'Unknown'}</strong>
+                      </td>
+                      <td className="score-cell">
+                        <span className="score-badge">{player.score} pts</span>
+                      </td>
+                      <td>{player.accuracy}%</td>
+                      <td className="time-cell">⏱️ {player.totalTime}s</td>
+                      <td>⚡ {player.avgReaction}ms</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="leaderboard-modal-footer">
+              <button 
+                type="button" 
+                className="btn-modal-start"
+                onClick={handleStartGame}
+              >
+                <Crosshair size={18} />
+                <span>Play & Challenge Top Rank</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn-modal-close"
+                onClick={() => setIsLeaderboardExpanded(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* ========================================================
-          3. FULL INTERACTIVE PLAYING ARENA
+          2. COUNTDOWN OVERLAY
+          ======================================================== */}
+      {gameState === 'countdown' && (
+        <div className="game-countdown-screen">
+          <div className="countdown-content">
+            <span className="countdown-subtitle">Get Ready! Aim for the Golden Core...</span>
+            <div className="countdown-number-display">{countdownNum}</div>
+            <p className="countdown-tip">Center Bullseye gives +3 points. Don't click outside or you will lose 1 point!</p>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================
+          3. FULL INTERACTIVE PLAYING ARENA (Target Count Hidden)
           ======================================================== */}
       {gameState === 'playing' && (
         <div 
@@ -609,11 +721,13 @@ export default function FunPage() {
           ref={arenaRef}
           onClick={handleArenaMiss}
         >
-          {/* Top Realtime HUD */}
+          {/* Top Realtime HUD (Target Count Intentionally Hidden) */}
           <div className="arena-hud-bar" onClick={(e) => e.stopPropagation()}>
             <div className="hud-metric">
-              <span className="hud-metric-label">Targets</span>
-              <span className="hud-metric-val">{currentHitCount} / {targetCountGoal}</span>
+              <span className="hud-metric-label">Live Score</span>
+              <span className="hud-metric-val" style={{ color: totalScoreAcc >= 0 ? '#34D399' : '#F87171' }}>
+                {totalScoreAcc} pts
+              </span>
             </div>
 
             <div className="hud-metric">
@@ -684,7 +798,7 @@ export default function FunPage() {
             <div className="target-pulse-ring" />
           </div>
 
-          {/* Floating Point Indicators (+300 Bullseye / +200 Mid / +100 Outer / Miss) */}
+          {/* Floating Point Indicators (+3 Center / +2 Mid / +1 Side / -1 Miss) */}
           {floatingPoints.map((pt) => (
             <div
               key={pt.id}
@@ -700,7 +814,7 @@ export default function FunPage() {
       )}
 
       {/* ========================================================
-          4. END-OF-GAME RESULTS SCREEN (Comprehensive Precision Report)
+          4. END-OF-GAME RESULTS SCREEN (Score & Accuracy Report)
           ======================================================== */}
       {gameState === 'gameover' && (
         <div className="game-results-screen">
@@ -714,75 +828,91 @@ export default function FunPage() {
                 <span>{rankInfo.rank} Rank • {rankInfo.title}</span>
               </div>
 
-              <h2 className="results-score-title">{finalComputedScore.toLocaleString()} Points</h2>
+              <h2 className="results-score-title">{totalScoreAcc} Points</h2>
               <p className="results-congrats-text">
-                Cleared {targetCountGoal} targets in <strong>{finalDuration.toFixed(2)}s</strong> with an average reaction time of <strong>{avgReactionTime}ms</strong>.
+                Completed 15 targets in <strong>{finalDuration.toFixed(2)}s</strong> with an average reaction time of <strong>{avgReactionTime}ms</strong>.
               </p>
 
-              {/* 3-Zone Accuracy Breakdown Card */}
-              <div className="results-zone-breakdown-card">
-                <h4 className="zone-breakdown-title">
-                  <Target size={16} color="#C21356" />
-                  <span>3-Zone Precision Breakdown</span>
-                </h4>
-
-                <div className="zone-stats-row">
-                  <div className="zone-stat-col center">
-                    <span className="zone-stat-pill">🎯 Center (≤33%)</span>
-                    <span className="zone-stat-count">{zoneCounts.center} Hits</span>
-                    <span className="zone-stat-percent">
-                      {currentHitCount > 0 ? Math.round((zoneCounts.center / currentHitCount) * 100) : 0}% of targets
-                    </span>
+              {/* Clean Inline Name Input (No outer nested box) */}
+              <div className="results-name-section-clean">
+                {!hasSubmittedScore ? (
+                  <form onSubmit={handleSaveLeaderboardScore} className="results-name-form-clean">
+                    <input
+                      type="text"
+                      maxLength={22}
+                      placeholder="Enter your name (leave blank for 'Unknown')"
+                      value={playerNameInput}
+                      onChange={(e) => setPlayerNameInput(e.target.value)}
+                      className="player-name-input-clean"
+                      autoFocus
+                    />
+                    <button type="submit" className="btn-submit-score-clean">
+                      Save to Leaderboard
+                    </button>
+                  </form>
+                ) : (
+                  <div className="results-name-saved-clean">
+                    <CheckCircle2 size={18} color="#10B981" />
+                    <span>Saved as <strong>{playerNameInput.trim() || 'Unknown'}</strong>! Rank <strong>#{userRankResult}</strong></span>
+                    <button 
+                      type="button" 
+                      className="btn-view-leaderboard-link"
+                      onClick={() => setIsLeaderboardExpanded(true)}
+                    >
+                      View Leaderboard ↗
+                    </button>
                   </div>
+                )}
+              </div>
 
-                  <div className="zone-stat-col mid">
-                    <span className="zone-stat-pill">✨ Middle (34-66%)</span>
-                    <span className="zone-stat-count">{zoneCounts.middle} Hits</span>
-                    <span className="zone-stat-percent">
-                      {currentHitCount > 0 ? Math.round((zoneCounts.middle / currentHitCount) * 100) : 0}% of targets
-                    </span>
-                  </div>
-
-                  <div className="zone-stat-col outer">
-                    <span className="zone-stat-pill">⚡ Outer (67-100%)</span>
-                    <span className="zone-stat-count">{zoneCounts.outer} Hits</span>
-                    <span className="zone-stat-percent">
-                      {currentHitCount > 0 ? Math.round((zoneCounts.outer / currentHitCount) * 100) : 0}% of targets
-                    </span>
-                  </div>
-
-                  <div className="zone-stat-col miss">
-                    <span className="zone-stat-pill">✕ Misses</span>
-                    <span className="zone-stat-count">{zoneCounts.miss} Clicks</span>
-                    <span className="zone-stat-percent">Outside Target</span>
-                  </div>
+              {/* Flat Clean 3-Zone Points Breakdown (No Nested Boxes) */}
+              <div className="results-breakdown-flat">
+                <div className="breakdown-flat-item center">
+                  <Target size={18} color="#D97706" />
+                  <span className="flat-item-title">Center</span>
+                  <span className="flat-item-val">{zoneCounts.center} hits</span>
+                  <span className="flat-item-pts">+{zoneCounts.center * 3} pts</span>
+                </div>
+                <div className="breakdown-flat-item mid">
+                  <CircleDot size={18} color="#EA580C" />
+                  <span className="flat-item-title">Middle</span>
+                  <span className="flat-item-val">{zoneCounts.middle} hits</span>
+                  <span className="flat-item-pts">+{zoneCounts.middle * 2} pts</span>
+                </div>
+                <div className="breakdown-flat-item outer">
+                  <Circle size={18} color="#C21356" />
+                  <span className="flat-item-title">Side</span>
+                  <span className="flat-item-val">{zoneCounts.outer} hits</span>
+                  <span className="flat-item-pts">+{zoneCounts.outer * 1} pts</span>
+                </div>
+                <div className="breakdown-flat-item miss">
+                  <XCircle size={18} color="#DC2626" />
+                  <span className="flat-item-title">Misses</span>
+                  <span className="flat-item-val">{zoneCounts.miss} misses</span>
+                  <span className="flat-item-pts">-{zoneCounts.miss * 1} pts</span>
                 </div>
               </div>
 
-              {/* Speed & Accuracy Summary Grid */}
-              <div className="results-metrics-grid">
-                <div className="result-stat-box">
-                  <div className="stat-box-icon"><Target size={18} color="#C21356" /></div>
-                  <span className="stat-box-val">{currentAccuracy}%</span>
-                  <span className="stat-box-label">Overall Accuracy ({currentHitCount}/{totalClicks} clicks)</span>
+              {/* Clean Flat Stats Row (No Box Grids) */}
+              <div className="results-stats-row-flat">
+                <div className="stat-flat-item">
+                  <span className="stat-flat-val">{currentAccuracy}%</span>
+                  <span className="stat-flat-label">Accuracy ({currentHitCount}/15)</span>
                 </div>
-
-                <div className="result-stat-box">
-                  <div className="stat-box-icon"><Zap size={18} color="#FA7538" /></div>
-                  <span className="stat-box-val">{avgReactionTime} ms</span>
-                  <span className="stat-box-label">Avg Speed (Fastest: {fastestReaction}ms)</span>
+                <div className="stat-flat-divider" />
+                <div className="stat-flat-item">
+                  <span className="stat-flat-val">{avgReactionTime} ms</span>
+                  <span className="stat-flat-label">Avg Speed (Best: {fastestReaction}ms)</span>
                 </div>
-
-                <div className="result-stat-box">
-                  <div className="stat-box-icon"><Clock size={18} color="#D81E6B" /></div>
-                  <span className="stat-box-val">{finalDuration.toFixed(2)} s</span>
-                  <span className="stat-box-label">Total Elapsed Time</span>
+                <div className="stat-flat-divider" />
+                <div className="stat-flat-item">
+                  <span className="stat-flat-val">{finalDuration.toFixed(2)} s</span>
+                  <span className="stat-flat-label">Total Time</span>
                 </div>
-
-                <div className="result-stat-box">
-                  <div className="stat-box-icon"><Flame size={18} color="#F59E0B" /></div>
-                  <span className="stat-box-val">{maxStreak}</span>
-                  <span className="stat-box-label">Max Hit Streak</span>
+                <div className="stat-flat-divider" />
+                <div className="stat-flat-item">
+                  <span className="stat-flat-val">{maxStreak}</span>
+                  <span className="stat-flat-label">Max Hit Streak</span>
                 </div>
               </div>
 

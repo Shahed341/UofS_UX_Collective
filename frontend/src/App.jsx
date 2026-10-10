@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BinaryBackground from './components/common/BinaryBackground.jsx';
 import ScrollToTop from './components/common/ScrollToTop.jsx';
 import Navbar from './components/nav/Navbar.jsx';
@@ -72,6 +72,7 @@ export const INITIAL_REAL_EVENTS = [
 ];
 
 export default function App() {
+  const location = useLocation();
   const [statusData, setStatusData] = useState(null);
   const [events, setEvents] = useState(INITIAL_REAL_EVENTS);
   const [logs, setLogs] = useState([]);
@@ -226,7 +227,8 @@ export default function App() {
         </Routes>
       </main>
 
-      <Footer />
+      {/* Hide footer on Game page */}
+      {location.pathname !== '/fun' && <Footer />}
     </>
   );
 }

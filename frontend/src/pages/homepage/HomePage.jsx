@@ -4,7 +4,6 @@ import { Sparkles, Users, ArrowRight } from 'lucide-react';
 import HeroSection from './HeroSection.jsx';
 import EventCalendarSection from './EventCalendarSection.jsx';
 import HomeGallerySection from './HomeGallerySection.jsx';
-import StudentComments from './StudentComments.jsx';
 import './HomePage.css';
 
 export default function HomePage({
@@ -153,10 +152,7 @@ export default function HomePage({
         {/* 4. Gallery Section */}
         <HomeGallerySection />
 
-        {/* 5. Student Comments / Testimonials Section */}
-        <StudentComments />
-
-        {/* 6. FAQ Section (3D Colorful Pill Accordion) */}
+        {/* 5. FAQ Section (3D Colorful Pill Accordion) */}
         <FAQSection />
       </div>
     </div>
