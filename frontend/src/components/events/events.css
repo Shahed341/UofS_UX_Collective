@@ -1,0 +1,183 @@
+/* ---------- Add to calendar ---------- */
+.add-to-cal {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.add-to-cal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1.5px solid #EADCE1;
+  background: #FFFFFF;
+  color: var(--text-dark);
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s ease, border-color 0.2s ease;
+}
+
+.add-to-cal-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-orange-coral);
+}
+
+.add-to-cal-btn.primary {
+  flex: 1;
+  background: var(--uxco-gradient);
+  border-color: transparent;
+  color: #FFFFFF;
+  box-shadow: 0 6px 18px rgba(194, 19, 86, 0.28);
+}
+
+.add-to-cal-btn.primary:hover {
+  box-shadow: 0 10px 26px rgba(194, 19, 86, 0.38);
+}
+
+.add-to-cal.is-compact .add-to-cal-btn {
+  padding: 9px 13px;
+  font-size: 13px;
+}
+
+/* ---------- Archive card ---------- */
+.archive-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #FFFFFF;
+  border: 1px solid #F0E8EB;
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+}
+
+.archive-card:hover {
+  box-shadow: 0 22px 50px rgba(194, 19, 86, 0.16);
+}
+
+.archive-card-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #F6EFF2;
+}
+
+.archive-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s var(--ease-out-expo), opacity 0.5s ease;
+}
+
+.archive-card:hover .archive-card-img {
+  transform: scale(1.07);
+}
+
+.archive-card-date {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(6px);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--primary-pink);
+  line-height: 1.1;
+}
+
+.archive-card-date strong {
+  font-size: 22px;
+  color: var(--text-dark);
+}
+
+.archive-card-photos {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(20, 8, 14, 0.66);
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.archive-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px 20px;
+  flex: 1;
+}
+
+.archive-card-cat {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent-orange-coral);
+}
+
+.archive-card-title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.archive-card-summary {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.archive-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13px;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.archive-card-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.archive-card-cta {
+  margin-top: auto;
+  padding-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--primary-pink);
+}
+
+.archive-card-cta svg {
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.archive-card:hover .archive-card-cta svg {
+  transform: translate(3px, -3px);
+}
