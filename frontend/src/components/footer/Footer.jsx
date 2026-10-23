@@ -172,7 +172,6 @@ export default function Footer() {
         <p className="footer-copyright-text">
           © {currentYear} University of Saskatchewan UX Collective • USSU Ratified Club
         </p>
-        <Link to="/admin" className="footer-admin-link">Exec login</Link>
       </div>
     </footer>
   );
