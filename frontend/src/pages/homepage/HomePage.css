@@ -758,6 +758,33 @@
 .inspector-card-top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inspector-next-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--primary-pink);
+}
+
+.inspector-next-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FA7538;
+  animation: livePulseDark 2s ease-out infinite;
+}
+
+@keyframes livePulseDark {
+  0% { box-shadow: 0 0 0 0 rgba(250, 117, 56, 0.6); }
+  100% { box-shadow: 0 0 0 10px rgba(250, 117, 56, 0); }
 }
 
 .inspector-event-title {
@@ -1021,10 +1048,6 @@
 }
 
 @media (max-width: 900px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-  }
   .cal-layout-container {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -1463,105 +1486,6 @@
 }
 
 /* ==========================================================
-   NEXT EVENT COUNTDOWN BANNER
-   ========================================================== */
-.next-event-banner {
-  display: grid;
-  grid-template-columns: 1.4fr auto;
-  grid-template-areas:
-    "info countdown"
-    "actions actions";
-  gap: 20px 32px;
-  align-items: center;
-  margin: -24px 0 72px;
-  padding: 28px 32px;
-  border-radius: 28px;
-  background: #FFFFFF;
-  border: 1px solid #F1E3E8;
-  box-shadow: 0 20px 50px rgba(194, 19, 86, 0.14);
-  position: relative;
-  z-index: 2;
-}
-
-.next-event-info { grid-area: info; min-width: 0; }
-.next-event-title {
-  margin-top: 6px;
-  font-size: clamp(22px, 2.8vw, 30px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-}
-.next-event-meta {
-  margin-top: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 14.5px;
-}
-.next-event-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.next-event-countdown {
-  grid-area: countdown;
-  display: flex;
-  gap: 10px;
-}
-.countdown-unit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 68px;
-  padding: 12px 8px 10px;
-  border-radius: 18px;
-  background: var(--uxco-gradient);
-  color: #FFFFFF;
-  box-shadow: 0 8px 20px rgba(194, 19, 86, 0.25), inset 0 -4px 0 rgba(107, 0, 27, 0.25);
-}
-.countdown-value {
-  font-size: 30px;
-  font-weight: 900;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  animation: tick 0.45s var(--ease-spring);
-}
-@keyframes tick {
-  from { transform: translateY(-40%); opacity: 0; }
-}
-.countdown-label {
-  margin-top: 4px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  opacity: 0.88;
-}
-
-.next-event-actions {
-  grid-area: actions;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 18px;
-  border-top: 1px dashed #EEDDE3;
-}
-.next-event-details {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 800;
-  color: var(--primary-pink);
-}
-.next-event-details svg { transition: transform 0.25s var(--ease-spring); }
-.next-event-details:hover svg { transform: translateX(4px); }
-
-/* ==========================================================
    SECTION HEADS, PATHS, RECAPS
    ========================================================== */
 .home-section-head {
@@ -1748,11 +1672,6 @@
   .home-recaps-grid {
     grid-template-columns: 1fr;
   }
-  .next-event-banner {
-    grid-template-columns: 1fr;
-    grid-template-areas: "info" "countdown" "actions";
-    margin-top: -12px;
-  }
   .home-game-teaser {
     flex-direction: column;
     align-items: flex-start;
@@ -1761,27 +1680,6 @@
 }
 
 @media (max-width: 640px) {
-  .next-event-banner {
-    padding: 22px 18px;
-    border-radius: 22px;
-    margin-bottom: 56px;
-  }
-  .next-event-countdown {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-  .countdown-unit {
-    min-width: 0;
-    padding: 10px 4px 8px;
-    border-radius: 14px;
-  }
-  .countdown-value {
-    font-size: 22px;
-  }
-  .next-event-actions .add-to-cal {
-    width: 100%;
-  }
   .home-section-head.with-action {
     flex-direction: column;
     align-items: flex-start;
@@ -1792,15 +1690,6 @@
   }
   .home-events-section + .cal-subscribe {
     margin: -24px 0 64px;
-  }
-  .stats-grid {
-    gap: 20px 14px;
-  }
-  .stat-number {
-    font-size: 40px;
-  }
-  .stat-label {
-    font-size: 12px;
   }
   .about-3d-red-card {
     padding: 28px 20px;
@@ -1886,5 +1775,32 @@
   50% {
     transform: translateY(-14px) rotate(1.2deg) scale(1.035);
     filter: drop-shadow(0 26px 46px rgba(150, 10, 60, 0.36));
+  }
+}
+
+/* Stats stay on a single row at every width; type scales with the viewport */
+.stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(8px, 2.5vw, 32px);
+}
+
+.stat-number {
+  font-size: clamp(24px, 5.6vw, 64px);
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.stat-label {
+  font-size: clamp(9px, 1.3vw, 15px);
+  letter-spacing: clamp(0.2px, 0.08vw, 0.8px);
+  line-height: 1.3;
+}
+
+@media (max-width: 640px) {
+  .stat-item {
+    text-align: center;
+  }
+  .stat-number {
+    filter: drop-shadow(0 2px 0 #C40E40) drop-shadow(0 4px 8px rgba(196, 14, 64, 0.2));
   }
 }

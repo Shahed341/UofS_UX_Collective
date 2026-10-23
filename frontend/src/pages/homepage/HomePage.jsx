@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CalendarDays, BookOpen, HandHeart, Gamepad2, Trophy } from 'lucide-react';
 import HeroSection from './HeroSection.jsx';
-import NextEventBanner from './NextEventBanner.jsx';
 import EventCalendarSection from './EventCalendarSection.jsx';
 import HomeGallerySection from './HomeGallerySection.jsx';
 import EventCard from '../../components/events/EventCard.jsx';
@@ -64,8 +63,6 @@ export default function HomePage() {
       <HeroSection nextEvent={nextEvent} />
 
       <div className="app-container">
-        {nextEvent && <NextEventBanner event={nextEvent} />}
-
         {/* About UXCO: 3D red card + photo collage */}
         <section className="home-about-showcase-section" id="about-uxco">
           <div className="about-showcase-grid">

@@ -12,6 +12,7 @@ import {
 
 import { MONTHS as MONTH_NAMES, parseDateTime, formatTimeRange, saskatoonToday } from '../../lib/dates.js';
 import AddToCalendar from '../../components/events/AddToCalendar.jsx';
+import EventCountdown from '../../components/events/EventCountdown.jsx';
 import { Reveal } from '../../lib/motion.jsx';
 
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -34,6 +35,8 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
     () => events.map((event) => ({ ...event, parsedDate: toDay(parseDateTime(event.start_at)) })),
     [events]
   );
+
+  const nextUpcomingId = parsedEvents.find((e) => !e.is_past)?.id;
 
   useEffect(() => {
     const next = parsedEvents.find((e) => !e.is_past && e.parsedDate);
@@ -412,6 +415,7 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                     <div key={event.id} className="inspector-event-card">
                       <div className="inspector-card-top">
                         <span className="event-tag">{event.category}</span>
+                        {nextUpcomingId === event.id && <span className="inspector-next-badge">Next event</span>}
                       </div>
 
                       <h5 className="inspector-event-title">{event.title}</h5>
@@ -442,6 +446,7 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                         </div>
                       </div>
 
+                      {!event.is_past && <EventCountdown startAt={event.start_at} />}
                       {!event.is_past && <AddToCalendar event={event} compact />}
                     </div>
                   ))}
