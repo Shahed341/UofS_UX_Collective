@@ -1598,9 +1598,6 @@
    HOMEPAGE MOBILE
    ========================================================== */
 @media (max-width: 960px) {
-  .home-recaps-grid {
-    grid-template-columns: 1fr;
-  }
   .home-game-teaser {
     flex-direction: column;
     align-items: flex-start;
@@ -1610,8 +1607,12 @@
 
 @media (max-width: 640px) {
   .home-section-head.with-action {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+  }
+  .home-section-head.with-action .btn-secondary {
+    flex-shrink: 0;
+    padding: 9px 14px;
+    font-size: 13.5px;
   }
   .home-paths-section,
   .home-recaps-section {
@@ -2028,5 +2029,65 @@
   }
   .about-3d-readmore-btn {
     justify-self: start;
+  }
+}
+
+/* Recap cards stay three-across at every width; compact tiles on small screens */
+.home-recaps-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 960px) {
+  .home-recaps-grid {
+    gap: 14px;
+  }
+  .home-recaps-grid .archive-card-body {
+    padding: 14px 14px 16px;
+    gap: 6px;
+  }
+  .home-recaps-grid .archive-card-title {
+    font-size: 16px;
+  }
+  .home-recaps-grid .archive-card-summary,
+  .home-recaps-grid .archive-card-meta {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-recaps-grid {
+    gap: 8px;
+  }
+  .home-recaps-grid .archive-card {
+    border-radius: 16px;
+  }
+  .home-recaps-grid .archive-card-media {
+    aspect-ratio: 1;
+  }
+  .home-recaps-grid .archive-card-date {
+    top: 6px;
+    left: 6px;
+    padding: 4px 6px;
+    border-radius: 9px;
+    font-size: 8.5px;
+  }
+  .home-recaps-grid .archive-card-date strong {
+    font-size: 14px;
+  }
+  .home-recaps-grid .archive-card-photos,
+  .home-recaps-grid .archive-card-cat,
+  .home-recaps-grid .archive-card-cta {
+    display: none;
+  }
+  .home-recaps-grid .archive-card-body {
+    padding: 8px 8px 10px;
+  }
+  .home-recaps-grid .archive-card-title {
+    font-size: 12.5px;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
