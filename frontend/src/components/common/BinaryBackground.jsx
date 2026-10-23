@@ -1,553 +1,546 @@
 import React, { useEffect, useRef } from 'react';
 
+/*
+ * Falling 0/1 "binary rain" behind the page. Digits land and stack on cards, bounce off
+ * buttons and corners, pile up at the bottom of the screen and scatter away from the cursor.
+ *
+ * Performance notes (keeps it smooth on phones, 4K monitors and 144 Hz screens):
+ * - Physics is time-based, so speed is the same at any refresh rate.
+ * - Glyphs are pre-rendered sprites drawn with drawImage instead of fillText.
+ * - Card positions are measured in page coordinates on a timer / resize, never during scroll;
+ *   each frame just offsets them by the current scroll position (no layout reads per frame).
+ * - Pixel ratio is capped, density adapts to screen size, and the loop pauses in hidden tabs.
+ */
+
+const OBSTACLE_SELECTORS = [
+  '[data-obstacle]',
+  '.event-ticket-row', '.spotlight-ticket-inner', '.event-principle-card', '.track-pill-btn',
+  '.ticket-cal-button', '.spotlight-cal-btn', '.cal-main-card', '.inspector-main-card', '.inspector-prior-card',
+  '.inspector-next-card', '.about-pillar-card', '.about-quick-banner', '.about-3d-red-card', '.about-collage-photo',
+  '.about-3d-readmore-btn', '.gallery-card', '.contact-3d-hub', '.contact-channel-pill', '.contact-form-card',
+  '.btn-primary', '.btn-secondary', '.cal-today-btn', '.cal-nav-btn', '.exec-3d-card', '.exec-nav-arrow-btn',
+  '.footer-icon-btn', '.hero-join-link', '.collab-link', '.faq-pill-btn', '.archive-card', '.resource-card',
+  '.role-card', '.game-card', '.stat-item', '.next-event-banner',
+].join(', ');
+
+const BUTTON_CLASSES = ['btn-primary', 'btn-secondary', 'hero-join-link', 'track-pill-btn', 'faq-pill-btn'];
+
+// UXCO palette, softened for a subtle background
+const PALETTE = [
+  [232, 29, 136, 0.32],
+  [244, 111, 194, 0.28],
+  [250, 155, 122, 0.30],
+  [51, 51, 51, 0.35],
+  [100, 100, 100, 0.24],
+  [160, 160, 160, 0.16],
+  [200, 200, 200, 0.12],
+];
+
+const CHAR_HEIGHT = 16;
+const FONT_SIZE = 13.5;
+const PILE_LIFETIME_MS = 10000;
+const FLOOR_LIFETIME_MS = 20000;
+const FLOOR_FADE_MS = 2500;
+const MAX_STACK_PER_COL = 7;
+const MAX_FLOOR_STACK = 8;
+const MAX_DPR = 2;
+
+// Wider columns on small screens keep phones light and uncluttered.
+const columnWidthFor = (w) => (w < 480 ? 32 : w < 900 ? 28 : 25);
+
+// Pre-render every glyph/colour/weight combination once per pixel ratio.
+function buildSprites(dpr) {
+  const sprites = {};
+  const size = Math.ceil(CHAR_HEIGHT * dpr);
+  for (const char of ['0', '1']) {
+    for (const weight of ['500', '700']) {
+      PALETTE.forEach(([r, g, b, a], ci) => {
+        const c = document.createElement('canvas');
+        c.width = size;
+        c.height = size;
+        const cx = c.getContext('2d');
+        cx.scale(dpr, dpr);
+        cx.font = `${weight} ${FONT_SIZE}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+        cx.fillText(char, CHAR_HEIGHT / 2, CHAR_HEIGHT / 2);
+        sprites[`${char}${weight}${ci}`] = c;
+      });
+    }
+  }
+  return sprites;
+}
+
 export default function BinaryBackground() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    if (!canvas) return undefined;
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    let animationFrameId;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
-
-    // Track obstacles relative to current viewport in real-time
-    let obstacles = [];
-
-    const getObstacleSelectors = () => [
-      '.event-card',
-      '.spotlight-ticket-inner',
-      '.event-principle-card',
-      '.event-ticket-row',
-      '.track-pill-btn',
-      '.ticket-cal-button',
-      '.spotlight-cal-btn',
-      '.featured-game-card',
-      '.leaderboard-mini-card',
-      '.leaderboard-modal-container',
-      '.arcade-teaser-card',
-      '.setting-btn',
-      '.btn-launch-game',
-      '.results-modal-card',
-      '.home-gallery-card',
-      '.comment-card',
-      '.cal-main-card',
-      '.inspector-prior-card',
-      '.inspector-main-card',
-      '.prior-chip-btn',
-      '.about-pillar-card',
-      '.about-quick-banner',
-      '.events-partners-ribbon',
-      '.events-filter-btn',
-      '.gallery-card',
-      '.contact-3d-hub',
-      '.contact-channel-pill',
-      '.contact-form-card',
-      '.btn-primary',
-      '.btn-secondary',
-      '.btn-cal',
-      '.cal-today-btn',
-      '.cal-nav-btn',
-      '.exec-3d-card',
-      '.exec-nav-arrow-btn',
-      '.footer-icon-btn',
-      '.hero-join-link',
-      '.collab-link',
-      '.faq-pill-btn',
-      '.about-3d-red-card',
-      '.about-collage-photo',
-      '.about-3d-readmore-btn',
-    ];
-
-    const updateObstacles = () => {
-      const elements = document.querySelectorAll(getObstacleSelectors().join(', '));
-      const newObs = [];
-      elements.forEach((el, index) => {
-        const rect = el.getBoundingClientRect();
-        // Keep elements in or near viewport
-        if (rect.width > 20 && rect.height > 15 && rect.bottom > -50 && rect.top < height + 50) {
-          const isButton = 
-            el.tagName === 'BUTTON' || 
-            el.tagName === 'A' ||
-            el.classList.contains('btn-hero-primary') || 
-            el.classList.contains('btn-hero-secondary') || 
-            el.classList.contains('btn-hero-discord') || 
-            el.classList.contains('btn-primary') || 
-            el.classList.contains('btn-secondary') ||
-            el.classList.contains('btn-cal') ||
-            el.classList.contains('btn-ping');
-
-          newObs.push({
-            id: index,
-            left: rect.left,
-            right: rect.right,
-            top: rect.top,
-            bottom: rect.bottom,
-            width: rect.width,
-            height: rect.height,
-            isButton,
-          });
-        }
-      });
-      obstacles = newObs;
-    };
-
-    // High DPI Canvas resize handler
-    const updateSize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.scale(dpr, dpr);
-      updateObstacles();
-    };
-
-    updateSize();
-
-    // Mouse interaction
-    const mouse = {
-      x: -1000,
-      y: -1000,
-      radius: 130,
-      isActive: false,
-    };
-
-    const handleMouseMove = (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-      mouse.isActive = true;
-    };
-
-    const handleMouseLeave = () => {
-      mouse.x = -1000;
-      mouse.y = -1000;
-      mouse.isActive = false;
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('scroll', updateObstacles, { passive: true });
-
-    // UXCO Brand Colors (Faded / Softer alpha values for subtle elegance)
-    const paletteColors = [
-      { r: 232, g: 29, b: 136, a: 0.32 },  // Primary Pink (faded)
-      { r: 244, g: 111, b: 194, a: 0.28 }, // Medium Pink (faded)
-      { r: 250, g: 155, b: 122, a: 0.30 }, // Orange-Coral (faded)
-      { r: 51, g: 51, b: 51, a: 0.35 },    // Deep Grey Accent (faded)
-      { r: 100, g: 100, b: 100, a: 0.24 }, // Medium Grey (faded)
-      { r: 160, g: 160, b: 160, a: 0.16 }, // Subtle Grey (faded)
-      { r: 200, g: 200, b: 200, a: 0.12 }, // Light Tint (faded)
-    ];
-
-    const columnWidth = 25; // Adjusted column spacing for ~10% lower density
-    const charHeight = 16;
-    const fontSize = 13.5;
-    const PILE_LIFETIME_MS = 10000; // 10 seconds before slipping behind box
-    const FLOOR_PILE_LIFETIME_MS = 20000; // 20 seconds before bottom tower digits disappear
-    const MAX_STACK_PER_COL = 7;
-    const MAX_FLOOR_STACK = 8; // Max tower height at bottom
-
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let columnWidth = 25;
+    let sprites = {};
     let particles = [];
+    let obstacles = [];
+    let obstacleMap = new Map();
+    let measuredScrollY = 0;
+    let frameId = null;
+    let lastTime = performance.now();
+
+    const pointer = { x: -1000, y: -1000, active: false, radius: 130 };
+
+    // ---------- Obstacles ----------
+
+    let nextObstacleId = 1;
+    const elementIds = new WeakMap();
+
+    const measureObstacles = () => {
+      measuredScrollY = window.scrollY;
+      const list = [];
+      document.querySelectorAll(OBSTACLE_SELECTORS).forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.width < 20 || rect.height < 15) return;
+        // Only keep elements within a couple of screens of the viewport
+        if (rect.bottom < -height || rect.top > height * 2) return;
+        if (!elementIds.has(el)) elementIds.set(el, nextObstacleId++);
+        list.push({
+          id: elementIds.get(el),
+          left: rect.left,
+          right: rect.right,
+          top: rect.top + measuredScrollY,
+          bottom: rect.bottom + measuredScrollY,
+          width: rect.width,
+          isButton: el.tagName === 'BUTTON' || el.tagName === 'A' || BUTTON_CLASSES.some((c) => el.classList.contains(c)),
+        });
+      });
+      obstacles = list;
+      obstacleMap = new Map(list.map((o) => [o.id, o]));
+    };
+
+    let measureTimer = null;
+    const scheduleMeasure = (delay = 120) => {
+      clearTimeout(measureTimer);
+      measureTimer = setTimeout(measureObstacles, delay);
+    };
+
+    // ---------- Particles ----------
 
     const createParticle = (colIndex, startY = null, layer = 'interactive') => {
       const colX = colIndex * columnWidth + columnWidth / 2;
-      const colorObj = paletteColors[Math.floor(Math.random() * paletteColors.length)];
       return {
         colIndex,
         colX,
         x: colX,
-        y: startY !== null ? startY : -20 - Math.random() * 80,
+        y: startY ?? -20 - Math.random() * 80,
         targetX: colX,
-        targetY: null,
+        targetY: 0,
         vx: 0,
         vy: 0,
         speed: 0.38 + Math.random() * 0.42,
         char: Math.random() > 0.5 ? '1' : '0',
-        color: colorObj,
+        color: Math.floor(Math.random() * PALETTE.length),
         weight: Math.random() > 0.6 ? '700' : '500',
-        flipTimer: 50 + Math.floor(Math.random() * 100),
-        state: 'falling', // 'falling' | 'stacked' | 'falling_behind' | 'stacked_bottom'
-        settledAt: null,
+        flipIn: 800 + Math.random() * 1600,
+        state: 'falling', // falling | stacked | behind | floor
+        settledAt: 0,
         obsId: null,
-        relX: 0, // Relative X offset inside the obstacle box
-        stackIndex: 0, // Vertical position in pile/tower
+        relX: 0,
+        stackIndex: 0,
         ignoreObsId: null,
         layer,
       };
     };
 
-    const initParticles = () => {
-      const columnsCount = Math.ceil(width / columnWidth) + 1;
+    const columnsCount = () => Math.ceil(width / columnWidth) + 1;
+    // Fewer particles per column on short/small screens
+    const perColumn = () => (height < 700 ? 2.4 : 3.2);
+
+    const seedParticles = () => {
       particles = [];
-      for (let c = 0; c < columnsCount; c++) {
+      const cols = columnsCount();
+      for (let c = 0; c < cols; c++) {
         particles.push(createParticle(c, Math.random() * height, 'interactive'));
-        particles.push(createParticle(c, Math.random() * (height / 2), 'interactive'));
         particles.push(createParticle(c, Math.random() * height, 'ambient'));
-        if (Math.random() > 0.55) {
-          particles.push(createParticle(c, (height / 2) + Math.random() * (height / 2), 'ambient'));
+        if (Math.random() < perColumn() - 2) {
+          particles.push(createParticle(c, Math.random() * height, Math.random() > 0.5 ? 'interactive' : 'ambient'));
         }
       }
     };
 
-    initParticles();
+    // ---------- Sizing ----------
 
-    // Re-anchor and reconcile particles on window resize
-    const handleResize = () => {
-      updateSize();
-      const currentCols = Math.ceil(width / columnWidth) + 1;
+    const resize = () => {
+      const newDpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+      const newWidth = window.innerWidth;
+      const newHeight = window.innerHeight;
+      const widthChanged = newWidth !== width;
 
-      // Filter out-of-bounds particles
-      particles = particles.filter((p) => p.x <= width + 50 && p.colIndex <= currentCols + 1);
+      if (newDpr !== dpr || !sprites['05000']) sprites = buildSprites(newDpr);
+      dpr = newDpr;
+      width = newWidth;
+      height = newHeight;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Re-anchor stacked particles to obstacle's new bounding box / floor
-      particles.forEach((p) => {
-        // Recalculate colX based on column width
-        p.colX = p.colIndex * columnWidth + columnWidth / 2;
-
-        if (p.state === 'stacked' && p.obsId !== null) {
-          const obs = obstacles.find((o) => o.id === p.obsId);
-          if (obs) {
-            p.targetX = obs.left + p.relX;
-            p.targetY = obs.top - 4 - p.stackIndex * charHeight;
-            // Snap position to prevent floating off-screen
-            p.x = p.targetX;
-            p.y = p.targetY;
-          } else {
-            // Obstacle vanished or shifted offscreen, resume falling
-            p.state = 'falling';
-            p.obsId = null;
-            p.settledAt = null;
+      // Height-only changes (mobile address bar showing/hiding) keep the current particles.
+      if (widthChanged) {
+        const oldColumnWidth = columnWidth;
+        columnWidth = columnWidthFor(width);
+        const cols = columnsCount();
+        if (particles.length === 0 || oldColumnWidth !== columnWidth) {
+          seedParticles();
+        } else {
+          particles = particles.filter((p) => p.colIndex < cols);
+          const target = Math.round(cols * perColumn());
+          while (particles.length < target) {
+            particles.push(createParticle(Math.floor(Math.random() * cols), Math.random() * height, 'ambient'));
           }
-        } else if (p.state === 'stacked_bottom') {
-          p.targetX = p.colX;
-          p.targetY = height - 16 - p.stackIndex * charHeight;
-          p.x = p.targetX;
-          p.y = p.targetY;
         }
-      });
-
-      // Refill ambient streams if window widened
-      while (particles.length < currentCols * 3.0) {
-        const randomCol = Math.floor(Math.random() * currentCols);
-        particles.push(createParticle(randomCol, Math.random() * height, 'ambient'));
       }
+      measureObstacles();
     };
 
-    window.addEventListener('resize', handleResize);
-    const obsInterval = setInterval(updateObstacles, 800);
+    // ---------- Drawing ----------
 
-    // Animation Render Loop
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
-      const now = Date.now();
-      const stackCounters = new Map();
-      const floorStackCounters = new Map();
+    const draw = (p, alpha = 1) => {
+      const sprite = sprites[`${p.char}${p.weight}${p.color}`];
+      if (!sprite) return;
+      if (alpha < 1) ctx.globalAlpha = alpha;
+      ctx.drawImage(sprite, p.x - CHAR_HEIGHT / 2, p.y - CHAR_HEIGHT / 2 - 4, CHAR_HEIGHT, CHAR_HEIGHT);
+      if (alpha < 1) ctx.globalAlpha = 1;
+    };
 
-      // Pre-calculate existing floor towers per column
-      for (let j = 0; j < particles.length; j++) {
-        const pt = particles[j];
-        if (pt.state === 'stacked_bottom') {
-          const cur = floorStackCounters.get(pt.colIndex) || 0;
-          floorStackCounters.set(pt.colIndex, Math.max(cur, pt.stackIndex + 1));
+    const clear = () => {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+    };
+
+    const flip = (p) => {
+      p.char = p.char === '1' ? '0' : '1';
+    };
+
+    // ---------- Simulation step ----------
+
+    const step = (dt, now) => {
+      const k = dt / 16.667; // 1.0 at 60 fps
+      const damp88 = Math.pow(0.88, k);
+      const damp94 = Math.pow(0.94, k);
+      const spring = 1 - Math.pow(1 - 0.15, k);
+      const steer = 1 - Math.pow(1 - 0.025, k);
+      // Obstacles are stored in page coordinates; convert with the live scroll position
+      const scrollY = window.scrollY;
+      const viewTop = (o) => o.top - scrollY;
+
+      const stackCounts = new Map();
+      const floorCounts = new Map();
+      for (const p of particles) {
+        if (p.state === 'floor') {
+          floorCounts.set(p.colIndex, Math.max(floorCounts.get(p.colIndex) || 0, p.stackIndex + 1));
         }
       }
+
+      const spawned = [];
+      const maxParticles = Math.ceil(columnsCount() * (perColumn() + 0.8));
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-        // Character flipping (0 <-> 1)
-        p.flipTimer--;
-        if (p.flipTimer <= 0) {
-          p.char = p.char === '1' ? '0' : '1';
-          p.flipTimer = 60 + Math.floor(Math.random() * 120);
+        p.flipIn -= dt;
+        if (p.flipIn <= 0) {
+          flip(p);
+          p.flipIn = 1000 + Math.random() * 2000;
         }
 
-        // Mouse distraction physics
-        if (mouse.isActive) {
-          const dx = p.x - mouse.x;
-          const dy = p.y - mouse.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < mouse.radius && dist > 0) {
-            const force = (1 - dist / mouse.radius) * 2.2;
-            const angle = Math.atan2(dy, dx);
-            p.vx += Math.cos(angle) * force;
-            p.vy += Math.sin(angle) * force * 0.7;
+        if (pointer.active) {
+          const dx = p.x - pointer.x;
+          const dy = p.y - pointer.y;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < pointer.radius * pointer.radius && distSq > 0) {
+            const dist = Math.sqrt(distSq);
+            const force = (1 - dist / pointer.radius) * 2.2 * k;
+            p.vx += (dx / dist) * force;
+            p.vy += (dy / dist) * force * 0.7;
           }
         }
 
-        // --- STATE: STACKED AT BOTTOM OF SCREEN (FOOTER TOWER) ---
-        if (p.state === 'stacked_bottom') {
+        // Settled at the bottom of the screen
+        if (p.state === 'floor') {
           const age = now - p.settledAt;
-
-          // Stay for 20 seconds before disappearing
-          if (age >= FLOOR_PILE_LIFETIME_MS) {
-            particles.splice(i, 1);
+          if (age >= FLOOR_LIFETIME_MS) {
+            particles[i] = particles[particles.length - 1];
+            particles.pop();
             i--;
             continue;
           }
-
-          // Maintain bottom tower position
           p.targetX = p.colX;
-          p.targetY = height - 16 - p.stackIndex * charHeight;
-
-          // Physics spring to maintain tower brick position
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vx *= 0.88;
-          p.vy *= 0.88;
-          p.x += (p.targetX - p.x) * 0.16;
-          p.y += (p.targetY - p.y) * 0.16;
-
-          // Smooth fade-out in final 2.5 seconds of the 20s duration
-          let alpha = p.color.a;
-          const fadeWindow = 2500;
-          if (age > FLOOR_PILE_LIFETIME_MS - fadeWindow) {
-            const remainingRatio = (FLOOR_PILE_LIFETIME_MS - age) / fadeWindow;
-            alpha = p.color.a * Math.max(0, Math.min(1, remainingRatio));
-          }
-
-          // Draw stacked floor tower digit
-          ctx.font = `${p.weight} ${fontSize}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
-          ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${alpha})`;
-          ctx.textAlign = 'center';
-          ctx.fillText(p.char, p.x, p.y);
+          p.targetY = height - 16 - p.stackIndex * CHAR_HEIGHT;
+          p.x += p.vx * k;
+          p.y += p.vy * k;
+          p.vx *= damp88;
+          p.vy *= damp88;
+          p.x += (p.targetX - p.x) * spring;
+          p.y += (p.targetY - p.y) * spring;
+          const remaining = FLOOR_LIFETIME_MS - age;
+          draw(p, remaining < FLOOR_FADE_MS ? remaining / FLOOR_FADE_MS : 1);
           continue;
         }
 
-        // --- STATE: STACKED ON TOP OF A BOX / CARD ---
+        // Stacked on a card
         if (p.state === 'stacked') {
-          const obs = obstacles.find((o) => o.id === p.obsId);
-          const age = now - p.settledAt;
-
-          // If obstacle is gone (e.g. page navigated / layout changed), fall down
+          const obs = obstacleMap.get(p.obsId);
           if (!obs) {
             p.state = 'falling';
             p.obsId = null;
-            p.settledAt = null;
-          } else if (age >= PILE_LIFETIME_MS) {
-            // AFTER 10s: Slip behind the box and continue raining to bottom!
-            p.state = 'falling_behind';
+          } else if (now - p.settledAt >= PILE_LIFETIME_MS) {
+            p.state = 'behind';
             p.ignoreObsId = p.obsId;
             p.obsId = null;
-            p.settledAt = null;
             p.speed = 0.35 + Math.random() * 0.4;
             p.vx = (Math.random() - 0.5) * 0.3;
           } else {
-            // Dynamically recalculate target position from live obstacle box
             p.targetX = obs.left + p.relX;
-            p.targetY = obs.top - 4 - p.stackIndex * charHeight;
-
-            // Physics spring to maintain position attached to the box
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vx *= 0.88;
-            p.vy *= 0.88;
-            p.x += (p.targetX - p.x) * 0.15;
-            p.y += (p.targetY - p.y) * 0.15;
-
+            p.targetY = viewTop(obs) - 4 - p.stackIndex * CHAR_HEIGHT;
+            p.x += p.vx * k;
+            p.y += p.vy * k;
+            p.vx *= damp88;
+            p.vy *= damp88;
+            // Follow the card tightly while scrolling, softly otherwise
+            p.x += (p.targetX - p.x) * spring;
+            p.y = Math.abs(p.targetY - p.y) > 40 ? p.targetY : p.y + (p.targetY - p.y) * spring;
             const key = `${p.colIndex}_${p.obsId}`;
-            const curCount = stackCounters.get(key) || 0;
-            stackCounters.set(key, curCount + 1);
-
-            // Draw stacked number
-            ctx.font = `${p.weight} ${fontSize}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
-            ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.color.a})`;
-            ctx.textAlign = 'center';
-            ctx.fillText(p.char, p.x, p.y);
+            stackCounts.set(key, (stackCounts.get(key) || 0) + 1);
+            draw(p);
             continue;
           }
         }
 
-        // --- STATE: FALLING (AND FALLING BEHIND BOX TO BOTTOM) ---
-        p.x += p.vx;
-        p.y += p.speed + p.vy;
-        p.vx *= 0.94; // slight bounce conservation
-        p.vy *= 0.94;
+        // Falling (or slipping behind a card)
+        p.x += p.vx * k;
+        p.y += (p.speed + p.vy) * k;
+        p.vx *= damp94;
+        p.vy *= damp94;
+        p.x += (p.colX - p.x) * steer;
 
-        // Steer x gently towards column slot
-        p.x += (p.colX - p.x) * 0.025;
-
-        // Clear ignore lock once particle has moved past the obstacle bounds
         if (p.ignoreObsId !== null) {
-          const pastObs = obstacles.find((o) => o.id === p.ignoreObsId);
-          if (
-            !pastObs || 
-            p.y > pastObs.bottom + 14 || 
-            p.y < pastObs.top - 25 || 
-            p.x < pastObs.left - 25 || 
-            p.x > pastObs.right + 25
-          ) {
+          const past = obstacleMap.get(p.ignoreObsId);
+          const top = past ? viewTop(past) : 0;
+          if (!past || p.y > top + (past.bottom - past.top) + 14 || p.y < top - 25 || p.x < past.left - 25 || p.x > past.right + 25) {
             p.ignoreObsId = null;
-            if (p.state === 'falling_behind') {
-              p.state = 'falling';
-            }
+            if (p.state === 'behind') p.state = 'falling';
           }
         }
 
-        // Check landing & corner bouncing collision for interactive particles
         if (p.state === 'falling' && p.layer === 'interactive') {
           for (let o = 0; o < obstacles.length; o++) {
             const obs = obstacles[o];
             if (obs.id === p.ignoreObsId) continue;
+            const top = viewTop(obs);
+            const bottom = top + (obs.bottom - obs.top);
+            if (p.y < top - 6 || p.y > bottom) continue;
+            const corner = Math.min(26, Math.max(12, obs.width * 0.22));
 
-            const isButton = obs.isButton;
-            const cornerWidth = Math.min(26, Math.max(12, obs.width * 0.22));
-
-            // A. TOP BOUNDARY COLLISION & CORNER BOUNCE
-            if (p.y >= obs.top - 6 && p.y <= obs.top + 12) {
-              // 1. LEFT CORNER BOUNCE: Bounces outward to the left & slightly upwards
-              if (p.x >= obs.left - 10 && p.x <= obs.left + cornerWidth) {
-                p.vx = - (1.5 + Math.random() * 1.8);
-                p.vy = - (1.1 + Math.random() * 1.4);
+            if (p.y <= top + 12) {
+              if (p.x >= obs.left - 10 && p.x <= obs.left + corner) {
+                p.vx = -(1.5 + Math.random() * 1.8);
+                p.vy = -(1.1 + Math.random() * 1.4);
                 p.ignoreObsId = obs.id;
-                p.char = p.char === '1' ? '0' : '1'; // subtle digit flip on bounce
+                flip(p);
                 break;
               }
-
-              // 2. RIGHT CORNER BOUNCE: Bounces outward to the right & slightly upwards
-              if (p.x >= obs.right - cornerWidth && p.x <= obs.right + 10) {
-                p.vx = (1.5 + Math.random() * 1.8);
-                p.vy = - (1.1 + Math.random() * 1.4);
+              if (p.x >= obs.right - corner && p.x <= obs.right + 10) {
+                p.vx = 1.5 + Math.random() * 1.8;
+                p.vy = -(1.1 + Math.random() * 1.4);
                 p.ignoreObsId = obs.id;
-                p.char = p.char === '1' ? '0' : '1';
+                flip(p);
                 break;
               }
-
-              // 3. CENTER FLAT IMPACT
-              if (p.x > obs.left + cornerWidth && p.x < obs.right - cornerWidth) {
-                if (isButton) {
-                  // Buttons: playful light bounce off the top
-                  p.vy = - (0.9 + Math.random() * 1.1);
+              if (p.x > obs.left + corner && p.x < obs.right - corner) {
+                if (obs.isButton) {
+                  p.vy = -(0.9 + Math.random() * 1.1);
                   p.vx = (Math.random() - 0.5) * 1.4;
                   p.ignoreObsId = obs.id;
-                  p.char = p.char === '1' ? '0' : '1';
+                  flip(p);
                   break;
-                } else {
-                  // Boxes & Cards: Stack on top with slight landing dampening
-                  const key = `${p.colIndex}_${obs.id}`;
-                  const currentStack = stackCounters.get(key) || 0;
-
-                  if (currentStack < MAX_STACK_PER_COL) {
-                    const landingY = obs.top - 4 - currentStack * charHeight;
-                    if (p.y >= landingY && p.y <= landingY + 14) {
-                      p.state = 'stacked';
-                      p.obsId = obs.id;
-                      p.relX = Math.max(8, Math.min(obs.width - 8, p.x - obs.left));
-                      p.stackIndex = currentStack;
-                      p.targetX = obs.left + p.relX;
-                      p.targetY = landingY;
-                      p.y = landingY;
-                      p.vy = -0.4;
-                      p.settledAt = now;
-                      stackCounters.set(key, currentStack + 1);
-
-                      // Spawn replacement particle at top
-                      particles.push(createParticle(p.colIndex, null, 'interactive'));
-                      break;
-                    }
+                }
+                const key = `${p.colIndex}_${obs.id}`;
+                const count = stackCounts.get(key) || 0;
+                if (count < MAX_STACK_PER_COL) {
+                  const landingY = top - 4 - count * CHAR_HEIGHT;
+                  if (p.y >= landingY && p.y <= landingY + 14) {
+                    p.state = 'stacked';
+                    p.obsId = obs.id;
+                    p.relX = Math.max(8, Math.min(obs.width - 8, p.x - obs.left));
+                    p.stackIndex = count;
+                    p.y = landingY;
+                    p.vy = -0.4;
+                    p.settledAt = now;
+                    stackCounts.set(key, count + 1);
+                    if (particles.length + spawned.length < maxParticles) spawned.push(createParticle(p.colIndex));
+                    break;
                   }
                 }
               }
             }
 
-            // B. SIDE EDGES DEFLECTION BOUNCE (while falling beside boxes & buttons)
-            if (p.y > obs.top + 4 && p.y < obs.bottom) {
+            if (p.y > top + 4) {
               if (p.x >= obs.left - 6 && p.x <= obs.left + 3) {
-                p.vx = - (1.2 + Math.random() * 1.2);
+                p.vx = -(1.2 + Math.random() * 1.2);
                 p.ignoreObsId = obs.id;
-                p.char = p.char === '1' ? '0' : '1';
+                flip(p);
                 break;
               }
               if (p.x >= obs.right - 3 && p.x <= obs.right + 6) {
-                p.vx = (1.2 + Math.random() * 1.2);
+                p.vx = 1.2 + Math.random() * 1.2;
                 p.ignoreObsId = obs.id;
-                p.char = p.char === '1' ? '0' : '1';
+                flip(p);
                 break;
               }
             }
           }
         }
 
-        // --- BOTTOM FLOOR / FOOTER TOWER STACKING COLLISION ---
-        if (p.state === 'falling' && (p.layer === 'interactive' || Math.random() > 0.5)) {
-          const curFloorCount = floorStackCounters.get(p.colIndex) || 0;
-          if (curFloorCount < MAX_FLOOR_STACK) {
-            const floorLandingY = height - 16 - curFloorCount * charHeight;
-            if (p.y >= floorLandingY - 8 && p.y <= floorLandingY + 14) {
-              p.state = 'stacked_bottom';
+        if (p.state === 'falling' && (p.layer === 'interactive' || p.colIndex % 2 === 0)) {
+          const count = floorCounts.get(p.colIndex) || 0;
+          if (count < MAX_FLOOR_STACK) {
+            const floorY = height - 16 - count * CHAR_HEIGHT;
+            if (p.y >= floorY - 8 && p.y <= floorY + 14) {
+              p.state = 'floor';
               p.settledAt = now;
-              p.stackIndex = curFloorCount;
-              p.targetX = p.colX;
-              p.targetY = floorLandingY;
+              p.stackIndex = count;
               p.x = p.colX;
-              p.y = floorLandingY;
-              p.vy = -0.3; // soft landing dampener
-              floorStackCounters.set(p.colIndex, curFloorCount + 1);
-
-              // Spawn replacement falling particle from the top
-              particles.push(createParticle(p.colIndex, null, p.layer));
-
-              // Draw settled bottom digit
-              ctx.font = `${p.weight} ${fontSize}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
-              ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.color.a})`;
-              ctx.textAlign = 'center';
-              ctx.fillText(p.char, p.x, p.y);
+              p.y = floorY;
+              p.vy = -0.3;
+              floorCounts.set(p.colIndex, count + 1);
+              if (particles.length + spawned.length < maxParticles) spawned.push(createParticle(p.colIndex, null, p.layer));
+              draw(p);
               continue;
             }
           }
         }
 
-        // Recycle when falling past bottom of screen
         if (p.y > height + 30) {
-          const maxAllowed = Math.ceil(width / columnWidth) * 3.8;
-          if (particles.length > maxAllowed) {
-            particles.splice(i, 1);
-            i--;
-            continue;
-          } else {
-            particles[i] = createParticle(p.colIndex, null, p.layer);
-            continue;
-          }
+          particles[i] = createParticle(p.colIndex, null, p.layer);
+          continue;
         }
 
-        // Draw falling number
-        ctx.font = `${p.weight} ${fontSize}px 'Plus Jakarta Sans', 'Roboto Mono', monospace`;
-        ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.color.a})`;
-        ctx.textAlign = 'center';
-        ctx.fillText(p.char, p.x, p.y);
+        draw(p);
       }
 
-      animationFrameId = requestAnimationFrame(render);
+      if (spawned.length) particles.push(...spawned);
+
+      // Keep every column fed so the rain never thins out
+      const minParticles = Math.round(columnsCount() * perColumn());
+      while (particles.length < minParticles) {
+        particles.push(createParticle(Math.floor(Math.random() * columnsCount()), null, 'ambient'));
+      }
     };
 
-    render();
+    // ---------- Loop ----------
+
+    const loop = (time) => {
+      const dt = Math.min(48, time - lastTime); // clamp after tab switches / long frames
+      lastTime = time;
+      clear();
+      step(dt, Date.now());
+      frameId = requestAnimationFrame(loop);
+    };
+
+    const start = () => {
+      if (frameId !== null || reducedMotion) return;
+      lastTime = performance.now();
+      frameId = requestAnimationFrame(loop);
+    };
+    const stop = () => {
+      if (frameId !== null) cancelAnimationFrame(frameId);
+      frameId = null;
+    };
+
+    // ---------- Events ----------
+
+    let resizeFrame = null;
+    const onResize = () => {
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = null;
+        resize();
+        if (reducedMotion) renderStatic();
+      });
+    };
+    const onPointerMove = (e) => {
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      pointer.active = true;
+      pointer.radius = e.pointerType === 'touch' ? 90 : 130;
+    };
+    const onPointerLeave = () => {
+      pointer.active = false;
+    };
+    const onScroll = () => scheduleMeasure(150);
+    const onVisibility = () => (document.hidden ? stop() : start());
+
+    // Static frame for visitors who prefer reduced motion
+    const renderStatic = () => {
+      clear();
+      for (const p of particles) draw(p);
+    };
+
+    resize();
+    if (reducedMotion) {
+      renderStatic();
+    } else {
+      start();
+    }
+
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerdown', onPointerMove, { passive: true });
+    document.addEventListener('pointerleave', onPointerLeave);
+    window.addEventListener('blur', onPointerLeave);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // Re-measure when the page layout changes (route changes, images loading, accordions)
+    const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => scheduleMeasure(200)) : null;
+    resizeObserver?.observe(document.body);
+    const measureInterval = setInterval(() => {
+      if (!document.hidden) measureObstacles();
+    }, 2000);
 
     return () => {
-      clearInterval(obsInterval);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', updateObstacles);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-      cancelAnimationFrame(animationFrameId);
+      stop();
+      clearTimeout(measureTimer);
+      clearInterval(measureInterval);
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerdown', onPointerMove);
+      document.removeEventListener('pointerleave', onPointerLeave);
+      window.removeEventListener('blur', onPointerLeave);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
+      className="binary-background"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100%',
-        height: '100%',
         pointerEvents: 'none',
         zIndex: 0,
         backgroundColor: '#FFFFFF',
