@@ -1,8 +1,9 @@
+import crypto from 'node:crypto';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { pool } from '../db.js';
 import { listEvents, getEvent } from '../lib/events.js';
-import { GAMES, LEADERBOARD_ORDER, weekStartUtc } from '../lib/games.js';
+import { GAMES, LEADERBOARD_ORDER } from '../lib/games.js';
 import { asyncRoute, validate, saskatoonNow } from '../lib/util.js';
 
 const router = Router();
@@ -177,17 +178,20 @@ router.post('/applications', formLimiter, asyncRoute(async (req, res) => {
   res.json({ success: true, message: 'Application received! We will email you within a week.' });
 }));
 
+// All-time leaderboard: each player's best score, once.
 router.get('/games/:game/leaderboard', asyncRoute(async (req, res) => {
   const game = GAMES[req.params.game];
   if (!game) return res.status(404).json({ success: false, error: 'Unknown game.' });
-  const weekly = req.query.period !== 'all';
   const [rows] = await pool.query(
-    `SELECT id, name, score, accuracy, time_ms, created_at FROM game_scores
-     WHERE game = ? ${weekly ? 'AND created_at >= ?' : ''}
+    `SELECT id, name, score, accuracy, time_ms, created_at FROM (
+       SELECT *, ROW_NUMBER() OVER (PARTITION BY LOWER(name) ORDER BY ${LEADERBOARD_ORDER}) AS player_rank
+       FROM game_scores WHERE game = ?
+     ) best
+     WHERE player_rank = 1
      ORDER BY ${LEADERBOARD_ORDER} LIMIT 50`,
-    weekly ? [req.params.game, weekStartUtc()] : [req.params.game]
+    [req.params.game]
   );
-  res.json({ success: true, period: weekly ? 'week' : 'all', data: rows });
+  res.json({ success: true, data: rows });
 }));
 
 router.post('/games/:game/scores', scoreLimiter, asyncRoute(async (req, res) => {
@@ -211,18 +215,39 @@ router.post('/games/:game/scores', scoreLimiter, asyncRoute(async (req, res) => 
     return res.status(400).json({ success: false, error: 'Invalid time.' });
   }
 
+  const editToken = crypto.randomBytes(16).toString('hex');
   const [result] = await pool.query(
-    'INSERT INTO game_scores (game, name, score, accuracy, time_ms, detail) VALUES (?, ?, ?, ?, ?, ?)',
-    [gameKey, name, score, accuracy, timeMs, JSON.stringify(req.body?.detail ?? null).slice(0, 2000)]
+    'INSERT INTO game_scores (game, name, score, accuracy, time_ms, detail, edit_token) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [gameKey, name, score, accuracy, timeMs, JSON.stringify(req.body?.detail ?? null).slice(0, 2000), editToken]
   );
 
-  // Rank among this week's scores using the same ordering as the leaderboard
-  const [weekRows] = await pool.query(
-    `SELECT id FROM game_scores WHERE game = ? AND created_at >= ? ORDER BY ${LEADERBOARD_ORDER}`,
-    [gameKey, weekStartUtc()]
+  // All-time rank: other players whose best score beats this one, plus one
+  const [ordered] = await pool.query(
+    `SELECT id, LOWER(name) AS player FROM game_scores WHERE game = ? ORDER BY ${LEADERBOARD_ORDER}`,
+    [gameKey]
   );
-  const rank = weekRows.findIndex((r) => r.id === result.insertId) + 1;
-  res.json({ success: true, id: result.insertId, rank, total: weekRows.length });
+  const ahead = new Set();
+  for (const row of ordered) {
+    if (row.id === result.insertId) break;
+    if (row.player !== name.toLowerCase()) ahead.add(row.player);
+  }
+  const players = new Set(ordered.map((r) => r.player)).size;
+  res.json({ success: true, id: result.insertId, rank: ahead.size + 1, total: players, edit_token: editToken });
+}));
+
+// Rename a score you just saved. Only works with the token returned when it was saved, for one hour.
+router.put('/games/scores/:id', scoreLimiter, asyncRoute(async (req, res) => {
+  const name = String(req.body?.name || '').trim().replace(/\s+/g, ' ').slice(0, 24);
+  const token = String(req.body?.edit_token || '');
+  if (name.length < 2) return res.status(400).json({ success: false, error: 'Name must be at least 2 characters.' });
+  if (!/^[a-f0-9]{32}$/.test(token)) return res.status(403).json({ success: false, error: 'Not allowed.' });
+
+  const [result] = await pool.query(
+    'UPDATE game_scores SET name = ? WHERE id = ? AND edit_token = ? AND created_at >= (UTC_TIMESTAMP() - INTERVAL 1 HOUR)',
+    [name, req.params.id, token]
+  );
+  if (!result.affectedRows) return res.status(403).json({ success: false, error: 'This score can no longer be renamed.' });
+  res.json({ success: true });
 }));
 
 export default router;

@@ -7,7 +7,7 @@ export const AIM_TOTAL_DOTS = 15;
 const SIZES = [42, 50, 62, 74, 84];
 
 // Three-zone aim trainer: centre +3, middle +2, edge +1, miss -1. 15 targets.
-export default function AimTrainer({ onFinish, onQuit }) {
+export default function AimTrainer({ onFinish, onQuit, onRestart }) {
   const [phase, setPhase] = useState('countdown');
   const [, rerender] = useState(0);
   const [target, setTarget] = useState({ x: 0, y: 0, size: 64, key: 0 });
@@ -135,6 +135,7 @@ export default function AimTrainer({ onFinish, onQuit }) {
     <div className="game-arena-screen" ref={arenaRef} onPointerDown={onMiss}>
       <HudShell
         onQuit={onQuit}
+        onRestart={onRestart}
         metrics={[
           { label: 'Score', value: r.score, color: r.score >= 0 ? '#34D399' : '#F87171' },
           { label: 'Target', value: `${Math.min(r.done + 1, AIM_TOTAL_DOTS)}/${AIM_TOTAL_DOTS}` },

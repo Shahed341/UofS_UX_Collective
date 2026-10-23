@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import PageHero from '../../components/common/PageHero.jsx';
 import SmartImage from '../../components/common/SmartImage.jsx';
 import Lightbox from '../../components/common/Lightbox.jsx';
@@ -42,8 +42,6 @@ export default function GalleryPage() {
   return (
     <div className="app-container page-padded gallery-page-wrapper">
       <PageHero
-        eyebrow="Visual showcase"
-        icon={<Camera size={14} />}
         title="Campus moments & design work"
         lead="Photos from our workshops, jams and socials — plus the brand system behind UXCO. Tap any photo to open it full screen."
       />

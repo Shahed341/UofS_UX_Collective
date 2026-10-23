@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Award, CheckCircle2, RotateCcw, Share2, ArrowLeft, Trophy } from 'lucide-react';
+import { Award, CheckCircle2, RotateCcw, Share2, ArrowLeft, Pencil, Loader2 } from 'lucide-react';
 import { api } from '../../lib/api.js';
+import { funnyName } from './funnyNames.js';
 
 const NAME_KEY = 'uxco_player_name';
 
@@ -12,37 +13,63 @@ function readSavedName() {
   }
 }
 
-// End-of-game screen shared by every game. Saves the score to the shared weekly leaderboard.
+function rememberName(name) {
+  try {
+    localStorage.setItem(NAME_KEY, name);
+  } catch {
+    // private mode: name just isn't remembered
+  }
+}
+
+// End-of-game screen shared by every game. The score is saved automatically
+// (with the player's last name, or a random funny one) and can be renamed afterwards.
 export default function GameResults({ result, onPlayAgain, onBack, onSaved }) {
-  const [name, setName] = useState(readSavedName);
-  const [saveState, setSaveState] = useState({ state: 'idle' });
+  const [saved, setSaved] = useState(null); // { id, rank, total, edit_token, name }
+  const [name, setName] = useState('');
+  const [editing, setEditing] = useState(false);
+  const [state, setState] = useState({ busy: true, error: '' });
   const [copied, setCopied] = useState(false);
-  const inputRef = useRef(null);
+  const startedSave = useRef(false);
 
+  // Auto-save once when the results appear
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const save = async (e) => {
-    e.preventDefault();
-    setSaveState({ state: 'saving' });
-    try {
-      const res = await api.post(`/api/games/${result.game}/scores`, {
-        name: name.trim(),
+    if (startedSave.current) return;
+    startedSave.current = true;
+    const initialName = readSavedName() || funnyName();
+    setName(initialName);
+    api
+      .post(`/api/games/${result.game}/scores`, {
+        name: initialName,
         score: result.score,
         accuracy: result.accuracy,
         time_ms: result.time_ms,
         detail: result.detail,
-      });
-      try {
-        localStorage.setItem(NAME_KEY, name.trim());
-      } catch {
-        // private mode: name just isn't remembered
-      }
-      setSaveState({ state: 'saved', rank: res.rank, total: res.total });
-      onSaved?.(res.id);
+      })
+      .then((res) => {
+        setSaved({ ...res, name: initialName });
+        setState({ busy: false, error: '' });
+        onSaved?.(res.id);
+      })
+      .catch((error) => setState({ busy: false, error: error.message }));
+  }, [result, onSaved]);
+
+  const rename = async (e) => {
+    e.preventDefault();
+    const next = name.trim();
+    if (!saved || next === saved.name) {
+      setEditing(false);
+      return;
+    }
+    setState({ busy: true, error: '' });
+    try {
+      await api.put(`/api/games/scores/${saved.id}`, { name: next, edit_token: saved.edit_token });
+      rememberName(next);
+      setSaved((s) => ({ ...s, name: next }));
+      setEditing(false);
+      setState({ busy: false, error: '' });
+      onSaved?.(saved.id);
     } catch (error) {
-      setSaveState({ state: 'error', message: error.message });
+      setState({ busy: false, error: error.message });
     }
   };
 
@@ -67,42 +94,46 @@ export default function GameResults({ result, onPlayAgain, onBack, onSaved }) {
         <div className="results-body">
           <div className="results-rank-badge" style={{ borderColor: result.rank.color }}>
             <Award size={22} color={result.rank.color} />
-            <span>{result.rank.rank} Rank · {result.rank.title}</span>
+            <span>{result.rank.rank} · {result.rank.title}</span>
           </div>
 
           <h2 id="results-title" className="results-score-title">{result.headline}</h2>
           <p className="results-congrats-text">{result.summary}</p>
 
           <div className="results-name-section-clean">
-            {saveState.state === 'saved' ? (
+            {!saved && state.busy ? (
+              <div className="results-name-saved-clean"><Loader2 size={18} className="spinning" /> Saving score…</div>
+            ) : saved && !editing ? (
               <div className="results-name-saved-clean">
                 <CheckCircle2 size={18} color="#10B981" />
                 <span>
-                  Saved as <strong>{name.trim()}</strong> — <strong>#{saveState.rank}</strong> of {saveState.total} this week!
+                  Saved as <strong>{saved.name}</strong> · <strong>#{saved.rank}</strong> all time
                 </span>
+                <button type="button" className="results-rename-btn" onClick={() => setEditing(true)}>
+                  <Pencil size={14} /> Change name
+                </button>
               </div>
-            ) : (
-              <form onSubmit={save} className="results-name-form-clean">
+            ) : saved ? (
+              <form onSubmit={rename} className="results-name-form-clean">
                 <label htmlFor="player-name" className="sr-only">Your name for the leaderboard</label>
                 <input
                   id="player-name"
-                  ref={inputRef}
                   type="text"
                   minLength={2}
                   maxLength={24}
                   required
-                  placeholder="Your name for the leaderboard"
+                  autoFocus
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="player-name-input-clean"
                   autoComplete="nickname"
                 />
-                <button type="submit" className="btn-submit-score-clean" disabled={saveState.state === 'saving'}>
-                  <Trophy size={16} /> {saveState.state === 'saving' ? 'Saving…' : 'Save score'}
+                <button type="submit" className="btn-submit-score-clean" disabled={state.busy}>
+                  {state.busy ? 'Saving…' : 'Save name'}
                 </button>
               </form>
-            )}
-            {saveState.state === 'error' && <p className="results-save-error" role="alert">{saveState.message}</p>}
+            ) : null}
+            {state.error && <p className="results-save-error" role="alert">{state.error}</p>}
           </div>
 
           {result.breakdown && (
@@ -134,10 +165,10 @@ export default function GameResults({ result, onPlayAgain, onBack, onSaved }) {
               <RotateCcw size={18} /> <span>Play again</span>
             </button>
             <button type="button" className="btn-results-share" onClick={share}>
-              <Share2 size={16} /> <span>{copied ? 'Copied!' : 'Share score'}</span>
+              <Share2 size={16} /> <span>{copied ? 'Copied!' : 'Share'}</span>
             </button>
             <button type="button" className="btn-results-secondary" onClick={onBack}>
-              <ArrowLeft size={16} /> <span>Game Corner</span>
+              <ArrowLeft size={16} /> <span>Back</span>
             </button>
           </div>
         </div>

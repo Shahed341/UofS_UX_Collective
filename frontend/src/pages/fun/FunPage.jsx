@@ -1,79 +1,92 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Crosshair, Palette, Ruler, Gamepad2, Play, Target, CircleDot, Circle, XCircle } from 'lucide-react';
+import { Crosshair, Grid3x3, Ruler, Play } from 'lucide-react';
 import PageHero from '../../components/common/PageHero.jsx';
 import { Reveal, TiltCard } from '../../lib/motion.jsx';
-import AimTrainer, { AIM_TOTAL_DOTS } from './games/AimTrainer.jsx';
-import ColorEye from './games/ColorEye.jsx';
-import PixelPerfect, { PIXEL_ROUNDS } from './games/PixelPerfect.jsx';
+import AimTrainer from './games/AimTrainer.jsx';
+import PatternGame from './games/PatternGame.jsx';
+import PixelPerfect from './games/PixelPerfect.jsx';
 import GameResults from './GameResults.jsx';
 import Leaderboard from './Leaderboard.jsx';
 import { sfx } from './sfx.js';
 import './FunPage.css';
 import './GameCorner.css';
 
-const seconds = (ms) => (ms == null ? '–' : `${(ms / 1000).toFixed(2)}s`);
+const seconds = (ms) => (ms == null ? '–' : `${(ms / 1000).toFixed(1)}s`);
 
 const GAMES = [
   {
     id: 'aim',
-    name: 'Aim Trainer',
-    tagline: 'Reflexes & precision',
+    name: 'Aim',
     icon: Crosshair,
     theme: 'crimson',
     component: AimTrainer,
-    description: `${AIM_TOTAL_DOTS} targets pop up at random sizes. Hit the core for the most points — but a miss costs you.`,
-    rules: [
-      { icon: Target, text: 'Centre +3' },
-      { icon: CircleDot, text: 'Middle +2' },
-      { icon: Circle, text: 'Edge +1' },
-      { icon: XCircle, text: 'Miss −1' },
-    ],
+    description: 'Hit 15 targets. Aim for the centre.',
+    rules: ['Centre +3', 'Middle +2', 'Edge +1', 'Miss −1'],
     columns: [
-      { key: 'score', primary: true, format: (r) => `${r.score} pts` },
-      { key: 'acc', format: (r) => `${r.accuracy ?? '–'}%` },
+      { key: 'score', primary: true, format: (r) => `${r.score}` },
       { key: 'time', format: (r) => seconds(r.time_ms) },
     ],
   },
   {
-    id: 'color',
-    name: 'Colour Eye',
-    tagline: 'Colour perception',
-    icon: Palette,
+    id: 'pattern',
+    name: 'Pattern',
+    icon: Grid3x3,
     theme: 'coral',
-    component: ColorEye,
-    description: 'Spot the tile with a slightly different shade. The grid grows and the difference shrinks every level. 45 seconds.',
-    rules: [
-      { icon: Palette, text: 'Find the odd shade' },
-      { icon: Target, text: '+1 level each' },
-      { icon: XCircle, text: 'Wrong tap −3s' },
-    ],
+    component: PatternGame,
+    description: 'Numbers flash. Tap them back in order.',
+    rules: ['3×3 → 9×9', '3 lives'],
     columns: [
-      { key: 'level', primary: true, format: (r) => `Lvl ${r.score}` },
-      { key: 'acc', format: (r) => `${r.accuracy ?? '–'}%` },
-      { key: 'time', format: (r) => (r.time_ms ? `${(r.time_ms / 1000).toFixed(2)}s/find` : '–') },
+      { key: 'score', primary: true, format: (r) => `${r.score}` },
+      { key: 'time', format: (r) => seconds(r.time_ms) },
     ],
   },
   {
     id: 'pixel',
-    name: 'Pixel Perfect',
-    tagline: 'Visual precision',
+    name: 'Pixel',
     icon: Ruler,
     theme: 'amber',
     component: PixelPerfect,
-    description: `Tap the exact centre of ${PIXEL_ROUNDS} shapes. You get up to 100 points per round — every pixel off costs you.`,
-    rules: [
-      { icon: Target, text: '0px = 100 pts' },
-      { icon: Ruler, text: '30px+ = 0 pts' },
-      { icon: CircleDot, text: `${PIXEL_ROUNDS} rounds` },
-    ],
+    description: 'Tap the exact centre of each shape.',
+    rules: ['8 rounds', '0px = 100'],
     columns: [
-      { key: 'score', primary: true, format: (r) => `${r.score} pts` },
-      { key: 'acc', format: (r) => `${r.accuracy ?? '–'}%` },
+      { key: 'score', primary: true, format: (r) => `${r.score}` },
       { key: 'time', format: (r) => seconds(r.time_ms) },
     ],
   },
 ];
+
+// Decorative art behind each game card, hinting at how the game plays.
+function GameArt({ id }) {
+  if (id === 'aim') {
+    return (
+      <span className="game-card-art art-aim" aria-hidden="true">
+        <span className="ring r1" />
+        <span className="ring r2" />
+        <span className="ring r3" />
+        <span className="cross" />
+      </span>
+    );
+  }
+  if (id === 'pattern') {
+    const numbers = { 0: 1, 5: 2, 7: 3 };
+    return (
+      <span className="game-card-art art-pattern" aria-hidden="true">
+        {Array.from({ length: 9 }, (_, i) => (
+          <span key={i} className={`cell ${numbers[i] ? 'lit' : ''}`} style={{ '--k': numbers[i] || 0 }}>
+            {numbers[i] || ''}
+          </span>
+        ))}
+      </span>
+    );
+  }
+  return (
+    <span className="game-card-art art-pixel" aria-hidden="true">
+      <span className="shape" />
+      <span className="marker" />
+    </span>
+  );
+}
 
 export default function FunPage() {
   const [selectedId, setSelectedId] = useState('aim');
@@ -113,18 +126,13 @@ export default function FunPage() {
 
   return (
     <div className="app-container page-padded game-corner">
-      <PageHero
-        eyebrow="Game Corner"
-        icon={<Gamepad2 size={14} />}
-        title="Train your designer’s eye"
-        lead="Three quick games built by UXCO. Play on desktop or phone, save your score, and top the weekly leaderboard."
-      />
+      <PageHero title="Fun" lead="Three quick games. Beat the all-time best." />
 
       <div className="game-picker" role="tablist" aria-label="Choose a game">
         {GAMES.map((g, i) => {
           const Icon = g.icon;
           return (
-            <Reveal key={g.id} variant="up" delay={i * 100}>
+            <Reveal key={g.id} variant="up" delay={i * 90}>
               <TiltCard
                 as="button"
                 type="button"
@@ -134,8 +142,8 @@ export default function FunPage() {
                 onClick={() => setSelectedId(g.id)}
                 maxDeg={7}
               >
+                <GameArt id={g.id} />
                 <span className="game-card-icon"><Icon size={26} /></span>
-                <span className="game-card-tagline">{g.tagline}</span>
                 <span className="game-card-name">{g.name}</span>
               </TiltCard>
             </Reveal>
@@ -153,12 +161,10 @@ export default function FunPage() {
           <h2 className="game-brief-title">{game.name}</h2>
           <p className="game-brief-desc">{game.description}</p>
           <ul className="game-brief-rules">
-            {game.rules.map(({ icon: Icon, text }) => (
-              <li key={text}><Icon size={16} /> {text}</li>
-            ))}
+            {game.rules.map((rule) => <li key={rule}>{rule}</li>)}
           </ul>
           <button type="button" className="game-play-btn" onClick={play}>
-            <Play size={20} fill="currentColor" /> Play {game.name}
+            <Play size={20} fill="currentColor" /> Play
           </button>
         </section>
 
@@ -166,7 +172,7 @@ export default function FunPage() {
       </div>
 
       {/* Games and results render on <body> so nothing on the page can clip or cover them */}
-      {playing && createPortal(<GameComponent key={runKey} onFinish={handleFinish} onQuit={handleQuit} />, document.body)}
+      {playing && createPortal(<GameComponent key={runKey} onFinish={handleFinish} onQuit={handleQuit} onRestart={play} />, document.body)}
 
       {result && createPortal(
         <GameResults

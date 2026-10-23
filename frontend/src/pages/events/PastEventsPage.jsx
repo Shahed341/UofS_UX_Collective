@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { History, Search, CalendarDays } from 'lucide-react';
+import { Search, CalendarDays } from 'lucide-react';
 import PageHero from '../../components/common/PageHero.jsx';
 import EventCard from '../../components/events/EventCard.jsx';
 import { Reveal, useCountUp } from '../../lib/motion.jsx';
@@ -52,8 +52,6 @@ export default function PastEventsPage() {
   return (
     <div className="app-container page-padded archive-page">
       <PageHero
-        eyebrow="Event archive"
-        icon={<History size={14} />}
         title="Every workshop, panel and jam we’ve hosted"
         lead="Recaps, photo albums, slides and recordings from past UX Collective events. Missed one? Catch up here."
       >

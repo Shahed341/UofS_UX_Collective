@@ -188,10 +188,10 @@ export default function HomePage() {
             <span className="floater f3" />
           </div>
           <div className="game-teaser-copy">
-            <span className="section-eyebrow light"><Gamepad2 size={15} /> Game Corner</span>
+            <span className="section-eyebrow light"><Gamepad2 size={15} /> Fun</span>
             <h2 className="game-teaser-title">Think you have a designer’s eye?</h2>
             <p className="game-teaser-text">
-              Test your aim, colour perception and pixel precision. Top the weekly leaderboard and win bragging rights at our next event.
+              Aim, memory and pixel precision. Beat the all-time best.
             </p>
           </div>
           <Link to="/fun" className="game-teaser-btn">

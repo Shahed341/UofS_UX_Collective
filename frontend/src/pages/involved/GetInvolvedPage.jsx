@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HandHeart, CalendarCheck, Megaphone, GraduationCap, Crown, Clock, Gift, CalendarClock, ArrowRight, MessageSquareHeart, FileSearch, Briefcase } from 'lucide-react';
+import { CalendarCheck, Megaphone, GraduationCap, Crown, Clock, Gift, CalendarClock, ArrowRight, MessageSquareHeart, FileSearch, Briefcase } from 'lucide-react';
 import PageHero from '../../components/common/PageHero.jsx';
 import ApplicationForm from './ApplicationForm.jsx';
 import { Reveal, TiltCard } from '../../lib/motion.jsx';
@@ -35,8 +35,6 @@ export default function GetInvolvedPage() {
   return (
     <div className="app-container page-padded involved-page">
       <PageHero
-        eyebrow="Get involved"
-        icon={<HandHeart size={14} />}
         title="Build the club. Build your portfolio."
         lead="Every role at UXCO is a chance to lead, teach and grow — and it looks great on a resume. Pick the level that fits your schedule."
       >

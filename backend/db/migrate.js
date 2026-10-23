@@ -96,5 +96,7 @@ export async function migrate({ retries = 10 } = {}) {
   await ensureColumn('contact_submissions', 'is_read', 'TINYINT(1) NOT NULL DEFAULT 0');
   // iCalendar SEQUENCE: bumped whenever an event's time/place changes so calendars apply the update
   await ensureColumn('events', 'sequence', 'INT NOT NULL DEFAULT 0');
+  // Lets the player who saved a score rename it (scores are auto-saved with a fun name)
+  await ensureColumn('game_scores', 'edit_token', 'VARCHAR(32) NULL');
   await seed();
 }

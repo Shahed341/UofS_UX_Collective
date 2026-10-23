@@ -11,7 +11,7 @@ export const NAV_ITEMS = [
   { path: '/resources', label: 'Resources' },
   { path: '/get-involved', label: 'Get Involved' },
   { path: '/gallery', label: 'Gallery' },
-  { path: '/fun', label: 'Game Corner' },
+  { path: '/fun', label: 'Fun' },
 ];
 
 export default function Navbar() {

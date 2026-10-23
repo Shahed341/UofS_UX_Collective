@@ -25,7 +25,7 @@ function makeShape(board) {
 }
 
 // Tap the exact centre of each shape. Eight rounds, up to 100 points each.
-export default function PixelPerfect({ onFinish, onQuit }) {
+export default function PixelPerfect({ onFinish, onQuit, onRestart }) {
   const [phase, setPhase] = useState('countdown');
   const [roundIndex, setRoundIndex] = useState(0);
   const [shape, setShape] = useState(null);
@@ -135,6 +135,7 @@ export default function PixelPerfect({ onFinish, onQuit }) {
     <div className="game-arena-screen pixel-arena">
       <HudShell
         onQuit={onQuit}
+        onRestart={onRestart}
         metrics={[
           { label: 'Score', value: total, color: '#34D399' },
           { label: 'Round', value: `${Math.min(roundIndex + 1, PIXEL_ROUNDS)}/${PIXEL_ROUNDS}` },

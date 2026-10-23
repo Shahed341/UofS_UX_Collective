@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Send, CheckCircle2, ExternalLink, Instagram, Linkedin, ArrowRight, MessageCircle } from 'lucide-react';
+import { Mail, MapPin, Send, CheckCircle2, ExternalLink, Instagram, Linkedin, ArrowRight } from 'lucide-react';
 import PageHero from '../../components/common/PageHero.jsx';
 import { Reveal } from '../../lib/motion.jsx';
 import { api } from '../../lib/api.js';
@@ -59,8 +59,6 @@ export default function ContactPage() {
     <div className="contact-page-wrapper">
       <div className="app-container page-padded">
         <PageHero
-          eyebrow="Get in touch"
-          icon={<MessageCircle size={14} />}
           title="Let’s build together"
           lead="Have a question, an event collaboration idea, or want to sponsor a workshop? Reach out anytime!"
         />

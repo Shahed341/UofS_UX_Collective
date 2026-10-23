@@ -89,8 +89,6 @@ export default function ResourcesPage() {
   return (
     <div className="app-container page-padded resources-page">
       <PageHero
-        eyebrow="Resource hub"
-        icon={<BookOpen size={14} />}
         title="Everything you need to start designing"
         lead="Templates, guides, courses and workshop slides hand-picked by the UXCO exec team. Free, beginner-friendly and always growing."
       />

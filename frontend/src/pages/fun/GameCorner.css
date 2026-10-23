@@ -261,7 +261,7 @@
 
 .lb-row {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto auto auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
@@ -358,6 +358,31 @@
   font-size: 14px;
 }
 
+.hud-restart-btn:hover svg {
+  transform: rotate(-120deg);
+}
+
+.hud-restart-btn svg {
+  transition: transform 0.35s var(--ease-spring);
+}
+
+.results-rename-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #FFF0F5;
+  color: var(--primary-pink);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.results-name-saved-clean .spinning {
+  animation: spin 0.8s linear infinite;
+}
+
 .btn-submit-score-clean {
   display: inline-flex;
   align-items: center;
@@ -365,78 +390,106 @@
   white-space: nowrap;
 }
 
-/* ---------- Colour Eye ---------- */
-.color-eye-arena {
+/* ---------- Pattern ---------- */
+.pattern-arena {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: default;
   padding: 110px 16px 24px;
+  cursor: default;
 }
 
-.color-eye-timer {
-  width: min(520px, 90vw);
-  height: 6px;
-  margin-bottom: 18px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.12);
-  overflow: hidden;
+.pattern-status {
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #FFD2A8;
+  animation: statusIn 0.35s var(--ease-spring);
 }
 
-.color-eye-timer span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, #E81D88, #FA7538, #FFE07A);
-  transform-origin: left;
-  transition: transform 0.1s linear;
+.pattern-status.input { color: #34D399; }
+.pattern-status.wrong { color: #F87171; }
+.pattern-status.clear { color: #FFE07A; }
+
+@keyframes statusIn {
+  from { transform: scale(0.7); opacity: 0; }
 }
 
-.color-eye-grid {
+.pattern-grid {
   display: grid;
-  gap: clamp(4px, 1vw, 8px);
-  width: min(520px, 90vw, calc(100dvh - 190px));
+  gap: clamp(4px, calc(2.4vw / var(--n) * 3), 10px);
+  width: min(520px, 92vw, calc(100dvh - 200px));
   aspect-ratio: 1;
+  animation: gridIn 0.4s var(--ease-out-expo);
 }
 
-.color-eye-grid.shake {
+@keyframes gridIn {
+  from { transform: scale(0.94); opacity: 0; }
+}
+
+.pattern-grid.shake {
   animation: shake 0.4s ease;
+}
+
+.pattern-cell {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  border-radius: clamp(5px, calc(40px / var(--n)), 14px);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  font-size: clamp(14px, calc(150px / var(--n)), 40px);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.pattern-cell:hover {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.pattern-cell:active {
+  transform: scale(0.92);
+}
+
+.pattern-cell.has-number {
+  background: var(--uxco-gradient);
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(232, 29, 136, 0.35);
+  animation: numberPop 0.35s var(--ease-spring) both;
+  animation-delay: var(--d);
+}
+
+@keyframes numberPop {
+  from { transform: scale(0.3); opacity: 0; }
+}
+
+.pattern-cell.is-done {
+  background: #10B981;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+  animation: numberPop 0.25s var(--ease-spring) both;
+}
+
+.pattern-cell.is-missed {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.pattern-cell.is-wrong {
+  background: #EF4444;
+  border-color: transparent;
+  animation: none;
 }
 
 @keyframes shake {
   20%, 60% { transform: translateX(-10px); }
   40%, 80% { transform: translateX(10px); }
-}
-
-.color-eye-tile {
-  border-radius: clamp(6px, 1.4vw, 14px);
-  cursor: pointer;
-  animation: tileIn 0.35s var(--ease-spring) both;
-  animation-delay: var(--d);
-  transition: transform 0.12s ease, filter 0.12s ease;
-}
-
-.color-eye-tile:hover {
-  filter: brightness(1.06);
-}
-
-.color-eye-tile:active {
-  transform: scale(0.92);
-}
-
-@keyframes tileIn {
-  from { transform: scale(0.4); opacity: 0; }
-}
-
-.color-eye-flash {
-  position: fixed;
-  z-index: 1001;
-  pointer-events: none;
-  font-size: 26px;
-  font-weight: 900;
-  color: #34D399;
-  transform: translate(-50%, -50%);
-  animation: floatUp 0.7s ease-out forwards;
 }
 
 /* ---------- Pixel Perfect ---------- */
@@ -633,7 +686,7 @@
   .hud-actions-right {
     gap: 6px;
   }
-  .color-eye-arena,
+  .pattern-arena,
   .pixel-arena {
     padding-top: 96px;
   }
@@ -653,4 +706,188 @@
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+/* ---------- Game card art (themed backgrounds) ---------- */
+.game-card {
+  position: relative;
+  min-height: 132px;
+}
+
+.game-card-icon,
+.game-card-name {
+  position: relative;
+  z-index: 1;
+}
+
+.game-card-art {
+  --art: var(--g1);
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 96px;
+  height: 96px;
+  transform: translateY(-50%);
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.5s var(--ease-out-expo);
+}
+
+.game-card:hover .game-card-art {
+  opacity: 0.85;
+  transform: translateY(-50%) scale(1.06);
+}
+
+.game-card.is-selected .game-card-art {
+  --art: #FFFFFF;
+  opacity: 0.5;
+}
+
+/* Aim: concentric target with a pulsing core */
+.art-aim .ring {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 50%;
+  border: 3px solid var(--art);
+}
+
+.art-aim .r1 { width: 96px; height: 96px; opacity: 0.45; }
+.art-aim .r2 { width: 62px; height: 62px; opacity: 0.7; }
+.art-aim .r3 {
+  width: 28px;
+  height: 28px;
+  background: var(--art);
+  animation: corePulse 2s ease-in-out infinite;
+}
+
+.art-aim .cross::before,
+.art-aim .cross::after {
+  content: '';
+  position: absolute;
+  background: var(--art);
+  opacity: 0.4;
+}
+
+.art-aim .cross::before { left: 50%; top: -6px; bottom: -6px; width: 2px; transform: translateX(-50%); }
+.art-aim .cross::after { top: 50%; left: -6px; right: -6px; height: 2px; transform: translateY(-50%); }
+
+@keyframes corePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.75); }
+}
+
+/* Pattern: 3×3 grid whose numbers light up in order */
+.art-pattern {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.art-pattern .cell {
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  border: 2px solid var(--art);
+  opacity: 0.35;
+  font-size: 15px;
+  font-weight: 900;
+  color: transparent;
+}
+
+.art-pattern .cell.lit {
+  background: var(--art);
+  color: #FFFFFF;
+  animation: cellFlash 3s ease-in-out infinite;
+  animation-delay: calc(var(--k) * 0.35s);
+}
+
+.game-card.is-selected .art-pattern .cell.lit {
+  color: var(--g2);
+}
+
+@keyframes cellFlash {
+  0%, 55%, 100% { opacity: 0.35; }
+  10%, 40% { opacity: 1; }
+}
+
+/* Pixel: shape on a pixel grid with a marker easing onto its centre */
+.art-pixel {
+  border-radius: 12px;
+  background-image:
+    linear-gradient(var(--art) 1px, transparent 1px),
+    linear-gradient(90deg, var(--art) 1px, transparent 1px);
+  background-size: 12px 12px;
+  background-position: -1px -1px;
+}
+
+.art-pixel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px var(--art);
+}
+
+.art-pixel .shape {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--art);
+  opacity: 0.55;
+}
+
+.art-pixel .marker {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  border: 2px solid var(--art);
+  background: #FFFFFF;
+  animation: markerSeek 3.2s var(--ease-out-expo) infinite;
+}
+
+@keyframes markerSeek {
+  0% { left: 22%; top: 28%; }
+  35%, 100% { left: 50%; top: 50%; }
+}
+
+@media (max-width: 640px) {
+  .game-card {
+    min-height: 0;
+  }
+  .game-card-art {
+    right: 50%;
+    top: 50%;
+    width: 72px;
+    height: 72px;
+    transform: translate(50%, -50%);
+    opacity: 0.18;
+  }
+  .game-card:hover .game-card-art {
+    transform: translate(50%, -50%) scale(1.06);
+  }
+  .art-aim .r1 { width: 72px; height: 72px; }
+  .art-aim .r2 { width: 46px; height: 46px; }
+  .art-aim .r3 { width: 20px; height: 20px; }
+  .art-pattern .cell { font-size: 11px; }
+  .art-pixel .shape { left: 18px; top: 18px; width: 36px; height: 36px; }
+}
+
+.game-leaderboard-refresh {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #F7F1F3;
+  color: var(--text-muted);
+}
+
+.game-leaderboard-refresh:hover {
+  color: var(--primary-pink);
 }

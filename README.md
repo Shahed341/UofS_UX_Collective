@@ -44,7 +44,7 @@ Stop everything with `docker compose down` (add `-v` to also wipe the database a
 | Resource hub + beginner learning path | `/resources` |
 | Get involved (roles, applications, mentorship booking) | `/get-involved` |
 | Gallery (event albums) | `/gallery` |
-| Game Corner (Aim Trainer, Colour Eye, Pixel Perfect + weekly leaderboard) | `/fun` |
+| Fun: games (Aim, Pattern, Pixel) with an all-time leaderboard | `/fun` |
 | Contact | `/contact` |
 | Admin panel | `/admin` |
 

@@ -225,7 +225,7 @@ export function SubscribersSection() {
 
 // ---------- Game score moderation ----------
 
-const GAME_NAMES = { aim: 'Aim Trainer', color: 'Colour Eye', pixel: 'Pixel Perfect' };
+const GAME_NAMES = { aim: 'Aim Trainer', pattern: 'Pattern', pixel: 'Pixel Perfect' };
 
 export function ScoresSection() {
   const { data: rows = [], reload } = useApi('/api/admin/scores', { initial: [] });

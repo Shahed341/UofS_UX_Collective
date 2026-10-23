@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX } from 'lucide-react';
+import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { sfx } from '../sfx.js';
 
-// Top bar shown during every game: live metrics, mute and quit.
-export default function HudShell({ metrics, onQuit }) {
+// Top bar shown during every game: live metrics, mute, restart and quit.
+export default function HudShell({ metrics, onQuit, onRestart }) {
   const [sound, setSound] = useState(sfx.enabled);
 
   const toggleSound = () => {
@@ -23,6 +23,11 @@ export default function HudShell({ metrics, onQuit }) {
         <button type="button" className="hud-icon-btn" onClick={toggleSound} aria-label={sound ? 'Mute sound' : 'Unmute sound'}>
           {sound ? <Volume2 size={18} /> : <VolumeX size={18} />}
         </button>
+        {onRestart && (
+          <button type="button" className="hud-icon-btn hud-restart-btn" onClick={onRestart} aria-label="Restart game" title="Restart">
+            <RotateCcw size={17} />
+          </button>
+        )}
         <button type="button" className="hud-quit-btn" onClick={onQuit}>✕ Quit</button>
       </div>
     </div>
