@@ -4,12 +4,10 @@ import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { useMagnetic } from '../../lib/motion.jsx';
 import './Navbar.css';
 
+// The logo links home; Resources and Get Involved live on the homepage and in the footer.
 export const NAV_ITEMS = [
-  { path: '/', label: 'Home' },
   { path: '/about', label: 'About' },
   { path: '/events', label: 'Events' },
-  { path: '/resources', label: 'Resources' },
-  { path: '/get-involved', label: 'Get Involved' },
   { path: '/gallery', label: 'Gallery' },
   { path: '/fun', label: 'Fun' },
 ];

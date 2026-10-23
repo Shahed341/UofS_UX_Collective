@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarDays, BookOpen, HandHeart, Gamepad2, Trophy } from 'lucide-react';
+import { ArrowRight, Gamepad2, Trophy } from 'lucide-react';
 import HeroSection from './HeroSection.jsx';
 import EventCalendarSection from './EventCalendarSection.jsx';
 import HomeGallerySection from './HomeGallerySection.jsx';
+import HomeInvolveSection from './HomeInvolveSection.jsx';
 import EventCard from '../../components/events/EventCard.jsx';
-import { Reveal, TiltCard, useCountUp } from '../../lib/motion.jsx';
+import { Reveal, useCountUp } from '../../lib/motion.jsx';
 import { useApi } from '../../lib/api.js';
 import { useSite } from '../../lib/site.jsx';
 import './HomePage.css';
@@ -22,33 +23,6 @@ function Stat({ value, suffix = '+', label, delay }) {
     </Reveal>
   );
 }
-
-const PATHS = [
-  {
-    to: '/events',
-    icon: CalendarDays,
-    title: 'Come to an event',
-    text: 'Hands-on Figma labs, portfolio nights, industry panels and design jams. No experience needed.',
-    cta: 'See what’s on',
-    theme: 'crimson',
-  },
-  {
-    to: '/resources',
-    icon: BookOpen,
-    title: 'Learn at your pace',
-    text: 'Templates, guides, workshop slides and a beginner learning path curated by our execs.',
-    cta: 'Browse resources',
-    theme: 'coral',
-  },
-  {
-    to: '/get-involved',
-    icon: HandHeart,
-    title: 'Get involved',
-    text: 'Volunteer, mentor, join a committee or book a 1-on-1 portfolio review with our team.',
-    cta: 'Find your role',
-    theme: 'amber',
-  },
-];
 
 export default function HomePage() {
   const { stats } = useSite();
@@ -98,28 +72,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Find your path */}
-        <section className="home-paths-section">
-          <Reveal variant="up" className="home-section-head">
-            <span className="section-eyebrow">Start here</span>
-            <h2 className="section-heading">Find your path into design</h2>
-          </Reveal>
-          <div className="home-paths-grid">
-            {PATHS.map(({ to, icon: Icon, title, text, cta, theme }, i) => (
-              <Reveal key={to} variant="flip" delay={i * 120}>
-                <TiltCard as={Link} to={to} className={`path-card theme-${theme}`}>
-                  <span className="path-card-icon"><Icon size={24} /></span>
-                  <h3 className="path-card-title">{title}</h3>
-                  <p className="path-card-text">{text}</p>
-                  <span className="path-card-cta">
-                    <span className="path-card-cta-label">{cta}</span> <ArrowRight size={16} />
-                  </span>
-                </TiltCard>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-
         <EventCalendarSection events={events} isLoadingEvents={loading} />
 
         {/* Recent recaps from the archive */}
@@ -166,6 +118,8 @@ export default function HomePage() {
             <Trophy size={18} /> Play now
           </Link>
         </Reveal>
+
+        <HomeInvolveSection />
 
         <FAQSection />
       </div>

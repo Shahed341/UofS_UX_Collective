@@ -97,7 +97,13 @@ export default function Footer() {
         <nav className="footer-collaborators-col footer-explore-col" aria-label="Footer">
           <h4 className="footer-collaborators-title">Explore</h4>
           <ul className="footer-collaborators-list">
-            {[...NAV_ITEMS.slice(1), { path: '/events/past', label: 'Past Events' }, { path: '/contact', label: 'Contact' }].map((item) => (
+            {[
+              ...NAV_ITEMS,
+              { path: '/events/past', label: 'Past Events' },
+              { path: '/resources', label: 'Resources' },
+              { path: '/get-involved', label: 'Get Involved' },
+              { path: '/contact', label: 'Contact' },
+            ].map((item) => (
               <li key={item.path}>
                 <Link to={item.path} className="collab-link">{item.label}</Link>
               </li>

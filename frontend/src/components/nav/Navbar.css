@@ -287,14 +287,14 @@
 
 
 /* Collapse to the drawer before the links get cramped */
-@media (max-width: 1180px) {
+@media (max-width: 900px) {
   .nav-btn {
     padding: 8px 12px;
     font-size: 14.5px;
   }
 }
 
-@media (max-width: 1060px) {
+@media (max-width: 760px) {
   .nav-right-container {
     display: none;
   }
@@ -315,7 +315,7 @@
   }
 }
 
-@media (min-width: 1061px) {
+@media (min-width: 761px) {
   .mobile-drawer {
     display: none;
   }
