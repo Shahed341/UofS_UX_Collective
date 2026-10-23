@@ -9,6 +9,7 @@ import { requireAdmin } from '../lib/auth.js';
 import { listEvents, getEvent } from '../lib/events.js';
 import { imageUpload, publicUrlFor, removeUpload } from '../lib/uploads.js';
 import { notifyInBackground } from '../lib/subscriptions.js';
+import { getAnalytics } from '../lib/analytics.js';
 import { asyncRoute, slugify, validate } from '../lib/util.js';
 
 const router = Router();
@@ -72,6 +73,13 @@ router.get('/overview', asyncRoute(async (req, res) => {
       (SELECT COUNT(*) FROM calendar_subscribers WHERE confirmed = 1) AS subscribers`);
   const upcoming = (await listEvents({ when: 'upcoming', includeDrafts: true })).slice(0, 3);
   res.json({ success: true, data: { counts, upcoming, system: await testConnection() } });
+}));
+
+// ---------- Analytics dashboard ----------
+
+router.get('/analytics', asyncRoute(async (req, res) => {
+  const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
+  res.json({ success: true, data: await getAnalytics(days) });
 }));
 
 // ---------- Uploads ----------

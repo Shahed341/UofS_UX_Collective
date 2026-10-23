@@ -134,6 +134,24 @@ CREATE TABLE IF NOT EXISTS calendar_subscribers (
     confirmed_at TIMESTAMP NULL
 );
 
+-- Anonymous, cookie-free analytics: one row per tracked action
+CREATE TABLE IF NOT EXISTS analytics_events (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(30) NOT NULL,
+    path VARCHAR(200) NOT NULL DEFAULT '',
+    target VARCHAR(200) NOT NULL DEFAULT '',
+    session_id CHAR(16) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_analytics_time (created_at),
+    INDEX idx_analytics_type (type, created_at)
+);
+
+-- Daily Discord member count, for the member growth chart
+CREATE TABLE IF NOT EXISTS stat_snapshots (
+    snap_date DATE PRIMARY KEY,
+    members INT NOT NULL
+);
+
 -- Tables from the original prototype that are no longer used
 DROP TABLE IF EXISTS uxco_events;
 DROP TABLE IF EXISTS connection_logs;

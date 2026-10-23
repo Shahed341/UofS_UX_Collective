@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import { pool } from '../db.js';
 import { listEvents, getEvent } from '../lib/events.js';
 import { GAMES, LEADERBOARD_ORDER } from '../lib/games.js';
+import { TRACK_TYPES, recordEvent, snapshotMembers } from '../lib/analytics.js';
 import { asyncRoute, validate, saskatoonNow } from '../lib/util.js';
 
 const router = Router();
@@ -50,6 +51,7 @@ async function getDiscordStats(fallbackMembers) {
     });
     const data = await response.json();
     if (data.approximate_member_count) {
+      snapshotMembers(data.approximate_member_count).catch(() => {});
       discordCache = {
         at: Date.now(),
         data: { memberCount: data.approximate_member_count, onlineCount: data.approximate_presence_count || 0, live: true },
@@ -61,6 +63,17 @@ async function getDiscordStats(fallbackMembers) {
   }
   return discordCache.data || { memberCount: Number(fallbackMembers) || 0, onlineCount: 0, live: false };
 }
+
+const trackLimiter = rateLimit({ windowMs: 60 * 1000, limit: 120, standardHeaders: 'draft-7', legacyHeaders: false });
+
+// Anonymous analytics beacon. Silently ignores anything malformed.
+router.post('/track', trackLimiter, asyncRoute(async (req, res) => {
+  const { type, path = '', target = '', sid = '' } = req.body || {};
+  if (TRACK_TYPES.includes(type) && /^[a-f0-9]{16}$/.test(sid) && typeof path === 'string' && typeof target === 'string') {
+    await recordEvent({ type, path: path.slice(0, 200), target: String(target).slice(0, 200), sid });
+  }
+  res.status(204).end();
+}));
 
 router.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
