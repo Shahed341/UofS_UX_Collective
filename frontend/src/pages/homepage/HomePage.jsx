@@ -145,7 +145,7 @@ export default function HomePage() {
                   <h3 className="path-card-title">{title}</h3>
                   <p className="path-card-text">{text}</p>
                   <span className="path-card-cta">
-                    {cta} <ArrowRight size={16} />
+                    <span className="path-card-cta-label">{cta}</span> <ArrowRight size={16} />
                   </span>
                 </TiltCard>
               </Reveal>

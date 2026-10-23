@@ -1668,7 +1668,6 @@
    HOMEPAGE MOBILE
    ========================================================== */
 @media (max-width: 960px) {
-  .home-paths-grid,
   .home-recaps-grid {
     grid-template-columns: 1fr;
   }
@@ -1802,5 +1801,66 @@
   }
   .stat-number {
     filter: drop-shadow(0 2px 0 #C40E40) drop-shadow(0 4px 8px rgba(196, 14, 64, 0.2));
+  }
+}
+
+/* Path cards stay three-across at every width: tighter on tablets, compact tiles on phones */
+.home-paths-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 960px) {
+  .home-paths-grid {
+    gap: 14px;
+  }
+  .path-card {
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+  .path-card-title {
+    font-size: 18px;
+  }
+  .path-card-text {
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-paths-grid {
+    gap: 8px;
+  }
+  .path-card {
+    align-items: center;
+    gap: 8px;
+    padding: 16px 8px 14px;
+    border-radius: 18px;
+    text-align: center;
+  }
+  .path-card::before {
+    width: 120px;
+    height: 120px;
+    right: -50px;
+    top: -50px;
+  }
+  .path-card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+  }
+  .path-card-title {
+    font-size: clamp(12.5px, 3.6vw, 15px);
+    line-height: 1.2;
+  }
+  .path-card-text {
+    display: none;
+  }
+  .path-card-cta {
+    padding-top: 2px;
+    font-size: 12px;
+    gap: 3px;
+  }
+  /* Keep just the arrow so the CTA fits narrow tiles */
+  .path-card-cta-label {
+    display: none;
   }
 }
