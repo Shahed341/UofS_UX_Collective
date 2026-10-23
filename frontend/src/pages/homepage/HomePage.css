@@ -1847,3 +1847,44 @@
     gap: 10px;
   }
 }
+
+/* ==========================================================
+   HERO LEAF: natural breathing + per-petal sway
+   ========================================================== */
+.petal-sway {
+  /* fill-box is the petal's own (unrotated) bounds, so 50% 100% is its base at the stem */
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: petalSway var(--sway-dur, 5s) cubic-bezier(0.45, 0.05, 0.55, 0.95) var(--sway-delay, 2s) infinite both;
+}
+
+@keyframes petalSway {
+  0%, 100% {
+    transform: rotate(0deg) scale(1, 1);
+  }
+  22% {
+    transform: rotate(calc(var(--sway-amp) * var(--sway-dir))) scale(1.015, 1.035);
+  }
+  48% {
+    transform: rotate(calc(var(--sway-amp) * var(--sway-dir) * -0.45)) scale(0.99, 0.985);
+  }
+  74% {
+    transform: rotate(calc(var(--sway-amp) * var(--sway-dir) * 0.6)) scale(1.01, 1.025) skewX(calc(var(--sway-dir) * 1.5deg));
+  }
+}
+
+/* Whole sheaf slowly inhales and exhales while floating */
+.hero-leaf-container {
+  animation: leafBreath 7.5s ease-in-out 1.8s infinite;
+}
+
+@keyframes leafBreath {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    filter: drop-shadow(0 12px 36px rgba(150, 10, 60, 0.28));
+  }
+  50% {
+    transform: translateY(-14px) rotate(1.2deg) scale(1.035);
+    filter: drop-shadow(0 26px 46px rgba(150, 10, 60, 0.36));
+  }
+}

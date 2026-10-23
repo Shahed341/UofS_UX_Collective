@@ -37,11 +37,33 @@ function UsaskWheatLeaf({ className = '', size = 360 }) {
         <path id="usask-leaf-petal" d="M 0,-62 C 34,-31 34,31 0,62 C -34,31 -34,-31 0,-62 Z" fill="#FFFFFF" />
       </defs>
 
-      {PETALS.map((petal, i) => (
-        <g key={i} className="leaf-petal" style={{ '--i': i, '--from-x': `${(i % 2 ? 1 : -1) * (60 + i * 18)}px`, '--from-r': `${(i % 2 ? 1 : -1) * 90}deg` }}>
-          <use href="#usask-leaf-petal" transform={`translate(${petal.x}, ${petal.y}) rotate(${petal.r})`} />
-        </g>
-      ))}
+      {PETALS.map((petal, i) => {
+        const row = Math.ceil(i / 2);
+        const side = petal.r === 0 ? 0 : petal.r < 0 ? -1 : 1;
+        return (
+          // Outer group: one-time fly-in. Inner group: endless sway around the petal's base.
+          <g
+            key={i}
+            className="leaf-petal"
+            style={{ '--i': i, '--from-x': `${(i % 2 ? 1 : -1) * (60 + i * 18)}px`, '--from-r': `${(i % 2 ? 1 : -1) * 90}deg` }}
+          >
+            <g transform={`translate(${petal.x}, ${petal.y}) rotate(${petal.r})`}>
+              <g
+                className="petal-sway"
+                style={{
+                  // Rows ripple top-to-bottom like a breeze; slightly different periods keep it from looking looped
+                  '--sway-delay': `${1.9 + row * 0.32}s`,
+                  '--sway-dur': `${4.6 + ((i * 7) % 5) * 0.35}s`,
+                  '--sway-amp': `${side === 0 ? 3 : 5 + row * 0.6}deg`,
+                  '--sway-dir': side === 0 ? 1 : side,
+                }}
+              >
+                <use href="#usask-leaf-petal" />
+              </g>
+            </g>
+          </g>
+        );
+      })}
     </svg>
   );
 }
