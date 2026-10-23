@@ -1,71 +1,75 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Users, ArrowRight } from 'lucide-react';
+import { ArrowRight, CalendarDays, BookOpen, HandHeart, Gamepad2, Trophy } from 'lucide-react';
 import HeroSection from './HeroSection.jsx';
+import NextEventBanner from './NextEventBanner.jsx';
 import EventCalendarSection from './EventCalendarSection.jsx';
 import HomeGallerySection from './HomeGallerySection.jsx';
+import EventCard from '../../components/events/EventCard.jsx';
+import CalendarSubscribe from '../../components/events/CalendarSubscribe.jsx';
+import { Reveal, TiltCard, useCountUp } from '../../lib/motion.jsx';
+import { useApi } from '../../lib/api.js';
+import { useSite } from '../../lib/site.jsx';
 import './HomePage.css';
 
-export default function HomePage({
-  events,
-  isLoadingEvents
-}) {
-  const [discordStats, setDiscordStats] = useState({
-    memberCount: 308,
-    onlineCount: 25,
-    isLoading: false
-  });
+function Stat({ value, suffix = '+', label, delay }) {
+  const [ref, current] = useCountUp(value);
+  return (
+    <Reveal variant="up" delay={delay} className="stat-item">
+      <div ref={ref} className="stat-number gradient-text">
+        {current}
+        {suffix}
+      </div>
+      <div className="stat-label">{label}</div>
+    </Reveal>
+  );
+}
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchDiscordStats = async () => {
-      try {
-        const res = await fetch('/api/discord-stats');
-        const data = await res.json();
-        if (isMounted && data && data.memberCount) {
-          setDiscordStats({
-            memberCount: data.memberCount,
-            onlineCount: data.onlineCount || 0,
-            isLoading: false
-          });
-        }
-      } catch (err) {
-        // Fallback directly to Discord API if proxy unavailable
-        try {
-          const directRes = await fetch('https://discord.com/api/v9/invites/Fx7BUvzdzT?with_counts=true');
-          const directData = await directRes.json();
-          if (isMounted && directData && directData.approximate_member_count) {
-            setDiscordStats({
-              memberCount: directData.approximate_member_count,
-              onlineCount: directData.approximate_presence_count || 0,
-              isLoading: false
-            });
-          }
-        } catch (e) {
-          // Keep default fallback
-        }
-      }
-    };
+const PATHS = [
+  {
+    to: '/events',
+    icon: CalendarDays,
+    title: 'Come to an event',
+    text: 'Hands-on Figma labs, portfolio nights, industry panels and design jams. No experience needed.',
+    cta: 'See what’s on',
+    theme: 'crimson',
+  },
+  {
+    to: '/resources',
+    icon: BookOpen,
+    title: 'Learn at your pace',
+    text: 'Templates, guides, workshop slides and a beginner learning path curated by our execs.',
+    cta: 'Browse resources',
+    theme: 'coral',
+  },
+  {
+    to: '/get-involved',
+    icon: HandHeart,
+    title: 'Get involved',
+    text: 'Volunteer, mentor, join a committee or book a 1-on-1 portfolio review with our team.',
+    cta: 'Find your role',
+    theme: 'amber',
+  },
+];
 
-    fetchDiscordStats();
-    const interval = setInterval(fetchDiscordStats, 30000); // 30s real-time poll
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
+export default function HomePage() {
+  const { stats } = useSite();
+  const { data: events = [], loading } = useApi('/api/events', { initial: [] });
+  const upcoming = events.filter((e) => !e.is_past);
+  const recaps = events.filter((e) => e.is_past).reverse().slice(0, 3);
+  const nextEvent = upcoming[0];
 
   return (
     <div className="homepage-container">
-      {/* 1. Hero Section (Full-Screen USask Sunset Mesh & Wheat Leaf Graphic) */}
-      <HeroSection />
+      <HeroSection nextEvent={nextEvent} />
 
       <div className="app-container">
-        {/* 2. About UXCO Section (3D Red Card + Photo Collage) */}
-        <section className="home-about-showcase-section">
+        {nextEvent && <NextEventBanner event={nextEvent} />}
+
+        {/* About UXCO: 3D red card + photo collage */}
+        <section className="home-about-showcase-section" id="about-uxco">
           <div className="about-showcase-grid">
-            {/* Left Column: 3D Red Card */}
-            <div className="about-3d-red-card">
+            <Reveal variant="left" className="about-3d-red-card">
               <h2 className="about-3d-title">About UXCO</h2>
 
               <div className="about-3d-content-block">
@@ -86,73 +90,121 @@ export default function HomePage({
                 <span>Explore Full Story & Team</span>
                 <ArrowRight size={16} />
               </Link>
-            </div>
+            </Reveal>
 
-            {/* Right Column: 3-Photo Rounded Collage */}
             <div className="about-photo-collage-container">
               <div className="about-photo-top-row">
-                <div className="about-collage-photo photo-top-left">
-                  <img 
-                    src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80" 
-                    alt="Students in UX Workshop"
-                    onError={(e) => { e.target.src = '/welcome.jpg'; }}
+                <Reveal variant="scale" delay={100} className="about-collage-photo photo-top-left">
+                  <img
+                    src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80"
+                    alt="Students in a UX workshop"
+                    loading="lazy"
+                    onError={(e) => { e.currentTarget.src = '/welcome.jpg'; }}
                   />
-                </div>
-                <div className="about-collage-photo photo-top-right">
-                  <img 
-                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=700&q=80" 
-                    alt="UXCO Team Collaboration"
-                    onError={(e) => { e.target.src = '/thorvaldson_preview.jpg'; }}
+                </Reveal>
+                <Reveal variant="scale" delay={220} className="about-collage-photo photo-top-right">
+                  <img
+                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=700&q=80"
+                    alt="UXCO team collaboration"
+                    loading="lazy"
+                    onError={(e) => { e.currentTarget.src = '/thorvaldson_preview.jpg'; }}
                   />
-                </div>
+                </Reveal>
               </div>
 
-              <div className="about-collage-photo photo-bottom-wide">
-                <img 
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1100&q=80" 
-                  alt="Student Designers Working Together"
-                  onError={(e) => { e.target.src = '/welcome.jpg'; }}
+              <Reveal variant="up" delay={320} className="about-collage-photo photo-bottom-wide">
+                <img
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1100&q=80"
+                  alt="Student designers working together"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = '/welcome.jpg'; }}
                 />
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
 
-        {/* 3. Stat Section (Unboxed numbers: Total Members, Events Hosted, Helped Students, Leaders) */}
-        <section className="stats-section">
+        {/* Stats count up when scrolled into view */}
+        <section className="stats-section" aria-label="Club in numbers">
           <div className="stats-grid">
-            <div className="stat-item">
-              <div className="stat-number gradient-text">{discordStats.memberCount}+</div>
-              <div className="stat-label">Total Members</div>
-            </div>
-
-            <div className="stat-item">
-              <div className="stat-number gradient-text">12+</div>
-              <div className="stat-label">Events Hosted</div>
-            </div>
-
-            <div className="stat-item">
-              <div className="stat-number gradient-text">250+</div>
-              <div className="stat-label">Helped Students</div>
-            </div>
-
-            <div className="stat-item">
-              <div className="stat-number gradient-text">7</div>
-              <div className="stat-label">Executive Leaders</div>
-            </div>
+            <Stat value={stats.members} label="Discord Members" delay={0} />
+            <Stat value={stats.eventsHosted} label="Events Hosted" delay={100} />
+            <Stat value={stats.studentsHelped} label="Students Helped" delay={200} />
+            <Stat value={new Date().getFullYear() - stats.foundedYear} suffix=" yrs" label="Designing at USask" delay={300} />
           </div>
         </section>
 
-        {/* 3. Event Calendar Section */}
-        <EventCalendarSection 
-          events={events}
-          isLoadingEvents={isLoadingEvents}
-        />
+        {/* Find your path */}
+        <section className="home-paths-section">
+          <Reveal variant="up" className="home-section-head">
+            <span className="section-eyebrow">Start here</span>
+            <h2 className="section-heading">Find your path into design</h2>
+          </Reveal>
+          <div className="home-paths-grid">
+            {PATHS.map(({ to, icon: Icon, title, text, cta, theme }, i) => (
+              <Reveal key={to} variant="flip" delay={i * 120}>
+                <TiltCard as={Link} to={to} className={`path-card theme-${theme}`}>
+                  <span className="path-card-icon"><Icon size={24} /></span>
+                  <h3 className="path-card-title">{title}</h3>
+                  <p className="path-card-text">{text}</p>
+                  <span className="path-card-cta">
+                    {cta} <ArrowRight size={16} />
+                  </span>
+                </TiltCard>
+              </Reveal>
+            ))}
+          </div>
+        </section>
 
-        {/* 4. Gallery Section */}
-        <HomeGallerySection />
+        <EventCalendarSection events={events} isLoadingEvents={loading} />
 
-        {/* 5. FAQ Section (3D Colorful Pill Accordion) */}
+        <CalendarSubscribe />
+
+        {/* Recent recaps from the archive */}
+        {recaps.length > 0 && (
+          <section className="home-recaps-section">
+            <Reveal variant="up" className="home-section-head with-action">
+              <div>
+                <span className="section-eyebrow">Recently</span>
+                <h2 className="section-heading">Event recaps</h2>
+              </div>
+              <Link to="/events/past" className="btn-secondary">
+                Full archive <ArrowRight size={15} />
+              </Link>
+            </Reveal>
+            <div className="home-recaps-grid">
+              {recaps.map((event, i) => (
+                <Reveal key={event.id} variant="up" delay={i * 110}>
+                  <EventCard event={event} />
+                </Reveal>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      <HomeGallerySection />
+
+      <div className="app-container">
+        {/* Game corner teaser */}
+        <Reveal variant="scale" className="home-game-teaser" data-obstacle>
+          <div className="game-teaser-floaters" aria-hidden="true">
+            <span className="floater f1" />
+            <span className="floater f2" />
+            <span className="floater f3" />
+          </div>
+          <div className="game-teaser-copy">
+            <span className="section-eyebrow light"><Gamepad2 size={15} /> Game Corner</span>
+            <h2 className="game-teaser-title">Think you have a designer’s eye?</h2>
+            <p className="game-teaser-text">
+              Test your aim, colour perception and pixel precision. Top the weekly leaderboard and win bragging rights at our next event.
+            </p>
+          </div>
+          <Link to="/fun" className="game-teaser-btn">
+            <Trophy size={18} /> Play now
+          </Link>
+        </Reveal>
+
         <FAQSection />
       </div>
     </div>
@@ -183,16 +235,16 @@ const FAQ_DATA = [
   },
   {
     id: 4,
-    question: 'What kind of events and workshops does the club host?',
+    question: 'How do I keep up with new events?',
     answer:
-      'We run interactive Figma design sprints, portfolio review nights with industry professionals, guest speaker panels with agencies (such as zu), collaborative hackathons with CSSS, and executive networking mixers throughout the academic year.',
+      'Subscribe to our calendar above — every new event lands in your Google, Apple or Outlook calendar automatically. You can also get email invites, or follow announcements on Discord and Instagram.',
     theme: 'amber',
   },
   {
     id: 5,
     question: 'How can I get involved in the executive leadership team?',
     answer:
-      'We recruit new executive members, project leads, and junior directors at the end of each academic term and during early fall orientation. Keep an eye on our Discord announcements and Instagram for application links!',
+      'We recruit volunteers, mentors and junior directors throughout the year. Open roles are listed on the Get Involved page — apply there, or come chat with us at any event!',
     theme: 'coral',
   },
 ];
@@ -200,50 +252,50 @@ const FAQ_DATA = [
 function FAQSection() {
   const [openId, setOpenId] = useState(null);
 
-  const toggleFAQ = (id) => {
-    setOpenId((prev) => (prev === id ? null : id));
-  };
-
   return (
     <section className="faq-section" id="faq">
-      <div className="faq-header-block">
+      <Reveal variant="up" className="faq-header-block">
         <h2 className="faq-title">Frequently Asked Questions</h2>
         <p className="faq-subtitle">
           Everything you need to know about joining, events, and getting involved with UXCO.
         </p>
-      </div>
+      </Reveal>
 
       <div className="faq-pills-list">
-        {FAQ_DATA.map((item) => {
+        {FAQ_DATA.map((item, i) => {
           const isOpen = openId === item.id;
           return (
-            <div key={item.id} className={`faq-item-wrapper theme-${item.theme} ${isOpen ? 'is-open' : ''}`}>
+            <Reveal key={item.id} variant="up" delay={i * 70} className={`faq-item-wrapper theme-${item.theme} ${isOpen ? 'is-open' : ''}`}>
               <button
                 type="button"
+                id={`faq-q-${item.id}`}
                 className={`faq-pill-btn theme-${item.theme} ${isOpen ? 'active' : ''}`}
-                onClick={() => toggleFAQ(item.id)}
+                onClick={() => setOpenId((prev) => (prev === item.id ? null : item.id))}
                 aria-expanded={isOpen}
+                aria-controls={`faq-a-${item.id}`}
               >
                 <span className="faq-question-text">{item.question}</span>
                 <span className={`faq-plus-icon ${isOpen ? 'rotated' : ''}`} aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M12 4V20M4 12H20"
-                      stroke="currentColor"
-                      strokeWidth="3.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                    <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
               </button>
 
-              {isOpen && (
-                <div className="faq-answer-card">
-                  <p className="faq-answer-text">{item.answer}</p>
+              {/* Always rendered so the height can animate open and closed */}
+              <div
+                id={`faq-a-${item.id}`}
+                role="region"
+                aria-labelledby={`faq-q-${item.id}`}
+                className="faq-answer-collapse"
+              >
+                <div className="faq-answer-inner">
+                  <div className="faq-answer-card">
+                    <p className="faq-answer-text">{item.answer}</p>
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            </Reveal>
           );
         })}
       </div>

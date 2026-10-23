@@ -1,110 +1,48 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Calendar as CalendarIcon, 
-  MapPin, 
-  CalendarPlus, 
-  ExternalLink, 
-  ArrowRight, 
-  ChevronLeft, 
-  ChevronRight, 
-  Clock, 
-  CalendarDays,
-  Info
+import { useNavigate } from 'react-router-dom';
+import {
+  Calendar as CalendarIcon,
+  MapPin,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  CalendarDays
 } from 'lucide-react';
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+import { MONTHS as MONTH_NAMES, parseDateTime, formatTimeRange, saskatoonToday } from '../../lib/dates.js';
+import AddToCalendar from '../../components/events/AddToCalendar.jsx';
+import { Reveal } from '../../lib/motion.jsx';
 
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// Helper to parse event date strings from MySQL
-function parseEventDate(dateStr) {
-  if (!dateStr) return null;
-
-  const monthMap = {
-    jan: 0, january: 0,
-    feb: 1, february: 1,
-    mar: 2, march: 2,
-    apr: 3, april: 3,
-    may: 4,
-    jun: 5, june: 5,
-    jul: 6, july: 6,
-    aug: 7, august: 7,
-    sep: 8, sept: 8, september: 8,
-    oct: 9, october: 9,
-    nov: 10, november: 10,
-    dec: 11, december: 11
-  };
-
-  const regex = /(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t|tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2}),?\s+(\d{4})/i;
-  const match = dateStr.match(regex);
-  if (match) {
-    const monthKey = match[1].toLowerCase();
-    const month = monthMap[monthKey];
-    const day = parseInt(match[2], 10);
-    const year = parseInt(match[3], 10);
-    return { year, month, day };
-  }
-
-  const parsed = new Date(dateStr);
-  if (!isNaN(parsed.getTime())) {
-    return {
-      year: parsed.getFullYear(),
-      month: parsed.getMonth(),
-      day: parsed.getDate()
-    };
-  }
-
-  return null;
-}
-
-// Helper to format clean event time (stripping redundant date & utf8 artifacts)
-function formatEventTime(dateStr) {
-  if (!dateStr) return '';
-  const cleanStr = dateStr.replace(/â€¢/g, '•');
-  if (cleanStr.includes('•')) {
-    return cleanStr.split('•')[1]?.trim() || cleanStr;
-  }
-  return cleanStr;
-}
+const toDay = (p) => (p ? { year: p.year, month: p.month, day: p.day } : null);
 
 export default function EventCalendarSection({ events = [], isLoadingEvents }) {
   const navigate = useNavigate();
-  const today = new Date();
-  const todayYear = today.getFullYear();
-  const todayMonth = today.getMonth();
-  const todayDay = today.getDate();
+  const today = saskatoonToday();
+  const todayYear = today.year;
+  const todayMonth = today.month;
+  const todayDay = today.day;
 
-  // Find initial month & year from events or today
-  const [viewYear, setViewYear] = useState(2026);
-  const [viewMonth, setViewMonth] = useState(8); // Default to September 2026 (first events in DB)
-  const [selectedDate, setSelectedDate] = useState({ year: 2026, month: 8, day: 16 });
+  // Calendar opens on today; once events load it jumps to the next upcoming one
+  const [viewYear, setViewYear] = useState(todayYear);
+  const [viewMonth, setViewMonth] = useState(todayMonth);
+  const [selectedDate, setSelectedDate] = useState(today);
 
-  // Map parsed events
-  const parsedEvents = useMemo(() => {
-    return events.map((event) => {
-      const parsed = parseEventDate(event.date);
-      return {
-        ...event,
-        parsedDate: parsed
-      };
-    });
-  }, [events]);
+  const parsedEvents = useMemo(
+    () => events.map((event) => ({ ...event, parsedDate: toDay(parseDateTime(event.start_at)) })),
+    [events]
+  );
 
-  // Set initial selected date to the first event once events load
   useEffect(() => {
-    if (parsedEvents.length > 0) {
-      const firstValid = parsedEvents.find(e => e.parsedDate);
-      if (firstValid && firstValid.parsedDate) {
-        setViewYear(firstValid.parsedDate.year);
-        setViewMonth(firstValid.parsedDate.month);
-        setSelectedDate(firstValid.parsedDate);
-      }
+    const next = parsedEvents.find((e) => !e.is_past && e.parsedDate);
+    if (next) {
+      setViewYear(next.parsedDate.year);
+      setViewMonth(next.parsedDate.month);
+      setSelectedDate(next.parsedDate);
     }
-  }, [events.length]);
+  }, [parsedEvents]);
 
   // Group events by "YYYY-M-D"
   const eventsByDateKey = useMemo(() => {
@@ -201,37 +139,10 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
     }
   };
 
-  const handlePrevYear = () => {
-    setViewYear((prev) => prev - 1);
-  };
-
-  const handleNextYear = () => {
-    setViewYear((prev) => prev + 1);
-  };
-
-  const handleMonthChange = (e) => {
-    setViewMonth(parseInt(e.target.value, 10));
-  };
-
-  const handleYearChange = (e) => {
-    setViewYear(parseInt(e.target.value, 10));
-  };
-
   const handleJumpToToday = () => {
     setViewYear(todayYear);
     setViewMonth(todayMonth);
     setSelectedDate({ year: todayYear, month: todayMonth, day: todayDay });
-  };
-
-  // Google Calendar Link generator
-  const getGoogleCalendarUrl = (event) => {
-    if (event.calendar_link && event.calendar_link.startsWith('http')) {
-      return event.calendar_link;
-    }
-    const text = encodeURIComponent(`UXCO: ${event.title}`);
-    const details = encodeURIComponent(event.description);
-    const location = encodeURIComponent(event.location);
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&details=${details}&location=${location}`;
   };
 
   // Generate calendar days grid
@@ -318,25 +229,25 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
       {/* Section Top Header */}
       <div className="section-header">
         <div>
-          <span className="section-tag">Interactive Schedule</span>
-          <h3 className="section-title">Club Calendar & Event Highlights</h3>
+          <span className="section-eyebrow">Interactive Schedule</span>
+          <h2 className="section-heading">Club calendar</h2>
         </div>
         <div>
           <button 
             className="btn-secondary" 
             onClick={() => navigate('/events')}
           >
-            View All Events List <ArrowRight size={15} />
+            All upcoming events <ArrowRight size={15} />
           </button>
         </div>
       </div>
 
       {isLoadingEvents ? (
         <div className="cal-loading-box">
-          <p style={{ color: 'var(--text-muted)' }}>Querying events from MySQL database...</p>
+          <p style={{ color: 'var(--text-muted)' }}>Loading events…</p>
         </div>
       ) : (
-        <div className="cal-layout-container">
+        <Reveal variant="up" className="cal-layout-container">
           {/* Left Column: Full Month Calendar */}
           <div className="cal-main-card">
             {/* Unified Clean Calendar Month & Controls Header */}
@@ -423,9 +334,9 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                     {/* Event indicators on the day cell */}
                     {hasEvents && (
                       <div className="cal-day-event-indicators">
-                        {cell.events.map((ev, i) => (
+                        {cell.events.map((ev) => (
                           <div 
-                            key={ev.id || i} 
+                            key={ev.id} 
                             className="cal-event-dot-item"
                             title={`${ev.title} (${ev.category})`}
                           >
@@ -505,18 +416,17 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
 
                       <h5 className="inspector-event-title">{event.title}</h5>
 
-                      {event.description && (
+                      {(event.summary || event.description) && (
                         <div className="inspector-desc-wrap">
                           <p className="inspector-event-desc-2line">
-                            {event.description}
+                            {event.summary || event.description}
                           </p>
                           <button
                             type="button"
                             className="btn-readmore-inline"
-                            onClick={() => navigate('/events')}
-                            title="Read full event details on Events page"
+                            onClick={() => navigate(`/events/${event.slug}`)}
                           >
-                            Read More <ArrowRight size={12} />
+                            {event.is_past ? 'View recap' : 'Event details'} <ArrowRight size={12} />
                           </button>
                         </div>
                       )}
@@ -524,7 +434,7 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                       <div className="event-details">
                         <div className="detail-row">
                           <Clock size={15} color="#FA9B7A" />
-                          <span>{formatEventTime(event.date)}</span>
+                          <span>{formatTimeRange(event.start_at, event.end_at)}</span>
                         </div>
                         <div className="detail-row">
                           <MapPin size={15} color="#E81D88" />
@@ -532,17 +442,7 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                         </div>
                       </div>
 
-                      <a 
-                        href={getGoogleCalendarUrl(event)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-cal-colorful"
-                        style={{ width: '100%', justifyContent: 'center', marginTop: '6px' }}
-                      >
-                        <CalendarPlus size={15} />
-                        Add to Google Calendar
-                        <ExternalLink size={12} style={{ opacity: 0.8 }} />
-                      </a>
+                      {!event.is_past && <AddToCalendar event={event} compact />}
                     </div>
                   ))}
                 </div>
@@ -585,7 +485,7 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
               </div>
             )}
           </div>
-        </div>
+        </Reveal>
       )}
     </section>
   );

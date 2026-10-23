@@ -62,9 +62,9 @@ export function Reveal({ as: Tag = 'div', variant = 'up', delay = 0, className =
 export function SplitText({ text, as: Tag = 'span', className = '', stagger = 55, startDelay = 0 }) {
   const words = String(text).split(' ');
   return (
-    <Tag className={`split-text ${className}`} aria-label={text}>
+    <Tag className={`split-text ${className}`}>
       {words.map((word, i) => (
-        <span className="split-word-mask" key={`${word}-${i}`} aria-hidden="true">
+        <span className="split-word-mask" key={`${word}-${i}`}>
           <span className="split-word" style={{ '--word-delay': `${startDelay + i * stagger}ms` }}>
             {word}
           </span>
