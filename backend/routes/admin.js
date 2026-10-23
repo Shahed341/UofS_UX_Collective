@@ -10,6 +10,7 @@ import { listEvents, getEvent } from '../lib/events.js';
 import { imageUpload, publicUrlFor, removeUpload } from '../lib/uploads.js';
 import { notifyInBackground } from '../lib/subscriptions.js';
 import { getAnalytics } from '../lib/analytics.js';
+import { deleteConversation, getConversation, isInboxKind, listConversations, reply } from '../lib/inbox.js';
 import { asyncRoute, slugify, validate } from '../lib/util.js';
 
 const router = Router();
@@ -287,11 +288,33 @@ router.put('/settings', asyncRoute(async (req, res) => {
   res.json({ success: true });
 }));
 
-// ---------- Inbox ----------
+// ---------- Inbox (messenger-style threads) ----------
 
-router.get('/messages', asyncRoute(async (req, res) => {
-  const [rows] = await pool.query('SELECT * FROM contact_submissions ORDER BY created_at DESC LIMIT 500');
-  res.json({ success: true, data: rows });
+router.get('/inbox', asyncRoute(async (req, res) => {
+  res.json({ success: true, data: await listConversations() });
+}));
+
+router.get('/inbox/:kind/:id', asyncRoute(async (req, res) => {
+  if (!isInboxKind(req.params.kind)) return badRequest(res, 'Unknown conversation type.');
+  const convo = await getConversation(req.params.kind, req.params.id);
+  if (!convo) return res.status(404).json({ success: false, error: 'Not found.' });
+  res.json({ success: true, data: convo });
+}));
+
+router.post('/inbox/:kind/:id/reply', asyncRoute(async (req, res) => {
+  if (!isInboxKind(req.params.kind)) return badRequest(res, 'Unknown conversation type.');
+  const body = String(req.body?.body || '').trim();
+  if (!body) return badRequest(res, 'Write a reply first.');
+  if (body.length > 5000) return badRequest(res, 'Reply is too long.');
+  const result = await reply(req.params.kind, req.params.id, body, req.admin.name || 'UX Collective');
+  if (!result) return res.status(404).json({ success: false, error: 'Not found.' });
+  res.json({ success: true, ...result });
+}));
+
+router.delete('/inbox/:kind/:id', asyncRoute(async (req, res) => {
+  if (!isInboxKind(req.params.kind)) return badRequest(res, 'Unknown conversation type.');
+  await deleteConversation(req.params.kind, req.params.id);
+  res.json({ success: true });
 }));
 
 router.put('/messages/:id', asyncRoute(async (req, res) => {
@@ -299,29 +322,10 @@ router.put('/messages/:id', asyncRoute(async (req, res) => {
   res.json({ success: true });
 }));
 
-router.delete('/messages/:id', asyncRoute(async (req, res) => {
-  await pool.query('DELETE FROM contact_submissions WHERE id = ?', [req.params.id]);
-  res.json({ success: true });
-}));
-
-router.get('/applications', asyncRoute(async (req, res) => {
-  const [rows] = await pool.query(
-    `SELECT a.*, o.title AS opportunity_title FROM applications a
-     LEFT JOIN opportunities o ON o.id = a.opportunity_id
-     ORDER BY a.created_at DESC LIMIT 500`
-  );
-  res.json({ success: true, data: rows });
-}));
-
 router.put('/applications/:id', asyncRoute(async (req, res) => {
   const status = req.body?.status;
   if (!['new', 'reviewing', 'accepted', 'declined'].includes(status)) return badRequest(res, 'Invalid status.');
   await pool.query('UPDATE applications SET status = ? WHERE id = ?', [status, req.params.id]);
-  res.json({ success: true });
-}));
-
-router.delete('/applications/:id', asyncRoute(async (req, res) => {
-  await pool.query('DELETE FROM applications WHERE id = ?', [req.params.id]);
   res.json({ success: true });
 }));
 

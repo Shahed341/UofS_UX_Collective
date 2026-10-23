@@ -134,6 +134,17 @@ CREATE TABLE IF NOT EXISTS calendar_subscribers (
     confirmed_at TIMESTAMP NULL
 );
 
+-- Admin replies to contact messages and applications (inbox threads)
+CREATE TABLE IF NOT EXISTS inbox_replies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    kind ENUM('message', 'application') NOT NULL,
+    item_id INT NOT NULL,
+    body TEXT NOT NULL,
+    emailed TINYINT(1) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_inbox_thread (kind, item_id)
+);
+
 -- Anonymous, cookie-free analytics: one row per tracked action
 CREATE TABLE IF NOT EXISTS analytics_events (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
