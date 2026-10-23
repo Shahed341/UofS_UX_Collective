@@ -20,7 +20,7 @@ const OBSTACLE_SELECTORS = [
   '.about-3d-readmore-btn', '.gallery-card', '.contact-3d-hub', '.contact-channel-pill', '.contact-form-card',
   '.btn-primary', '.btn-secondary', '.cal-today-btn', '.cal-nav-btn', '.exec-3d-card', '.exec-nav-arrow-btn',
   '.footer-icon-btn', '.hero-join-link', '.collab-link', '.faq-pill-btn', '.archive-card', '.resource-card',
-  '.role-card', '.game-card', '.stat-item', '.next-event-banner',
+  '.role-card', '.game-card', '.stat-item', '.ev-row', '.subscribe-menu-btn',
 ].join(', ');
 
 const BUTTON_CLASSES = ['btn-primary', 'btn-secondary', 'hero-join-link', 'track-pill-btn', 'faq-pill-btn'];

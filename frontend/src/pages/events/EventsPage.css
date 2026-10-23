@@ -1,730 +1,237 @@
-.events-page-wrapper {
-  width: 100%;
-  max-width: 100%;
-  padding-bottom: 48px;
+/* ==========================================================
+   EVENTS PAGE (minimal list)
+   ========================================================== */
+.events-page {
+  max-width: 920px;
 }
 
-/* 1. Header Block */
-.events-hero-header {
-  text-align: center;
-  max-width: 860px;
-  margin: 0 auto 36px auto;
-  padding: 10px 16px 0 16px;
+.events-notice {
+  margin-bottom: 20px;
 }
 
-.events-badge-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #C21356;
-  background: #FFF0F5;
-  border: 1px solid rgba(194, 19, 86, 0.18);
-  padding: 6px 16px;
-  border-radius: 20px;
-  margin-bottom: 14px;
-}
-
-.events-main-title {
-  font-size: clamp(30px, 3.8vw, 46px);
-  font-weight: 800;
-  color: var(--text-dark);
-  letter-spacing: -0.03em;
-  line-height: 1.18;
-  margin-bottom: 12px;
-}
-
-.events-main-subtitle {
-  font-size: 16px;
-  color: var(--text-muted);
-  line-height: 1.6;
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-/* 2. Spotlight Headline Event Ticket (3D Crimson Pass) */
-.spotlight-ticket-container {
-  margin-bottom: 48px;
-}
-
-.spotlight-ticket-inner {
-  background: linear-gradient(135deg, #BF1154 0%, #D81B60 30%, #FA7538 100%);
-  border-radius: 32px;
-  padding: 34px 38px;
-  color: #FFFFFF;
-  box-shadow: 0 14px 0 #6B001B, 0 24px 48px rgba(107, 0, 27, 0.3);
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
-}
-
-.spotlight-ticket-inner:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 0 #6B001B, 0 28px 56px rgba(107, 0, 27, 0.38);
-}
-
-.spotlight-badge-row {
+.events-head {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
+  gap: 20px;
+  padding-top: 24px;
+}
+
+.events-title {
+  font-size: clamp(34px, 5.5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.events-lead {
+  margin: 10px 0 26px;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.events-filters {
+  display: flex;
+  gap: 8px;
   margin-bottom: 22px;
 }
 
-.spotlight-flame-tag {
-  display: inline-flex;
+/* ---------- Event rows ---------- */
+.ev-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ev-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 6px;
+  gap: 20px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: #FFFFFF;
+  border: 1px solid #F0E8EB;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s ease, border-color 0.2s ease;
+}
+
+.ev-row:hover {
+  transform: translateY(-3px);
+  border-color: #F6CFDD;
+  box-shadow: 0 16px 34px rgba(194, 19, 86, 0.12);
+}
+
+/* Whole row is clickable; the calendar button sits above the link */
+.ev-row-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.ev-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  border-radius: 14px;
+  background: #FFF3F7;
+  line-height: 1.05;
+}
+
+.ev-date-month {
   font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--primary-pink);
+}
+
+.ev-date-day {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.ev-date-weekday {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-light);
+}
+
+.ev-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ev-category {
+  font-size: 11.5px;
   font-weight: 800;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  background: #FFFFFF;
-  color: #C21356;
-  padding: 5px 14px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: var(--accent-orange-coral);
 }
 
-.spotlight-cat-tag {
-  font-size: 12px;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
-  padding: 5px 14px;
-  border-radius: 20px;
-  backdrop-filter: blur(8px);
-}
-
-.spotlight-content-grid {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 32px;
-}
-
-/* Spotlight Left Date Block */
-.spotlight-date-box {
-  background: #FFFFFF;
-  color: #C21356;
-  border-radius: 20px;
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  min-width: 100px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
-  flex-shrink: 0;
-}
-
-.spotlight-month {
-  font-size: 13px;
+.ev-title {
+  font-size: 19px;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #FA7538;
-}
-
-.spotlight-day {
-  font-size: 38px;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -1px;
-}
-
-.spotlight-time {
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #555555;
-  margin-top: 4px;
-  white-space: nowrap;
-}
-
-/* Spotlight Center Info */
-.spotlight-center-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.spotlight-title {
-  font-size: clamp(22px, 2.5vw, 28px);
-  font-weight: 800;
-  color: #FFFFFF;
-  line-height: 1.25;
-  margin: 0;
   letter-spacing: -0.02em;
+  line-height: 1.25;
+  transition: color 0.2s ease;
 }
 
-.spotlight-loc-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #FFE6D6;
+.ev-row:hover .ev-title {
+  color: var(--primary-pink);
 }
 
-.spotlight-desc {
-  font-size: 14.5px;
-  color: rgba(255, 255, 255, 0.94);
-  line-height: 1.55;
-  margin: 4px 0 10px 0;
-}
-
-.spotlight-points-grid {
+.ev-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 4px 16px;
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
-.spotlight-point-chip {
+.ev-meta span {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.22);
-  color: #FFFFFF;
-  padding: 6px 14px;
-  border-radius: 14px;
-  font-size: 12.5px;
-  font-weight: 700;
-  backdrop-filter: blur(6px);
+  gap: 5px;
 }
 
-/* Spotlight Right Action */
-.spotlight-action-box {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.spotlight-cal-btn {
-  background: #FFFFFF;
-  color: #C21356;
-  padding: 13px 24px;
-  border-radius: 16px;
-  font-size: 14.5px;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-decoration: none;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.spotlight-cal-btn:hover {
-  background: #FFF0F5;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
-}
-
-.spotlight-discord-link {
-  color: #FFFFFF;
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
-}
-
-.spotlight-discord-link:hover {
-  opacity: 1;
-}
-
-/* 3. "What to Expect" Principles Grid */
-.events-principles-grid {
+.ev-cal-btn {
+  position: relative;
+  z-index: 2;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-bottom: 44px;
-}
-
-.event-principle-card {
-  background: #FFFFFF;
-  border: 1px solid #EFEFEF;
-  border-radius: 24px;
-  padding: 26px 22px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.22s ease, border-color 0.22s ease;
-}
-
-.event-principle-card:hover {
-  transform: translateY(-3px);
-  border-color: #FA7538;
-}
-
-.principle-icon-box {
+  place-items: center;
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.principle-icon-box.pink {
-  background: #FFF0F5;
-}
-
-.principle-icon-box.orange {
-  background: #FFF4EC;
-}
-
-.principle-icon-box.crimson {
-  background: #FDF0F6;
-}
-
-.principle-title {
-  font-size: 17px;
-  font-weight: 800;
-  color: var(--text-dark);
-  margin-bottom: 8px;
-  letter-spacing: -0.01em;
-}
-
-.principle-text {
-  font-size: 13.5px;
-  color: var(--text-muted);
-  line-height: 1.55;
-  margin: 0;
-}
-
-/* 4. Track Filter Bar */
-.events-tracks-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 24px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #F0F0F0;
-}
-
-.tracks-list {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.track-pill-btn {
-  background: #FFFFFF;
-  border: 1px solid #EAEAEA;
-  color: var(--text-dark);
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-}
-
-.track-pill-btn:hover {
-  border-color: #FA7538;
-  color: #C21356;
-}
-
-.track-pill-btn.active {
-  background: var(--uxco-gradient);
-  color: #FFFFFF;
-  border-color: transparent;
-  box-shadow: 0 4px 14px rgba(194, 19, 86, 0.3);
-}
-
-.tracks-counter {
-  font-size: 12.5px;
-  font-weight: 800;
-  color: #C21356;
-  background: #FFF0F5;
-  padding: 5px 12px;
-  border-radius: 14px;
-}
-
-/* 5. Event Tickets Stack */
-.events-tickets-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 48px;
-}
-
-.event-ticket-row {
-  background: #FFFFFF;
-  border: 1px solid #EFEFEF;
-  border-radius: 24px;
-  padding: 24px 28px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 28px;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-}
-
-.event-ticket-row:hover {
-  transform: translateY(-3px);
-  border-color: #FA7538;
-  box-shadow: 0 12px 30px rgba(194, 19, 86, 0.1);
-}
-
-/* Left Date Col */
-.ticket-date-col {
-  background: #FFF5F8;
-  border: 1px solid rgba(194, 19, 86, 0.12);
-  border-radius: 18px;
-  padding: 14px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  min-width: 86px;
-  flex-shrink: 0;
-}
-
-.ticket-weekday {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: #FA7538;
-  letter-spacing: 0.6px;
-}
-
-.ticket-day-num {
-  font-size: 32px;
-  font-weight: 900;
-  color: #C21356;
-  line-height: 1;
-  margin: 2px 0;
-}
-
-.ticket-month-name {
-  font-size: 11.5px;
-  font-weight: 800;
-  color: var(--text-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-/* Center Details Col */
-.ticket-main-col {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.ticket-header-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.ticket-tag {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: #C21356;
-  background: #FFF0F5;
-  padding: 3px 10px;
-  border-radius: 10px;
-}
-
-.ticket-time-chip, .ticket-loc-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.ticket-title {
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--text-dark);
-  margin: 0;
-  line-height: 1.3;
-}
-
-.ticket-description {
-  font-size: 13.5px;
-  color: var(--text-muted);
-  line-height: 1.55;
-  margin: 0;
-}
-
-.ticket-points-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.ticket-bullet-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #444444;
-  background: #FAFAFA;
-  border: 1px solid #ECECEC;
-  padding: 3px 10px;
-  border-radius: 12px;
-}
-
-.bullet-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #FA7538;
-}
-
-/* Right Action Col */
-.ticket-action-col {
-  flex-shrink: 0;
-}
-
-.ticket-cal-button {
-  background: #FFFFFF;
-  border: 1.5px solid rgba(194, 19, 86, 0.2);
-  color: #C21356;
-  padding: 10px 18px;
-  border-radius: 14px;
-  font-size: 13px;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.ticket-cal-button:hover {
-  background: var(--uxco-gradient);
-  color: #FFFFFF;
-  border-color: transparent;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(194, 19, 86, 0.3);
-}
-
-/* 6. Campus Partners Footer Ribbon */
-.events-campus-collab-footer {
-  background: var(--uxco-subtle-gradient);
-  border: 1px solid rgba(250, 117, 56, 0.22);
-  border-radius: 20px;
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 14px;
-}
-
-.collab-footer-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13.5px;
-  font-weight: 800;
-  color: var(--text-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.collab-footer-chips {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.collab-badge {
-  font-size: 12px;
-  font-weight: 700;
-  color: #C21356;
-  background: #FFFFFF;
-  padding: 4px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(194, 19, 86, 0.12);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-}
-
-.events-loading-state, .events-empty-state {
-  background: #FAFAFA;
-  border: 1px dashed #E0E0E0;
-  border-radius: 24px;
-  padding: 48px;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 15px;
-  font-weight: 600;
-}
-
-/* Responsive Styles */
-@media (max-width: 960px) {
-  .spotlight-content-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  .spotlight-date-box {
-    align-self: flex-start;
-  }
-  .events-principles-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .event-ticket-row {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .ticket-date-col {
-    align-self: flex-start;
-    flex-direction: row;
-    gap: 10px;
-    min-width: auto;
-    padding: 8px 14px;
-  }
-  .ticket-day-num {
-    font-size: 20px;
-    margin: 0;
-  }
-}
-
-/* ---------- Data-driven additions ---------- */
-.events-notice {
-  margin-bottom: 8px;
-}
-
-.spotlight-title a,
-.ticket-title a {
-  color: inherit;
-  background-image: linear-gradient(currentColor, currentColor);
-  background-size: 0% 2px;
-  background-repeat: no-repeat;
-  background-position: 0 100%;
-  transition: background-size 0.35s var(--ease-out-expo);
-}
-
-.spotlight-title a:hover,
-.ticket-title a:hover {
-  background-size: 100% 2px;
-}
-
-/* Calendar buttons on the gradient spotlight */
-.spotlight-action-box .add-to-cal {
-  flex-direction: column;
-}
-.spotlight-action-box .add-to-cal-btn.primary {
-  background: #FFFFFF;
-  color: #C21356;
-  box-shadow: 0 6px 0 rgba(107, 0, 27, 0.35);
-}
-.spotlight-action-box .add-to-cal-btn:not(.primary) {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #FFFFFF;
-}
-
-.ticket-action-col {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 10px;
-}
-
-.ticket-details-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  font-weight: 800;
-  font-size: 14px;
+  background: #FFF3F7;
   color: var(--primary-pink);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.25s var(--ease-spring);
 }
 
-.ticket-details-link svg {
-  transition: transform 0.25s var(--ease-spring);
+.ev-cal-btn:hover {
+  background: var(--uxco-gradient);
+  color: #FFFFFF;
+  transform: scale(1.08);
 }
 
-.ticket-details-link:hover svg {
+.ev-arrow {
+  color: var(--text-light);
+  transition: transform 0.3s var(--ease-spring), color 0.2s ease;
+}
+
+.ev-row:hover .ev-arrow {
+  color: var(--primary-pink);
   transform: translateX(4px);
 }
 
-.inline-link {
-  color: var(--primary-pink);
+.events-past-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 28px;
   font-weight: 800;
-  text-decoration: underline;
+  color: var(--primary-pink);
 }
 
-.events-subscribe-wrap {
-  margin: 56px 0 40px;
+.events-past-link svg {
+  transition: transform 0.25s var(--ease-spring);
 }
 
-@media (max-width: 960px) {
-  .ticket-action-col {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .spotlight-action-box .add-to-cal {
-    flex-direction: row;
-  }
+.events-past-link:hover svg {
+  transform: translateX(4px);
 }
 
+/* ---------- Phones ---------- */
 @media (max-width: 640px) {
-  .spotlight-ticket-inner {
-    padding: 24px 20px;
-    border-radius: 24px;
+  .events-head {
+    align-items: center;
+    padding-top: 12px;
   }
-  .event-ticket-row {
-    padding: 20px 18px;
-    border-radius: 20px;
+  .events-lead {
+    margin-bottom: 18px;
+    font-size: 14.5px;
   }
-  /* Filters scroll sideways instead of wrapping into a wall of pills */
-  .tracks-list {
-    flex-wrap: nowrap;
+  .events-filters {
     overflow-x: auto;
-    width: calc(100% + 32px);
-    margin: 0 -16px;
-    padding: 4px 16px;
+    margin: 0 -16px 18px;
+    padding: 2px 16px 4px;
     scrollbar-width: none;
-    scroll-snap-type: x proximity;
   }
-  .tracks-list::-webkit-scrollbar {
+  .events-filters::-webkit-scrollbar {
     display: none;
   }
-  .track-pill-btn {
+  .events-filters .pill-filter {
     flex-shrink: 0;
-    scroll-snap-align: start;
   }
-  .ticket-action-col .add-to-cal {
-    width: 100%;
+  .ev-row {
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
   }
-  .events-subscribe-wrap {
-    margin: 40px 0 32px;
+  .ev-arrow {
+    display: none;
+  }
+  .ev-date-day {
+    font-size: 22px;
+  }
+  .ev-title {
+    font-size: 16px;
+  }
+  .ev-meta {
+    flex-direction: column;
+    font-size: 13px;
+  }
+  .ev-cal-btn {
+    width: 40px;
+    height: 40px;
   }
 }
