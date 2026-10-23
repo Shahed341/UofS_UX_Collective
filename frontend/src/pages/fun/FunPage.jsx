@@ -10,7 +10,6 @@ import GameResults from './GameResults.jsx';
 import Leaderboard from './Leaderboard.jsx';
 import { sfx } from './sfx.js';
 import './FunPage.css';
-import './GameCorner.css';
 
 const seconds = (ms) => (ms == null ? '–' : `${(ms / 1000).toFixed(1)}s`);
 
