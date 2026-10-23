@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Pencil, Trash2, ExternalLink, Images, Star, Upload, Loader2 } from 'lucide-react';
-import { api, useApi } from '../../lib/api.js';
-import { formatDate, formatTimeRange } from '../../lib/dates.js';
-import { Modal, SchemaForm, EmptyRow, StatusPill, confirmDelete, uploadImages } from './ui.jsx';
+import { api, useApi } from '../../../lib/api.js';
+import { formatDate, formatTimeRange } from '../../../lib/dates.js';
+import { Modal, SchemaForm, EmptyRow, StatusPill, confirmDelete, uploadImages } from '../ui.jsx';
 
 const EVENT_FIELDS = [
   { name: 'title', label: 'Title', required: true, full: true },
