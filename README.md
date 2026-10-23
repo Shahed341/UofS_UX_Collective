@@ -45,6 +45,7 @@ Events, recaps, resources, ways to get involved, mini-games and an admin panel f
 
 **For the exec team (`/admin`)**
 - Sign-in with a single Google account.
+- **Analytics dashboard.** Visitors, page views, member growth, event engagement (views and calendar adds), game plays, resource clicks and subscriptions, over 7, 30, 90 or 365 days.
 - Create and edit events, upload photo albums, write recaps.
 - Manage resources, open roles, the team and homepage stats.
 - An inbox for contact messages, applications and mentorship requests.
@@ -54,6 +55,7 @@ Events, recaps, resources, ways to get involved, mini-games and an admin panel f
 - Bold but accessible motion: scroll reveals, a wheat leaf whose petals sway, and a falling binary background. Everything respects `prefers-reduced-motion`.
 - Fully responsive, from 320 px phones to wide desktops.
 - Spam protection (honeypots and rate limits) on every public form.
+- Privacy-friendly analytics: an anonymous per-visit ID with no cookies and no personal data, stored in your own database.
 
 ---
 
@@ -222,7 +224,8 @@ UX_Collectives/
 | `GET` | `/api/site` | Homepage stats (live Discord member count, cached) |
 | `POST` | `/api/contact` · `/api/applications` | Forms (rate-limited) |
 | `GET` / `POST` | `/api/games/:game/leaderboard` · `/api/games/:game/scores` | Fun page |
-| `*` | `/api/admin/*` | Admin panel (signed-in only) |
+| `POST` | `/api/track` | Anonymous analytics beacon |
+| `*` | `/api/admin/*` | Admin panel and analytics (signed-in only) |
 
 Event times are stored and shown in **Saskatoon time** (America/Regina, UTC−6, no daylight saving).
 
