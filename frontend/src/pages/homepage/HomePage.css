@@ -172,7 +172,7 @@
 
 .about-showcase-grid {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: 1fr;
   align-items: stretch;
   gap: 36px;
 }
@@ -251,47 +251,6 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
 }
 
-/* Photo Collage (Right Column) */
-.about-photo-collage-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  height: 100%;
-}
-
-.about-photo-top-row {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 16px;
-  flex: 1;
-  min-height: 200px;
-}
-
-.about-collage-photo {
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  position: relative;
-  background: #F3F4F6;
-}
-
-.about-collage-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.about-collage-photo:hover img {
-  transform: scale(1.04);
-}
-
-.photo-bottom-wide {
-  height: 190px;
-  flex-shrink: 0;
-}
-
 @media (max-width: 960px) {
   .about-showcase-grid {
     grid-template-columns: 1fr;
@@ -299,9 +258,6 @@
   }
   .about-3d-red-card {
     padding: 36px 28px;
-  }
-  .photo-bottom-wide {
-    height: 180px;
   }
 }
 
@@ -2055,5 +2011,22 @@
   .cal-header-bar {
     flex-wrap: wrap;
     gap: 8px;
+  }
+}
+
+/* Full-width About card: the two text blocks sit side by side on desktop */
+@media (min-width: 961px) {
+  .about-3d-red-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 48px;
+    align-items: start;
+  }
+  .about-3d-title,
+  .about-3d-readmore-btn {
+    grid-column: 1 / -1;
+  }
+  .about-3d-readmore-btn {
+    justify-self: start;
   }
 }

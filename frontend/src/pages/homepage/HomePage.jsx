@@ -62,7 +62,7 @@ export default function HomePage() {
       <HeroSection nextEvent={nextEvent} />
 
       <div className="app-container">
-        {/* About UXCO: 3D red card + photo collage */}
+        {/* About UXCO */}
         <section className="home-about-showcase-section" id="about-uxco">
           <div className="about-showcase-grid">
             <Reveal variant="left" className="about-3d-red-card">
@@ -87,36 +87,6 @@ export default function HomePage() {
                 <ArrowRight size={16} />
               </Link>
             </Reveal>
-
-            <div className="about-photo-collage-container">
-              <div className="about-photo-top-row">
-                <Reveal variant="scale" delay={100} className="about-collage-photo photo-top-left">
-                  <img
-                    src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80"
-                    alt="Students in a UX workshop"
-                    loading="lazy"
-                    onError={(e) => { e.currentTarget.src = '/welcome.jpg'; }}
-                  />
-                </Reveal>
-                <Reveal variant="scale" delay={220} className="about-collage-photo photo-top-right">
-                  <img
-                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=700&q=80"
-                    alt="UXCO team collaboration"
-                    loading="lazy"
-                    onError={(e) => { e.currentTarget.src = '/thorvaldson_preview.jpg'; }}
-                  />
-                </Reveal>
-              </div>
-
-              <Reveal variant="up" delay={320} className="about-collage-photo photo-bottom-wide">
-                <img
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1100&q=80"
-                  alt="Student designers working together"
-                  loading="lazy"
-                  onError={(e) => { e.currentTarget.src = '/welcome.jpg'; }}
-                />
-              </Reveal>
-            </div>
           </div>
         </section>
 
