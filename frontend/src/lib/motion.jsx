@@ -11,45 +11,56 @@ const hasFinePointer = () =>
 
 // One observer for every <Reveal>, instead of one per element.
 let revealObserver = null;
-function observeReveal(el) {
+const revealCallbacks = new WeakMap();
+
+function observeReveal(el, onVisible) {
   if (!revealObserver) {
     revealObserver = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
             revealObserver.unobserve(entry.target);
+            revealCallbacks.get(entry.target)?.();
+            revealCallbacks.delete(entry.target);
           }
         }
       },
       { rootMargin: '0px 0px -8% 0px', threshold: 0.12 }
     );
   }
+  revealCallbacks.set(el, onVisible);
   revealObserver.observe(el);
-  return () => revealObserver?.unobserve(el);
+  return () => {
+    revealObserver?.unobserve(el);
+    revealCallbacks.delete(el);
+  };
 }
 
 /**
  * Fades/slides children in when they scroll into view.
  * variant: 'up' | 'down' | 'left' | 'right' | 'scale' | 'blur' | 'flip'
+ *
+ * Visibility lives in React state (not a class added by hand), so re-renders that
+ * change `className` — e.g. an accordion opening — never hide the element again.
  */
 export function Reveal({ as: Tag = 'div', variant = 'up', delay = 0, className = '', style, children, ...rest }) {
   const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return undefined;
+    if (!el || visible) return undefined;
     if (prefersReducedMotion() || typeof IntersectionObserver === 'undefined') {
-      el.classList.add('is-visible');
+      setVisible(true);
       return undefined;
     }
-    return observeReveal(el);
-  }, []);
+    return observeReveal(el, () => setVisible(true));
+  }, [visible]);
 
   return (
     <Tag
       ref={ref}
-      className={`reveal reveal-${variant} ${className}`}
+      className={`reveal reveal-${variant} ${visible ? 'is-visible' : ''} ${className}`}
       style={{ '--reveal-delay': `${delay}ms`, ...style }}
       {...rest}
     >
