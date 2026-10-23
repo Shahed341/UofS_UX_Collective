@@ -762,30 +762,7 @@
   gap: 8px;
 }
 
-.inspector-next-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: var(--primary-pink);
-}
 
-.inspector-next-badge::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #FA7538;
-  animation: livePulseDark 2s ease-out infinite;
-}
-
-@keyframes livePulseDark {
-  0% { box-shadow: 0 0 0 0 rgba(250, 117, 56, 0.6); }
-  100% { box-shadow: 0 0 0 10px rgba(250, 117, 56, 0); }
-}
 
 .inspector-event-title {
   font-size: 17px;
@@ -1577,9 +1554,6 @@
 .path-card-cta svg { transition: transform 0.3s var(--ease-spring); }
 .path-card:hover .path-card-cta svg { transform: translateX(6px); }
 
-.home-events-section + .cal-subscribe {
-  margin: -48px 0 96px;
-}
 
 /* ==========================================================
    GAME CORNER TEASER
@@ -1686,9 +1660,6 @@
   .home-paths-section,
   .home-recaps-section {
     margin-bottom: 64px;
-  }
-  .home-events-section + .cal-subscribe {
-    margin: -24px 0 64px;
   }
   .about-3d-red-card {
     padding: 28px 20px;
@@ -1862,5 +1833,227 @@
   /* Keep just the arrow so the CTA fits narrow tiles */
   .path-card-cta-label {
     display: none;
+  }
+}
+
+/* ==========================================================
+   CALENDAR: header row, titled event chips, simple event card
+   ========================================================== */
+.cal-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.cal-section-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Event chips inside day cells, like Google / Apple Calendar */
+.cal-event-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: var(--uxco-gradient);
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(194, 19, 86, 0.22);
+  animation: chipIn 0.4s var(--ease-spring) both;
+}
+
+@keyframes chipIn {
+  from { transform: scale(0.85); opacity: 0; }
+}
+
+.cal-event-chip.is-past {
+  background: #F3E6EB;
+  color: #9B6B7D;
+  box-shadow: none;
+}
+
+.cal-event-chip-time {
+  flex-shrink: 0;
+  font-size: 9.5px;
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+.cal-event-chip .cal-event-mini-title {
+  color: inherit;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.cal-day-cell {
+  min-height: 86px;
+}
+
+.cal-legend-bar {
+  flex-wrap: wrap;
+}
+
+.cal-all-events-link {
+  order: 2;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  padding: 0;
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--primary-pink);
+}
+
+.cal-all-events-link svg {
+  transition: transform 0.25s var(--ease-spring);
+}
+
+.cal-all-events-link:hover svg {
+  transform: translateX(4px);
+}
+
+/* Simple event card: date, title, 2-line details, time, location, one button */
+.inspector-event-card {
+  gap: 8px;
+}
+
+.inspector-event-date {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent-orange-coral);
+}
+
+.inspector-event-title a {
+  color: inherit;
+}
+
+.inspector-event-title a:hover {
+  color: var(--primary-pink);
+}
+
+.inspector-event-desc-2line {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.inspector-add-cal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--uxco-gradient);
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 14.5px;
+  box-shadow: 0 6px 18px rgba(194, 19, 86, 0.26);
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s ease;
+}
+
+.inspector-add-cal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(194, 19, 86, 0.34);
+}
+
+.inspector-recap-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--primary-pink);
+}
+
+/* Tablets: chips drop the time, titles stay */
+@media (max-width: 900px) {
+  .cal-event-chip-time {
+    display: none;
+  }
+  .cal-event-chip .cal-event-mini-title {
+    display: -webkit-box;
+  }
+  .cal-day-cell {
+    min-height: 70px;
+  }
+}
+
+/* Phones: tiny two-line titles, edge-to-edge chips */
+@media (max-width: 640px) {
+  .cal-section-head {
+    align-items: center;
+  }
+  .cal-section-title .section-eyebrow {
+    font-size: 10.5px;
+  }
+  .cal-day-cell {
+    min-height: 62px;
+    padding: 3px;
+  }
+  .cal-day-number-row {
+    margin-bottom: 2px;
+  }
+  .cal-today-pill {
+    display: none;
+  }
+  .cal-event-chip {
+    padding: 2px 3px;
+    border-radius: 4px;
+  }
+  .cal-event-chip .cal-event-mini-title {
+    font-size: 8px;
+    line-height: 1.15;
+    letter-spacing: -0.1px;
+  }
+  .cal-days-grid {
+    gap: 3px;
+  }
+}
+
+/* Let the calendar shrink below its content width (chips would otherwise widen it past small screens) */
+.cal-days-grid,
+.cal-weekdays-row {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.cal-day-cell {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .cal-layout-container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .cal-main-card {
+    padding: 16px 10px;
+  }
+  .cal-header-bar {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }

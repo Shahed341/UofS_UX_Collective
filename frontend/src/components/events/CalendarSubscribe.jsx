@@ -2,20 +2,8 @@ import React, { useState } from 'react';
 import { BellRing, Check, Copy, Mail } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { Reveal } from '../../lib/motion.jsx';
+import { CALENDAR_APPS, copyFeedUrl } from '../../lib/calendarFeed.js';
 import './CalendarSubscribe.css';
-
-const feedUrl = () => `${window.location.origin}/api/calendar.ics`;
-const webcalUrl = () => feedUrl().replace(/^https?:/, 'webcal:');
-
-const CALENDAR_APPS = [
-  { id: 'google', label: 'Google Calendar', href: () => `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcalUrl())}` },
-  { id: 'apple', label: 'Apple Calendar', href: () => webcalUrl() },
-  {
-    id: 'outlook',
-    label: 'Outlook',
-    href: () => `https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feedUrl())}&name=${encodeURIComponent('UX Collective Events')}`,
-  },
-];
 
 // "Never miss an event": subscribe to the live calendar feed, or get invites by email.
 export default function CalendarSubscribe() {
@@ -37,12 +25,9 @@ export default function CalendarSubscribe() {
   };
 
   const copyFeed = async () => {
-    try {
-      await navigator.clipboard.writeText(feedUrl());
+    if (await copyFeedUrl()) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      window.prompt('Copy this calendar link:', feedUrl());
     }
   };
 
@@ -62,7 +47,7 @@ export default function CalendarSubscribe() {
       <div className="cal-subscribe-actions">
         <div className="cal-subscribe-apps">
           {CALENDAR_APPS.map((app) => (
-            <a key={app.id} href={app.href()} target={app.id === 'apple' ? undefined : '_blank'} rel="noopener noreferrer" className={`cal-app-btn ${app.id}`}>
+            <a key={app.id} href={app.href()} target={app.newTab ? '_blank' : undefined} rel="noopener noreferrer" className={`cal-app-btn ${app.id}`}>
               {app.label}
             </a>
           ))}

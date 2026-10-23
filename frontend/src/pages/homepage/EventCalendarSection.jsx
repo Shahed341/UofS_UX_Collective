@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Calendar as CalendarIcon,
   MapPin,
@@ -7,15 +7,23 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  CalendarDays
+  CalendarDays,
+  CalendarPlus
 } from 'lucide-react';
 
-import { MONTHS as MONTH_NAMES, parseDateTime, formatTimeRange, saskatoonToday } from '../../lib/dates.js';
-import AddToCalendar from '../../components/events/AddToCalendar.jsx';
-import EventCountdown from '../../components/events/EventCountdown.jsx';
+import { MONTHS as MONTH_NAMES, parseDateTime, formatDate, formatTimeRange, googleCalendarUrl, saskatoonToday } from '../../lib/dates.js';
 import { Reveal } from '../../lib/motion.jsx';
+import SubscribeMenu from '../../components/events/SubscribeMenu.jsx';
 
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// Compact start time for calendar chips, e.g. "5:30p" (Google Calendar style)
+function formatChipTime(startAt) {
+  const p = parseDateTime(startAt);
+  if (!p) return '';
+  const h = p.hour % 12 || 12;
+  return `${h}${p.minute ? `:${String(p.minute).padStart(2, '0')}` : ''}${p.hour < 12 ? 'a' : 'p'}`;
+}
 
 const toDay = (p) => (p ? { year: p.year, month: p.month, day: p.day } : null);
 
@@ -35,8 +43,6 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
     () => events.map((event) => ({ ...event, parsedDate: toDay(parseDateTime(event.start_at)) })),
     [events]
   );
-
-  const nextUpcomingId = parsedEvents.find((e) => !e.is_past)?.id;
 
   useEffect(() => {
     const next = parsedEvents.find((e) => !e.is_past && e.parsedDate);
@@ -230,19 +236,12 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
   return (
     <section className="home-events-section" id="events-calendar">
       {/* Section Top Header */}
-      <div className="section-header">
-        <div>
+      <div className="cal-section-head">
+        <div className="cal-section-title">
           <span className="section-eyebrow">Interactive Schedule</span>
           <h2 className="section-heading">Club calendar</h2>
         </div>
-        <div>
-          <button 
-            className="btn-secondary" 
-            onClick={() => navigate('/events')}
-          >
-            All upcoming events <ArrowRight size={15} />
-          </button>
-        </div>
+        <SubscribeMenu />
       </div>
 
       {isLoadingEvents ? (
@@ -338,11 +337,12 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                     {hasEvents && (
                       <div className="cal-day-event-indicators">
                         {cell.events.map((ev) => (
-                          <div 
-                            key={ev.id} 
-                            className="cal-event-dot-item"
-                            title={`${ev.title} (${ev.category})`}
+                          <div
+                            key={ev.id}
+                            className={`cal-event-chip ${ev.is_past ? 'is-past' : ''}`}
+                            title={`${formatTimeRange(ev.start_at, ev.end_at)} · ${ev.title}`}
                           >
+                            <span className="cal-event-chip-time">{formatChipTime(ev.start_at)}</span>
                             <span className="cal-event-mini-title">{ev.title}</span>
                           </div>
                         ))}
@@ -355,6 +355,9 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
 
             {/* Calendar Footer Legend */}
             <div className="cal-legend-bar">
+              <button type="button" className="cal-all-events-link" onClick={() => navigate('/events')}>
+                All upcoming events <ArrowRight size={14} />
+              </button>
               <div className="cal-legend-item">
                 <span className="legend-dot legend-event" />
                 <span>Club Event / Workshop</span>
@@ -413,26 +416,14 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                 <div className="inspector-events-list">
                   {selectedDateEvents.map((event) => (
                     <div key={event.id} className="inspector-event-card">
-                      <div className="inspector-card-top">
-                        <span className="event-tag">{event.category}</span>
-                        {nextUpcomingId === event.id && <span className="inspector-next-badge">Next event</span>}
-                      </div>
+                      <span className="inspector-event-date">{formatDate(event.start_at, { short: true })}</span>
 
-                      <h5 className="inspector-event-title">{event.title}</h5>
+                      <h5 className="inspector-event-title">
+                        <Link to={`/events/${event.slug}`}>{event.title}</Link>
+                      </h5>
 
                       {(event.summary || event.description) && (
-                        <div className="inspector-desc-wrap">
-                          <p className="inspector-event-desc-2line">
-                            {event.summary || event.description}
-                          </p>
-                          <button
-                            type="button"
-                            className="btn-readmore-inline"
-                            onClick={() => navigate(`/events/${event.slug}`)}
-                          >
-                            {event.is_past ? 'View recap' : 'Event details'} <ArrowRight size={12} />
-                          </button>
-                        </div>
+                        <p className="inspector-event-desc-2line">{event.summary || event.description}</p>
                       )}
 
                       <div className="event-details">
@@ -446,8 +437,15 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                         </div>
                       </div>
 
-                      {!event.is_past && <EventCountdown startAt={event.start_at} />}
-                      {!event.is_past && <AddToCalendar event={event} compact />}
+                      {event.is_past ? (
+                        <Link to={`/events/${event.slug}`} className="inspector-recap-link">
+                          View recap <ArrowRight size={14} />
+                        </Link>
+                      ) : (
+                        <a href={googleCalendarUrl(event)} target="_blank" rel="noopener noreferrer" className="inspector-add-cal">
+                          <CalendarPlus size={16} /> Add to calendar
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>

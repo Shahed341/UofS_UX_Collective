@@ -5,7 +5,6 @@ import HeroSection from './HeroSection.jsx';
 import EventCalendarSection from './EventCalendarSection.jsx';
 import HomeGallerySection from './HomeGallerySection.jsx';
 import EventCard from '../../components/events/EventCard.jsx';
-import CalendarSubscribe from '../../components/events/CalendarSubscribe.jsx';
 import { Reveal, TiltCard, useCountUp } from '../../lib/motion.jsx';
 import { useApi } from '../../lib/api.js';
 import { useSite } from '../../lib/site.jsx';
@@ -154,8 +153,6 @@ export default function HomePage() {
         </section>
 
         <EventCalendarSection events={events} isLoadingEvents={loading} />
-
-        <CalendarSubscribe />
 
         {/* Recent recaps from the archive */}
         {recaps.length > 0 && (
