@@ -612,3 +612,119 @@
     margin: 0;
   }
 }
+
+/* ---------- Data-driven additions ---------- */
+.events-notice {
+  margin-bottom: 8px;
+}
+
+.spotlight-title a,
+.ticket-title a {
+  color: inherit;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 0.35s var(--ease-out-expo);
+}
+
+.spotlight-title a:hover,
+.ticket-title a:hover {
+  background-size: 100% 2px;
+}
+
+/* Calendar buttons on the gradient spotlight */
+.spotlight-action-box .add-to-cal {
+  flex-direction: column;
+}
+.spotlight-action-box .add-to-cal-btn.primary {
+  background: #FFFFFF;
+  color: #C21356;
+  box-shadow: 0 6px 0 rgba(107, 0, 27, 0.35);
+}
+.spotlight-action-box .add-to-cal-btn:not(.primary) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #FFFFFF;
+}
+
+.ticket-action-col {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.ticket-details-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--primary-pink);
+}
+
+.ticket-details-link svg {
+  transition: transform 0.25s var(--ease-spring);
+}
+
+.ticket-details-link:hover svg {
+  transform: translateX(4px);
+}
+
+.inline-link {
+  color: var(--primary-pink);
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.events-subscribe-wrap {
+  margin: 56px 0 40px;
+}
+
+@media (max-width: 960px) {
+  .ticket-action-col {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .spotlight-action-box .add-to-cal {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 640px) {
+  .spotlight-ticket-inner {
+    padding: 24px 20px;
+    border-radius: 24px;
+  }
+  .event-ticket-row {
+    padding: 20px 18px;
+    border-radius: 20px;
+  }
+  /* Filters scroll sideways instead of wrapping into a wall of pills */
+  .tracks-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: calc(100% + 32px);
+    margin: 0 -16px;
+    padding: 4px 16px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .tracks-list::-webkit-scrollbar {
+    display: none;
+  }
+  .track-pill-btn {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+  .ticket-action-col .add-to-cal {
+    width: 100%;
+  }
+  .events-subscribe-wrap {
+    margin: 40px 0 32px;
+  }
+}
