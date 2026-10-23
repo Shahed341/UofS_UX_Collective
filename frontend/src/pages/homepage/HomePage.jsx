@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/homepage/HomePage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Gamepad2, Trophy } from 'lucide-react';

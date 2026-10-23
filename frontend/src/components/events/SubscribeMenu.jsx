@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/components/events/SubscribeMenu.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import { BellRing, Check, ChevronDown, Copy, Mail, X } from 'lucide-react';
 import { api } from '../../lib/api.js';

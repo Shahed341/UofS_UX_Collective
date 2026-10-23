@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/fun/Leaderboard.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React from 'react';
 import { Trophy, RefreshCw } from 'lucide-react';
 import { useApi } from '../../lib/api.js';

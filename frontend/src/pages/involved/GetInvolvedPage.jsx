@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/involved/GetInvolvedPage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState } from 'react';
 import { CalendarCheck, Megaphone, GraduationCap, Crown, Clock, Gift, CalendarClock, ArrowRight, MessageSquareHeart, FileSearch, Briefcase } from 'lucide-react';
 import PageHero from '../../components/common/PageHero.jsx';

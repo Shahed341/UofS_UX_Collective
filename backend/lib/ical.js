@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/lib/ical.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 // iCalendar (RFC 5545) output for the subscribable feed and emailed invites.
 
 const SITE_URL = () => (process.env.SITE_URL || 'http://localhost:3000').replace(/\/$/, '');

@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/gallery/GalleryPage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';

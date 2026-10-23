@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/lib/api.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import { useCallback, useEffect, useState } from 'react';
 
 export class ApiError extends Error {

@@ -1,3 +1,7 @@
+-- UX Collective — backend/db/schema.sql
+-- Author: Md Shahed
+-- Date: 2026-10-23
+
 -- UX Collective schema. Every statement is idempotent; migrate.js runs this on each backend start.
 -- All DATETIME values are stored in Saskatoon local time (America/Regina, UTC-6, no DST).
 

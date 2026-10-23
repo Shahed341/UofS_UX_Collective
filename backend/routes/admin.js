@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/routes/admin.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import { Router } from 'express';
 import { pool, testConnection } from '../db.js';
 import { requireAdmin } from '../lib/auth.js';

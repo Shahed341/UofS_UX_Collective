@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/db/migrate.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import { readFile } from 'node:fs/promises';
 import { pool } from '../db.js';
 import { DEMO_EVENTS, DEMO_RESOURCES, DEMO_OPPORTUNITIES, DEMO_TEAM, DEFAULT_SETTINGS } from './seed.js';

@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/components/footer/Footer.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Instagram, Linkedin } from 'lucide-react';

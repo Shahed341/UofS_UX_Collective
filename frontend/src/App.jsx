@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/App.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BinaryBackground from './components/common/BinaryBackground.jsx';

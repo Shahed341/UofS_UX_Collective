@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/db/seed.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 // Demo content inserted into empty tables on first start.
 // Everything here is editable (or deletable) from the admin panel.
 

@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/fun/sfx.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 // Tiny Web Audio synth for instant game sound effects (no audio files to load).
 class SoundFX {
   constructor() {

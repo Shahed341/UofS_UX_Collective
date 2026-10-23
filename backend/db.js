@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/db.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 

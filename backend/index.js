@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/index.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';

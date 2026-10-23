@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/lib/uploads.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { mkdirSync } from 'node:fs';

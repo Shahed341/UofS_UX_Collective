@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/routes/public.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import crypto from 'node:crypto';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';

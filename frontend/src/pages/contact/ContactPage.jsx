@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/contact/ContactPage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState } from 'react';
 import { Mail, MapPin, Send, CheckCircle2, ExternalLink, Instagram, Linkedin, ArrowRight } from 'lucide-react';
 import PageHero from '../../components/common/PageHero.jsx';

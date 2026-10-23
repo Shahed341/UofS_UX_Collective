@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/admin/AdminLogin.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft, Terminal } from 'lucide-react';

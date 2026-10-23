@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/fun/games/HudShell.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState } from 'react';
 import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { sfx } from '../sfx.js';

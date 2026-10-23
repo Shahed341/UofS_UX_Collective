@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/lib/site.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { createContext, useContext } from 'react';
 import { useApi } from './api.js';
 

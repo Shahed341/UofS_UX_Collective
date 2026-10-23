@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/components/common/Lightbox.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';

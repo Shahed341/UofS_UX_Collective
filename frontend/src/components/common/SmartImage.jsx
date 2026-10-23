@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/components/common/SmartImage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState } from 'react';
 
 const FALLBACK = '/thorvaldson_preview.jpg';

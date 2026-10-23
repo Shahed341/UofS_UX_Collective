@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/routes/auth.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { authConfig, currentAdmin, endSession, startSession, verifyGoogleCredential } from '../lib/auth.js';

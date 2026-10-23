@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/homepage/EventCalendarSection.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {

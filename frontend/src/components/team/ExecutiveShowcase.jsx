@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/components/team/ExecutiveShowcase.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApi } from '../../lib/api.js';

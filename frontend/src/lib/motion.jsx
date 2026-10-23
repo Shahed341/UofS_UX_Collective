@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/lib/motion.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useEffect, useRef, useState } from 'react';
 
 // Shared motion helpers. Every effect is skipped when the visitor prefers reduced motion,

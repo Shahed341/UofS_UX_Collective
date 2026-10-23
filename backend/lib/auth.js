@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/lib/auth.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import crypto from 'node:crypto';
 import { OAuth2Client } from 'google-auth-library';
 

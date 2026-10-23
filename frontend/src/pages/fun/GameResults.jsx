@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/fun/GameResults.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import { Award, CheckCircle2, RotateCcw, Share2, ArrowLeft, Pencil, Loader2 } from 'lucide-react';
 import { api } from '../../lib/api.js';

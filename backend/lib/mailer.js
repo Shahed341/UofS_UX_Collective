@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/lib/mailer.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import nodemailer from 'nodemailer';
 
 // Outgoing email (calendar invites, subscription confirmations).

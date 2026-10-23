@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/lib/events.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import { pool } from '../db.js';
 import { parseJson, saskatoonNow } from './util.js';
 

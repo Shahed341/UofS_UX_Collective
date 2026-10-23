@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/events/EventsPage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, CalendarPlus, Clock, MapPin } from 'lucide-react';

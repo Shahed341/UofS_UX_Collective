@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/lib/util.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 // Saskatoon observes CST (UTC-6) all year, so local time is a fixed offset from UTC.
 const SASKATOON_OFFSET_MS = -6 * 60 * 60 * 1000;
 

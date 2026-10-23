@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/components/events/EventCard.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Camera, MapPin, Users, ArrowUpRight } from 'lucide-react';

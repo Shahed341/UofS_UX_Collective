@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/lib/dates.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 // Event times come from the API as 'YYYY-MM-DD HH:MM:SS' in Saskatoon local time (UTC-6, no DST).
 // We treat them as wall-clock values and never convert them through the browser's timezone.
 

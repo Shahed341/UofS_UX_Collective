@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/fun/games/PatternGame.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Countdown from './Countdown.jsx';
 import HudShell from './HudShell.jsx';

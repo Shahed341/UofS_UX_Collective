@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/main.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

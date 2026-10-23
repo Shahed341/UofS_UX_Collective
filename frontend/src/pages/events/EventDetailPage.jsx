@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/events/EventDetailPage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {

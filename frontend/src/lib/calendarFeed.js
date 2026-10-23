@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/lib/calendarFeed.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 // Links for subscribing to the club's live iCal feed in common calendar apps.
 // Subscribed calendars re-check the feed, so future events appear automatically.
 

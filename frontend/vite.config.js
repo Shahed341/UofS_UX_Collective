@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/vite.config.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 

@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/components/common/ScrollToTop.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 

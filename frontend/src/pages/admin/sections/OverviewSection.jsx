@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/admin/sections/OverviewSection.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React from 'react';
 import { CalendarDays, Images, BookOpen, Briefcase, Inbox, Mail, Gamepad2, BellRing, Database } from 'lucide-react';
 import { api, useApi } from '../../../lib/api.js';

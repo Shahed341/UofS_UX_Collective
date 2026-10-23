@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/admin/ui.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Upload, X, Loader2 } from 'lucide-react';

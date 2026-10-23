@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/homepage/HeroSection.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useEffect, useRef } from 'react';
 import { SplitText, useMagnetic, prefersReducedMotion } from '../../lib/motion.jsx';
 import { useSite } from '../../lib/site.jsx';

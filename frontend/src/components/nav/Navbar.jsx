@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/components/nav/Navbar.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, ArrowUpRight } from 'lucide-react';

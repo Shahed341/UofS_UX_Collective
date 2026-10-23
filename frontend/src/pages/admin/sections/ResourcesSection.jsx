@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/admin/sections/ResourcesSection.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React from 'react';
 import { Star } from 'lucide-react';
 import CrudSection from '../CrudSection.jsx';

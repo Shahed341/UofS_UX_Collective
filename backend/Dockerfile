@@ -1,3 +1,7 @@
+# UX Collective — backend/Dockerfile
+# Author: Md Shahed
+# Date: 2026-10-23
+
 FROM node:20-alpine
 
 WORKDIR /app

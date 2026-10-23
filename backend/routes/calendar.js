@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/routes/calendar.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { pool } from '../db.js';

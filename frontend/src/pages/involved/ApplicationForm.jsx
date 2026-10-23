@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/involved/ApplicationForm.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useEffect, useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
 import { api } from '../../lib/api.js';

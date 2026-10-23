@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/fun/FunPage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Crosshair, Grid3x3, Ruler, Play } from 'lucide-react';

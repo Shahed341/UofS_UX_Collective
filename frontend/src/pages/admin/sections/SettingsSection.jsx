@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/admin/sections/SettingsSection.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState } from 'react';
 import { api, useApi } from '../../../lib/api.js';
 import { EmptyRow, SchemaForm } from '../ui.jsx';

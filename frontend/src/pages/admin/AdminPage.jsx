@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/admin/AdminPage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {

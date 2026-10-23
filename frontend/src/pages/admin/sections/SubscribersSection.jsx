@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/admin/sections/SubscribersSection.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React, { useState } from 'react';
 import { Trash2, Copy, Check } from 'lucide-react';
 import { api, useApi } from '../../../lib/api.js';

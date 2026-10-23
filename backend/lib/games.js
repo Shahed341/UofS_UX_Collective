@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/lib/games.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 // Games available on the Fun page, with the score ceilings used to reject impossible submissions.
 export const GAMES = {
   aim: { name: 'Aim Trainer', maxScore: 45 },

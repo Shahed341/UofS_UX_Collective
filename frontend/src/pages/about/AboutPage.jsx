@@ -1,3 +1,8 @@
+/**
+ * UX Collective — frontend/src/pages/about/AboutPage.jsx
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import React from 'react';
 import { Target, Users, Sparkles, Compass, ArrowUpRight } from 'lucide-react';
 import ExecutiveShowcase from '../../components/team/ExecutiveShowcase.jsx';

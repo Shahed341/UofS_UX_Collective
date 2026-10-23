@@ -1,3 +1,8 @@
+/**
+ * UX Collective — backend/lib/subscriptions.js
+ * Author: Md Shahed
+ * Date: 2026-10-23
+ */
 import crypto from 'node:crypto';
 import { pool } from '../db.js';
 import { buildCalendar } from './ical.js';
