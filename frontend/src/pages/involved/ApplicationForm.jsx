@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
 import { api } from '../../lib/api.js';
+import { track } from '../../lib/track.js';
 
 const EMPTY = { name: '', email: '', program: '', year_of_study: '', topic: '', portfolio_url: '', availability: '', message: '', website: '' };
 
@@ -41,6 +42,7 @@ export default function ApplicationForm({ kind, roles = [], selectedRoleId, onRo
     try {
       const res = await api.post('/api/applications', { ...form, kind, opportunity_id: kind === 'role' ? selectedRoleId : undefined });
       setStatus({ state: 'success', message: res.message });
+      track('form_submit', kind);
       setForm(EMPTY);
     } catch (error) {
       setStatus({ state: 'error', message: error.message });

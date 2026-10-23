@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { BellRing, Check, ChevronDown, Copy, Mail, X } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { CALENDAR_APPS, copyFeedUrl } from '../../lib/calendarFeed.js';
+import { track } from '../../lib/track.js';
 import './SubscribeMenu.css';
 
 // "Subscribe to events" button with a menu: one-tap calendar app subscriptions, copy link, or email invites.
@@ -34,6 +35,7 @@ export default function SubscribeMenu() {
   }, [open]);
 
   const copy = async () => {
+    track('subscribe_click', 'copy');
     if (await copyFeedUrl()) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -46,6 +48,7 @@ export default function SubscribeMenu() {
     try {
       const res = await api.post('/api/calendar/subscribe', { email, website });
       setStatus({ state: 'success', message: res.message });
+      track('subscribe_email');
       setEmail('');
     } catch (error) {
       setStatus({ state: 'error', message: error.message });
@@ -86,7 +89,10 @@ export default function SubscribeMenu() {
                 target={app.newTab ? '_blank' : undefined}
                 rel="noopener noreferrer"
                 className={`subscribe-app ${app.id}`}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  track('subscribe_click', app.id);
+                  setOpen(false);
+                }}
               >
                 <span className="subscribe-app-dot" />
                 {app.label}

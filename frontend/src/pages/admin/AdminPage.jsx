@@ -6,11 +6,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  LayoutDashboard, CalendarDays, BookOpen, Briefcase, Users, Inbox, BellRing, Gamepad2, Settings, LogOut, ExternalLink
+  LayoutDashboard, LineChart, CalendarDays, BookOpen, Briefcase, Users, Inbox, BellRing, Gamepad2, Settings, LogOut, ExternalLink
 } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import AdminLogin from './AdminLogin.jsx';
 import OverviewSection from './sections/OverviewSection.jsx';
+import DashboardSection from './sections/DashboardSection.jsx';
 import EventsSection from './sections/EventsSection.jsx';
 import ResourcesSection from './sections/ResourcesSection.jsx';
 import RolesSection from './sections/RolesSection.jsx';
@@ -23,6 +24,7 @@ import './AdminPage.css';
 
 const SECTIONS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard, render: (nav) => <OverviewSection onNavigate={nav} /> },
+  { id: 'dashboard', label: 'Dashboard', icon: LineChart, render: () => <DashboardSection /> },
   { id: 'events', label: 'Events & photos', icon: CalendarDays, render: () => <EventsSection /> },
   { id: 'resources', label: 'Resources', icon: BookOpen, render: () => <ResourcesSection /> },
   { id: 'roles', label: 'Open roles', icon: Briefcase, render: () => <RolesSection /> },

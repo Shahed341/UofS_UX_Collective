@@ -3,12 +3,13 @@
  * Author: Md Shahed
  * Date: 2026-10-23
  */
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BinaryBackground from './components/common/BinaryBackground.jsx';
 import ScrollToTop from './components/common/ScrollToTop.jsx';
 import Navbar from './components/nav/Navbar.jsx';
 import Footer from './components/footer/Footer.jsx';
+import { track } from './lib/track.js';
 
 import HomePage from './pages/homepage/HomePage.jsx';
 import AboutPage from './pages/about/AboutPage.jsx';
@@ -29,6 +30,10 @@ const AdminPage = lazy(() => import('./pages/admin/AdminPage.jsx'));
 export default function App() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
+
+  useEffect(() => {
+    track('page_view');
+  }, [location.pathname]);
 
   if (isAdmin) {
     return (

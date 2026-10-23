@@ -7,6 +7,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Instagram, Linkedin } from 'lucide-react';
 import { useSite } from '../../lib/site.jsx';
+import { track } from '../../lib/track.js';
 import { NAV_ITEMS } from '../nav/Navbar.jsx';
 import './Footer.css';
 
@@ -81,6 +82,7 @@ export default function Footer() {
               target="_blank" 
               rel="noopener noreferrer" 
               className="footer-icon-btn discord"
+              onClick={() => track('join_click', 'footer')}
               title="Join Community Discord"
               aria-label="Discord"
             >

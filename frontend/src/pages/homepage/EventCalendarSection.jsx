@@ -19,6 +19,7 @@ import {
 import { MONTHS as MONTH_NAMES, parseDateTime, formatDate, formatTimeRange, googleCalendarUrl, saskatoonToday } from '../../lib/dates.js';
 import { Reveal } from '../../lib/motion.jsx';
 import SubscribeMenu from '../../components/events/SubscribeMenu.jsx';
+import { track } from '../../lib/track.js';
 
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -447,7 +448,13 @@ export default function EventCalendarSection({ events = [], isLoadingEvents }) {
                           View recap <ArrowRight size={14} />
                         </Link>
                       ) : (
-                        <a href={googleCalendarUrl(event)} target="_blank" rel="noopener noreferrer" className="inspector-add-cal">
+                        <a
+                          href={googleCalendarUrl(event)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inspector-add-cal"
+                          onClick={() => track('calendar_add', event.slug)}
+                        >
                           <CalendarPlus size={16} /> Add to calendar
                         </a>
                       )}

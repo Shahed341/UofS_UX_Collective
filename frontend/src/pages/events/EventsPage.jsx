@@ -9,6 +9,7 @@ import { ArrowRight, CalendarPlus, Clock, MapPin } from 'lucide-react';
 import SubscribeMenu from '../../components/events/SubscribeMenu.jsx';
 import { Reveal, SplitText } from '../../lib/motion.jsx';
 import { useApi } from '../../lib/api.js';
+import { track } from '../../lib/track.js';
 import { MONTHS, WEEKDAYS, formatTimeRange, googleCalendarUrl, parseDateTime } from '../../lib/dates.js';
 import './EventsPage.css';
 
@@ -49,6 +50,7 @@ function EventRow({ event }) {
         target="_blank"
         rel="noopener noreferrer"
         className="ev-cal-btn"
+        onClick={() => track('calendar_add', event.slug)}
         title="Add to calendar"
         aria-label={`Add ${event.title} to calendar`}
       >

@@ -6,6 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import { SplitText, useMagnetic, prefersReducedMotion } from '../../lib/motion.jsx';
 import { useSite } from '../../lib/site.jsx';
+import { track } from '../../lib/track.js';
 
 // Petal positions of the stylised USask wheat sheaf, top to bottom.
 const PETALS = [
@@ -126,6 +127,7 @@ export default function HeroSection() {
               target="_blank"
               rel="noopener noreferrer"
               className="hero-join-link magnetic"
+              onClick={() => track('join_click', 'hero')}
               title="Join U of S UX Collective on Discord"
             >
               <span>Join us</span>

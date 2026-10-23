@@ -14,6 +14,7 @@ import PixelPerfect from './games/PixelPerfect.jsx';
 import GameResults from './GameResults.jsx';
 import Leaderboard from './Leaderboard.jsx';
 import { sfx } from './sfx.js';
+import { track } from '../../lib/track.js';
 import './FunPage.css';
 
 const seconds = (ms) => (ms == null ? '–' : `${(ms / 1000).toFixed(1)}s`);
@@ -115,6 +116,7 @@ export default function FunPage() {
 
   const play = () => {
     sfx.init(); // browsers only allow audio after a user gesture
+    track('game_start', selectedId);
     setResult(null);
     setSavedId(null);
     setRunKey((k) => k + 1);
@@ -122,6 +124,7 @@ export default function FunPage() {
   };
 
   const handleFinish = useCallback((res) => {
+    track('game_finish', res.game);
     setPlaying(false);
     setResult(res);
   }, []);

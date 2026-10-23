@@ -9,6 +9,7 @@ import { ArrowRight, ArrowUpRight, BookOpen, HandHeart, CalendarClock } from 'lu
 import { Reveal, TiltCard } from '../../lib/motion.jsx';
 import { useApi } from '../../lib/api.js';
 import { formatDate } from '../../lib/dates.js';
+import { track } from '../../lib/track.js';
 
 // Bottom-of-homepage section: a peek at the resource hub and open roles.
 export default function HomeInvolveSection() {
@@ -36,7 +37,7 @@ export default function HomeInvolveSection() {
             <ul className="involve-panel-list">
               {picks.map((r) => (
                 <li key={r.id}>
-                  <a href={r.url} target="_blank" rel="noopener noreferrer">
+                  <a href={r.url} target="_blank" rel="noopener noreferrer" onClick={() => track('resource_click', r.title)}>
                     <span className="involve-item-title">{r.title}</span>
                     <span className="involve-item-meta">{r.level}</span>
                     <ArrowUpRight size={15} />

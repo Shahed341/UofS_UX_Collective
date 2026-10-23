@@ -8,6 +8,7 @@ import { Target, Users, Sparkles, Compass, ArrowUpRight } from 'lucide-react';
 import ExecutiveShowcase from '../../components/team/ExecutiveShowcase.jsx';
 import { Reveal, SplitText, TiltCard } from '../../lib/motion.jsx';
 import { useSite } from '../../lib/site.jsx';
+import { track } from '../../lib/track.js';
 import './AboutPage.css';
 
 export default function AboutPage() {
@@ -100,6 +101,7 @@ export default function AboutPage() {
               target="_blank" 
               rel="noopener noreferrer"
               className="quick-banner-link"
+              onClick={() => track('join_click', 'about')}
             >
               <span>Join on Discord</span>
               <ArrowUpRight size={16} />

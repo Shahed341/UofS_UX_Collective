@@ -9,6 +9,7 @@ import PageHero from '../../components/common/PageHero.jsx';
 import { Reveal } from '../../lib/motion.jsx';
 import { api } from '../../lib/api.js';
 import { useSite } from '../../lib/site.jsx';
+import { track } from '../../lib/track.js';
 import './ContactPage.css';
 
 function DiscordIcon({ size = 18, color = 'currentColor' }) {
@@ -52,6 +53,7 @@ export default function ContactPage() {
     try {
       await api.post('/api/contact', formData);
       setIsSuccess(true);
+      track('form_submit', 'contact');
       setFormData({ name: '', email: '', subject: '', message: '', website: '' });
     } catch (err) {
       setErrorMsg(err.message);

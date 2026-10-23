@@ -12,6 +12,7 @@ import {
 import PageHero from '../../components/common/PageHero.jsx';
 import { Reveal, TiltCard } from '../../lib/motion.jsx';
 import { useApi } from '../../lib/api.js';
+import { track } from '../../lib/track.js';
 import './ResourcesPage.css';
 
 const CATEGORIES = {
@@ -45,7 +46,15 @@ const hostOf = (url) => {
 function ResourceCard({ resource }) {
   const Icon = CATEGORIES[resource.category]?.icon || BookOpen;
   return (
-    <TiltCard as="a" href={resource.url} target="_blank" rel="noopener noreferrer" className={`resource-card cat-${resource.category}`} maxDeg={5}>
+    <TiltCard
+      as="a"
+      href={resource.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`resource-card cat-${resource.category}`}
+      maxDeg={5}
+      onClick={() => track('resource_click', resource.title)}
+    >
       <div className="resource-card-top">
         <span className="resource-card-icon"><Icon size={20} /></span>
         <span className={`resource-level level-${resource.level}`}>{resource.level}</span>
