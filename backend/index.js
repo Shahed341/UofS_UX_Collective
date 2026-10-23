@@ -1,194 +1,52 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import { pool, testConnection } from './db.js';
+import { migrate } from './db/migrate.js';
+import { UPLOAD_DIR } from './lib/uploads.js';
+import publicRoutes from './routes/public.js';
+import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
 
-app.use(cors());
-app.use(express.json());
+// Requests arrive through the Vite dev proxy or Nginx, so trust one proxy hop for client IPs (rate limiting)
+app.set('trust proxy', 1);
 
-const startTime = Date.now();
+const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
+app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : true, credentials: true }));
+app.use(express.json({ limit: '200kb' }));
+app.use(cookieParser());
 
-// Base API Documentation
-app.get('/api', (req, res) => {
-  res.json({
-    service: 'UX Collective API Service',
-    status: 'running',
-    version: '1.0.0',
-    endpoints: {
-      health: 'GET /api/health',
-      status: 'GET /api/status',
-      events: 'GET /api/events',
-      logs: 'GET /api/logs',
-      pingDb: 'POST /api/ping-db',
-      contact: 'POST /api/contact'
-    }
+app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d', immutable: true }));
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', publicRoutes);
+
+app.use('/api', (req, res) => {
+  res.status(404).json({ success: false, error: 'Not found.' });
+});
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  const status = err.status || (err.code === 'LIMIT_FILE_SIZE' ? 413 : 500);
+  if (status >= 500) console.error(err);
+  res.status(status).json({
+    success: false,
+    error: status >= 500 ? 'Something went wrong on our side.' : err.message,
   });
 });
 
-// Fast health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    service: 'uxco-backend',
-    uptimeSeconds: Math.floor((Date.now() - startTime) / 1000),
-    timestamp: new Date().toISOString(),
-    nodeVersion: process.version,
-    memoryUsageMB: Math.round(process.memoryUsage().rss / 1024 / 1024)
+migrate()
+  .then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 UXCO backend running on http://0.0.0.0:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Database migration failed:', error);
+    process.exit(1);
   });
-});
-
-// Full end-to-end 3-tier status check (Frontend <-> Node <-> MySQL)
-app.get('/api/status', async (req, res) => {
-  const dbStatus = await testConnection();
-
-  const fullStatus = {
-    service: 'UX Collective System Monitor',
-    timestamp: new Date().toISOString(),
-    frontend: {
-      name: 'React Frontend',
-      status: 'active',
-      framework: 'React + Vite'
-    },
-    backend: {
-      name: 'Node.js Express Server',
-      status: 'connected',
-      uptimeSeconds: Math.floor((Date.now() - startTime) / 1000),
-      port: PORT,
-      nodeVersion: process.version
-    },
-    database: {
-      name: 'MySQL Database',
-      ...dbStatus
-    }
-  };
-
-  res.status(dbStatus.connected ? 200 : 503).json(fullStatus);
-});
-
-// Retrieve live Discord member count in real-time
-app.get('/api/discord-stats', async (req, res) => {
-  try {
-    const response = await fetch('https://discord.com/api/v9/invites/Fx7BUvzdzT?with_counts=true');
-    const data = await response.json();
-    res.json({
-      success: true,
-      memberCount: data.approximate_member_count || 308,
-      onlineCount: data.approximate_presence_count || 25,
-      guildName: data.guild?.name || 'U of S UX Collective'
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      memberCount: 308,
-      onlineCount: 25,
-      error: error.message
-    });
-  }
-});
-
-// Retrieve UX Collective events from database
-app.get('/api/events', async (req, res) => {
-  try {
-    const [rows] = await pool.query('SELECT * FROM uxco_events ORDER BY id ASC');
-    res.json({
-      success: true,
-      count: rows.length,
-      data: rows
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch events from database',
-      details: error.message
-    });
-  }
-});
-
-// Retrieve connection logs from database
-app.get('/api/logs', async (req, res) => {
-  try {
-    const [rows] = await pool.query('SELECT * FROM connection_logs ORDER BY id DESC LIMIT 10');
-    res.json({
-      success: true,
-      count: rows.length,
-      data: rows
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch connection logs',
-      details: error.message
-    });
-  }
-});
-
-// Perform an interactive ping write & read in MySQL
-app.post('/api/ping-db', async (req, res) => {
-  const { source = 'React Frontend', message = 'Interactive connection test' } = req.body || {};
-  const writeStart = Date.now();
-
-  try {
-    const [insertResult] = await pool.query(
-      'INSERT INTO connection_logs (source, message) VALUES (?, ?)',
-      [source, `${message} at ${new Date().toLocaleTimeString()}`]
-    );
-
-    const writeLatency = Date.now() - writeStart;
-    const [recentLogs] = await pool.query('SELECT * FROM connection_logs ORDER BY id DESC LIMIT 5');
-
-    res.json({
-      success: true,
-      insertedId: insertResult.insertId,
-      writeLatencyMs: writeLatency,
-      timestamp: new Date().toISOString(),
-      recentLogs
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to record ping in MySQL',
-      details: error.message
-    });
-  }
-});
-
-// Submit contact form into MySQL
-app.post('/api/contact', async (req, res) => {
-  const { name, email, subject, message } = req.body || {};
-
-  if (!name || !email || !message) {
-    return res.status(400).json({
-      success: false,
-      error: 'Name, email, and message are required fields.'
-    });
-  }
-
-  try {
-    const [result] = await pool.query(
-      'INSERT INTO contact_submissions (name, email, subject, message) VALUES (?, ?, ?, ?)',
-      [name, email, subject || 'General Inquiry', message]
-    );
-
-    res.json({
-      success: true,
-      submissionId: result.insertId,
-      message: 'Your message has been stored in the database.'
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to save contact submission',
-      details: error.message
-    });
-  }
-});
-
-// Start Express Server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 UXCO Node.js backend server running on http://0.0.0.0:${PORT}`);
-});

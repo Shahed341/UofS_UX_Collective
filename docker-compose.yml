@@ -38,11 +38,18 @@ services:
       DB_PASSWORD: uxco_password
       DB_NAME: uxco_db
       NODE_ENV: development
+      UPLOAD_DIR: /app/uploads
+      # Admin sign-in: set these in a root .env file (see .env.example)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      ALLOW_DEV_LOGIN: ${ALLOW_DEV_LOGIN:-true}
     ports:
       - "5002:5000"
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - uploads_data:/app/uploads
     depends_on:
       database:
         condition: service_healthy
@@ -72,6 +79,8 @@ services:
 
 volumes:
   mysql_data:
+    driver: local
+  uploads_data:
     driver: local
 
 networks:
