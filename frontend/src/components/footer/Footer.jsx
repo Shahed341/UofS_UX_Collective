@@ -1,5 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Mail, Instagram, Linkedin } from 'lucide-react';
+import { useSite } from '../../lib/site.jsx';
+import { NAV_ITEMS } from '../nav/Navbar.jsx';
 import './Footer.css';
 
 function DiscordIcon({ size = 20, color = 'currentColor' }) {
@@ -19,6 +22,7 @@ function DiscordIcon({ size = 20, color = 'currentColor' }) {
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { discordInvite } = useSite();
 
   return (
     <footer className="footer-wrapper">
@@ -68,7 +72,7 @@ export default function Footer() {
             </a>
 
             <a 
-              href="https://discord.gg/Fx7BUvzdzT" 
+              href={discordInvite} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="footer-icon-btn discord"
@@ -88,6 +92,18 @@ export default function Footer() {
             </a>
           </div>
         </div>
+
+        {/* Middle Column: Sitemap */}
+        <nav className="footer-collaborators-col footer-explore-col" aria-label="Footer">
+          <h4 className="footer-collaborators-title">Explore</h4>
+          <ul className="footer-collaborators-list">
+            {[...NAV_ITEMS.slice(1), { path: '/events/past', label: 'Past Events' }, { path: '/contact', label: 'Contact' }].map((item) => (
+              <li key={item.path}>
+                <Link to={item.path} className="collab-link">{item.label}</Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         {/* Right Column: Our Collaborators */}
         <div className="footer-collaborators-col">
@@ -143,6 +159,7 @@ export default function Footer() {
         <p className="footer-copyright-text">
           © {currentYear} University of Saskatchewan UX Collective • USSU Ratified Club
         </p>
+        <Link to="/admin" className="footer-admin-link">Exec login</Link>
       </div>
     </footer>
   );
