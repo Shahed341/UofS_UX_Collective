@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Send, CheckCircle2, MessageSquare, ExternalLink, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import { Mail, MapPin, Send, CheckCircle2, ExternalLink, Instagram, Linkedin, ArrowRight, MessageCircle } from 'lucide-react';
+import PageHero from '../../components/common/PageHero.jsx';
+import { Reveal } from '../../lib/motion.jsx';
+import { api } from '../../lib/api.js';
+import { useSite } from '../../lib/site.jsx';
 import './ContactPage.css';
 
 function DiscordIcon({ size = 18, color = 'currentColor' }) {
@@ -18,11 +22,13 @@ function DiscordIcon({ size = 18, color = 'currentColor' }) {
 }
 
 export default function ContactPage() {
+  const { discordInvite, stats } = useSite();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
+    website: '' // honeypot: hidden from people, filled in by bots
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -39,19 +45,9 @@ export default function ContactPage() {
     setIsSuccess(false);
 
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to submit contact form');
-      }
-
+      await api.post('/api/contact', formData);
       setIsSuccess(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
+      setFormData({ name: '', email: '', subject: '', message: '', website: '' });
     } catch (err) {
       setErrorMsg(err.message);
     } finally {
@@ -62,18 +58,16 @@ export default function ContactPage() {
   return (
     <div className="contact-page-wrapper">
       <div className="app-container page-padded">
-        {/* Header */}
-        <div className="page-header">
-          <span className="page-tag">Get In Touch</span>
-          <h1 className="page-title">Let's Build Together</h1>
-          <p className="page-subtitle">
-            Have a question, event collaboration proposal, or want to get involved? Reach out anytime!
-          </p>
-        </div>
+        <PageHero
+          eyebrow="Get in touch"
+          icon={<MessageCircle size={14} />}
+          title="Let’s build together"
+          lead="Have a question, an event collaboration idea, or want to sponsor a workshop? Reach out anytime!"
+        />
 
         <div className="contact-layout">
           {/* Left Column: 3D Sunset Connect Hub */}
-          <div className="contact-3d-hub">
+          <Reveal variant="left" className="contact-3d-hub">
             <h3 className="contact-hub-title">Club Channels</h3>
             <p className="contact-hub-subtitle">
               Join our active community online or connect directly with our executive team.
@@ -81,7 +75,7 @@ export default function ContactPage() {
 
             <div className="contact-links-stack">
               <a 
-                href="https://discord.gg/Fx7BUvzdzT" 
+                href={discordInvite} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="contact-channel-pill"
@@ -91,7 +85,7 @@ export default function ContactPage() {
                 </div>
                 <div className="channel-text">
                   <span className="channel-name">Community Discord</span>
-                  <span className="channel-desc">Join 300+ student creators</span>
+                  <span className="channel-desc">Join {stats.members}+ student creators</span>
                 </div>
                 <ExternalLink size={14} className="channel-arrow" />
               </a>
@@ -147,29 +141,30 @@ export default function ContactPage() {
                 <span>University of Saskatchewan • Saskatoon, SK</span>
               </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Right Column: Clean Form */}
-          <div className="contact-form-card">
+          <Reveal variant="right" delay={120} className="contact-form-card">
             {isSuccess && (
-              <div className="success-alert">
+              <div className="success-alert" role="status">
                 <CheckCircle2 size={20} color="#10B981" />
                 <span>Thank you! Your message has been sent successfully. We'll be in touch soon.</span>
               </div>
             )}
 
             {errorMsg && (
-              <div className="error-alert">
-                <span>Error: {errorMsg}</span>
+              <div className="error-alert" role="alert">
+                <span>{errorMsg}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="contact-form">
               <div className="form-row-2col">
                 <div className="form-group">
-                  <label className="form-label">Full Name</label>
+                  <label className="form-label" htmlFor="contact-name">Full Name</label>
                   <input 
                     type="text" 
+                    id="contact-name"
                     name="name" 
                     required 
                     placeholder="e.g. Alex Morgan" 
@@ -180,9 +175,10 @@ export default function ContactPage() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Email Address</label>
+                  <label className="form-label" htmlFor="contact-email">Email Address</label>
                   <input 
                     type="email" 
+                    id="contact-email"
                     name="email" 
                     required 
                     placeholder="alex.m@usask.ca" 
@@ -194,9 +190,10 @@ export default function ContactPage() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Subject</label>
+                <label className="form-label" htmlFor="contact-subject">Subject</label>
                 <input 
                   type="text" 
+                  id="contact-subject"
                   name="subject" 
                   placeholder="Workshop idea / Question / Partnership" 
                   className="form-input" 
@@ -206,8 +203,9 @@ export default function ContactPage() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Message</label>
+                <label className="form-label" htmlFor="contact-message">Message</label>
                 <textarea 
+                  id="contact-message"
                   name="message" 
                   required 
                   placeholder="Tell us what you'd like to collaborate or connect about..." 
@@ -217,12 +215,23 @@ export default function ContactPage() {
                 />
               </div>
 
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                className="ux-honeypot"
+                aria-hidden="true"
+                value={formData.website}
+                onChange={handleChange}
+              />
+
               <button type="submit" className="btn-submit" disabled={isSubmitting}>
                 <Send size={16} />
                 <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
               </button>
             </form>
-          </div>
+          </Reveal>
         </div>
       </div>
     </div>
