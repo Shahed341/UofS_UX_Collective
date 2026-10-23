@@ -16,6 +16,7 @@
     "express-rate-limit": "^7.4.1",
     "google-auth-library": "^9.14.2",
     "multer": "^2.0.2",
-    "mysql2": "^3.11.3"
+    "mysql2": "^3.11.3",
+    "nodemailer": "^6.9.16"
   }
 }

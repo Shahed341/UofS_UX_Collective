@@ -3,6 +3,7 @@ import { pool, testConnection } from '../db.js';
 import { requireAdmin } from '../lib/auth.js';
 import { listEvents, getEvent } from '../lib/events.js';
 import { imageUpload, publicUrlFor, removeUpload } from '../lib/uploads.js';
+import { notifyInBackground } from '../lib/subscriptions.js';
 import { asyncRoute, slugify, validate } from '../lib/util.js';
 
 const router = Router();
@@ -62,7 +63,8 @@ router.get('/overview', asyncRoute(async (req, res) => {
       (SELECT COUNT(*) FROM opportunities WHERE is_open = 1) AS open_roles,
       (SELECT COUNT(*) FROM applications WHERE status = 'new') AS new_applications,
       (SELECT COUNT(*) FROM contact_submissions WHERE is_read = 0) AS unread_messages,
-      (SELECT COUNT(*) FROM game_scores) AS game_scores`);
+      (SELECT COUNT(*) FROM game_scores) AS game_scores,
+      (SELECT COUNT(*) FROM calendar_subscribers WHERE confirmed = 1) AS subscribers`);
   const upcoming = (await listEvents({ when: 'upcoming', includeDrafts: true })).slice(0, 3);
   res.json({ success: true, data: { counts, upcoming, system: await testConnection() } });
 }));
@@ -144,19 +146,35 @@ router.post('/events', asyncRoute(async (req, res) => {
   if (error) return badRequest(res, error);
   if (data.featured) await pool.query('UPDATE events SET featured = 0');
   const [result] = await pool.query('INSERT INTO events SET ?', [data]);
+  notifyInBackground(await getEvent(result.insertId, { includeDrafts: true }), 'REQUEST');
   res.status(201).json({ success: true, id: result.insertId, slug: data.slug });
 }));
 
 router.put('/events/:id', asyncRoute(async (req, res) => {
   const { data, error } = await prepareEvent(req.body || {}, Number(req.params.id));
   if (error) return badRequest(res, error);
+  const [[before]] = await pool.query('SELECT * FROM events WHERE id = ?', [req.params.id]);
+  if (!before) return res.status(404).json({ success: false, error: 'Not found.' });
+
+  // Calendar-relevant changes bump SEQUENCE and are pushed to email subscribers
+  const calendarChanged = ['title', 'start_at', 'end_at', 'location', 'status']
+    .some((k) => String(before[k] ?? '') !== String(data[k] ?? ''));
+  if (calendarChanged) data.sequence = (before.sequence || 0) + 1;
+
   if (data.featured) await pool.query('UPDATE events SET featured = 0 WHERE id <> ?', [req.params.id]);
-  const [result] = await pool.query('UPDATE events SET ? WHERE id = ?', [data, req.params.id]);
-  if (!result.affectedRows) return res.status(404).json({ success: false, error: 'Not found.' });
+  await pool.query('UPDATE events SET ? WHERE id = ?', [data, req.params.id]);
+
+  if (calendarChanged) {
+    const after = await getEvent(req.params.id, { includeDrafts: true });
+    if (after.status === 'published') notifyInBackground(after, 'REQUEST');
+    else if (before.status === 'published') notifyInBackground(after, 'CANCEL');
+  }
   res.json({ success: true, slug: data.slug });
 }));
 
 router.delete('/events/:id', asyncRoute(async (req, res) => {
+  const existing = await getEvent(req.params.id, { includeDrafts: true });
+  if (existing?.status === 'published') notifyInBackground({ ...existing, sequence: (existing.sequence || 0) + 1 }, 'CANCEL');
   const [photos] = await pool.query('SELECT url FROM event_photos WHERE event_id = ?', [req.params.id]);
   const [[event]] = await pool.query('SELECT cover_image FROM events WHERE id = ?', [req.params.id]);
   await pool.query('DELETE FROM events WHERE id = ?', [req.params.id]);
@@ -291,6 +309,18 @@ router.put('/applications/:id', asyncRoute(async (req, res) => {
 
 router.delete('/applications/:id', asyncRoute(async (req, res) => {
   await pool.query('DELETE FROM applications WHERE id = ?', [req.params.id]);
+  res.json({ success: true });
+}));
+
+// ---------- Calendar subscribers ----------
+
+router.get('/subscribers', asyncRoute(async (req, res) => {
+  const [rows] = await pool.query('SELECT id, email, confirmed, created_at, confirmed_at FROM calendar_subscribers ORDER BY created_at DESC');
+  res.json({ success: true, data: rows });
+}));
+
+router.delete('/subscribers/:id', asyncRoute(async (req, res) => {
+  await pool.query('DELETE FROM calendar_subscribers WHERE id = ?', [req.params.id]);
   res.json({ success: true });
 }));
 

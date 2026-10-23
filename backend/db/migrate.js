@@ -94,5 +94,7 @@ export async function migrate({ retries = 10 } = {}) {
   }
 
   await ensureColumn('contact_submissions', 'is_read', 'TINYINT(1) NOT NULL DEFAULT 0');
+  // iCalendar SEQUENCE: bumped whenever an event's time/place changes so calendars apply the update
+  await ensureColumn('events', 'sequence', 'INT NOT NULL DEFAULT 0');
   await seed();
 }

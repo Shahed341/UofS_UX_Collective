@@ -7,6 +7,7 @@ import { UPLOAD_DIR } from './lib/uploads.js';
 import publicRoutes from './routes/public.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import calendarRoutes from './routes/calendar.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(cookieParser());
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d', immutable: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api', calendarRoutes);
 app.use('/api', publicRoutes);
 
 app.use('/api', (req, res) => {

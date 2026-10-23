@@ -121,6 +121,15 @@ CREATE TABLE IF NOT EXISTS game_scores (
     INDEX idx_scores_game (game, score)
 );
 
+CREATE TABLE IF NOT EXISTS calendar_subscribers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    token VARCHAR(64) NOT NULL UNIQUE,
+    confirmed TINYINT(1) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    confirmed_at TIMESTAMP NULL
+);
+
 -- Tables from the original prototype that are no longer used
 DROP TABLE IF EXISTS uxco_events;
 DROP TABLE IF EXISTS connection_logs;
