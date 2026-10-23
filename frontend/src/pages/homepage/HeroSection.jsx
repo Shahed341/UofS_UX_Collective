@@ -120,8 +120,9 @@ export default function HeroSection({ nextEvent }) {
           </h1>
 
           <p className="hero-brand-description">
-            USask’s first ever product design club.<br className="hero-desc-br" />
-            Educating and connecting students in<br className="hero-desc-br" />
+            {/* Explicit spaces keep words apart when the desktop line breaks are hidden on mobile */}
+            USask’s first ever product design club.{' '}<br className="hero-desc-br" />
+            Educating and connecting students in{' '}<br className="hero-desc-br" />
             product design since 2022.
           </p>
 

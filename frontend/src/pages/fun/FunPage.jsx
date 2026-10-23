@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Crosshair, Palette, Ruler, Gamepad2, Play, Target, CircleDot, Circle, XCircle } from 'lucide-react';
 import PageHero from '../../components/common/PageHero.jsx';
 import { Reveal, TiltCard } from '../../lib/motion.jsx';
@@ -164,9 +165,10 @@ export default function FunPage() {
         <Leaderboard game={game} columns={game.columns} highlightId={savedId} refreshKey={refreshKey} />
       </div>
 
-      {playing && <GameComponent key={runKey} onFinish={handleFinish} onQuit={handleQuit} />}
+      {/* Games and results render on <body> so nothing on the page can clip or cover them */}
+      {playing && createPortal(<GameComponent key={runKey} onFinish={handleFinish} onQuit={handleQuit} />, document.body)}
 
-      {result && (
+      {result && createPortal(
         <GameResults
           result={result}
           onPlayAgain={play}
@@ -175,7 +177,8 @@ export default function FunPage() {
             setSavedId(id);
             setRefreshKey((k) => k + 1);
           }}
-        />
+        />,
+        document.body
       )}
     </div>
   );

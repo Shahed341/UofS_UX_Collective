@@ -50,7 +50,8 @@
 
 /* Page enter transition (also used as View Transitions fallback) */
 .page-enter {
-  animation: pageEnter 0.6s var(--ease-out-expo) both;
+  /* backwards (not both): a transform left applied after the animation would trap position: fixed children */
+  animation: pageEnter 0.6s var(--ease-out-expo) backwards;
 }
 @keyframes pageEnter {
   from { opacity: 0; transform: translateY(18px); }

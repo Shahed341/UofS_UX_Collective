@@ -89,7 +89,7 @@
   grid-template-columns: 1.1fr 0.9fr;
   gap: 22px;
   align-items: stretch;
-  animation: pageEnter 0.5s var(--ease-out-expo) both;
+  animation: pageEnter 0.5s var(--ease-out-expo) backwards;
 }
 
 .game-brief {

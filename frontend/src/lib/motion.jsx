@@ -64,12 +64,15 @@ export function SplitText({ text, as: Tag = 'span', className = '', stagger = 55
   return (
     <Tag className={`split-text ${className}`}>
       {words.map((word, i) => (
-        <span className="split-word-mask" key={`${word}-${i}`}>
-          <span className="split-word" style={{ '--word-delay': `${startDelay + i * stagger}ms` }}>
-            {word}
+        <React.Fragment key={`${word}-${i}`}>
+          <span className="split-word-mask">
+            <span className="split-word" style={{ '--word-delay': `${startDelay + i * stagger}ms` }}>
+              {word}
+            </span>
           </span>
-          {i < words.length - 1 ? ' ' : ''}
-        </span>
+          {/* Space sits outside the inline-block mask so it isn't collapsed */}
+          {i < words.length - 1 ? ' ' : null}
+        </React.Fragment>
       ))}
     </Tag>
   );

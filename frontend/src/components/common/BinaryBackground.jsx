@@ -494,6 +494,11 @@ export default function BinaryBackground() {
     };
 
     resize();
+    // Sprites may have been drawn with a fallback font; redraw once Plus Jakarta Sans has loaded
+    document.fonts?.ready.then(() => {
+      sprites = buildSprites(dpr);
+      if (reducedMotion) renderStatic();
+    });
     if (reducedMotion) {
       renderStatic();
     } else {
