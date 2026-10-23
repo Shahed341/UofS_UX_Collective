@@ -1,0 +1,138 @@
+/* ---------- Shared motion system ---------- */
+
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transition:
+    opacity 0.8s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo),
+    filter 0.9s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal-up { transform: translateY(42px); }
+.reveal-down { transform: translateY(-42px); }
+.reveal-left { transform: translateX(-56px); }
+.reveal-right { transform: translateX(56px); }
+.reveal-scale { transform: scale(0.88); }
+.reveal-blur { transform: translateY(18px); filter: blur(10px); }
+.reveal-flip { transform: perspective(900px) rotateX(-24deg) translateY(30px); transform-origin: top center; }
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* Word-by-word headline reveal */
+.split-word-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.split-word {
+  display: inline-block;
+  transform: translateY(105%) rotate(4deg);
+  opacity: 0;
+  animation: wordRise 0.85s var(--ease-out-expo) forwards;
+  animation-delay: var(--word-delay, 0ms);
+}
+@keyframes wordRise {
+  to { transform: none; opacity: 1; }
+}
+
+/* Page enter transition (also used as View Transitions fallback) */
+.page-enter {
+  animation: pageEnter 0.6s var(--ease-out-expo) both;
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+::view-transition-old(root) {
+  animation: 0.28s ease-in both vtFadeOut;
+}
+::view-transition-new(root) {
+  animation: 0.45s var(--ease-out-expo) both vtFadeIn;
+}
+@keyframes vtFadeOut { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes vtFadeIn { from { opacity: 0; transform: translateY(14px); } }
+
+/* Tilt cards with a cursor-following glow */
+.tilt-card {
+  position: relative;
+  transition: transform 0.45s var(--ease-out-expo), box-shadow 0.35s ease;
+  transform-style: preserve-3d;
+}
+.tilt-card.tilt-enabled {
+  transition: transform 0.12s ease-out, box-shadow 0.35s ease;
+}
+.tilt-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(420px circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(250, 117, 56, 0.16), transparent 45%);
+}
+.tilt-card:hover::after {
+  opacity: 1;
+}
+
+/* Magnetic elements spring back smoothly */
+.magnetic {
+  transition: transform 0.35s var(--ease-spring);
+  will-change: transform;
+}
+
+/* Shimmer for loading skeletons */
+.skeleton {
+  background: linear-gradient(90deg, #f3f0f1 0%, #fbf8f9 40%, #f3f0f1 80%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 16px;
+}
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+/* Floating blobs used behind section headers */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Respect reduced motion everywhere */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  .split-word {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}

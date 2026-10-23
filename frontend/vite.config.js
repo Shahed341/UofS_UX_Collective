@@ -19,6 +19,11 @@ export default defineConfig({
         target: process.env.VITE_API_URL || 'http://backend:5000',
         changeOrigin: true,
       },
+      // Images uploaded through the admin panel
+      '/uploads': {
+        target: process.env.VITE_API_URL || 'http://backend:5000',
+        changeOrigin: true,
+      },
     },
   },
 });
