@@ -53,13 +53,11 @@ const PATHS = [
 export default function HomePage() {
   const { stats } = useSite();
   const { data: events = [], loading } = useApi('/api/events', { initial: [] });
-  const upcoming = events.filter((e) => !e.is_past);
   const recaps = events.filter((e) => e.is_past).reverse().slice(0, 3);
-  const nextEvent = upcoming[0];
 
   return (
     <div className="homepage-container">
-      <HeroSection nextEvent={nextEvent} />
+      <HeroSection />
 
       <div className="app-container">
         {/* About UXCO */}

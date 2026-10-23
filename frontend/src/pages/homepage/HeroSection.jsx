@@ -1,9 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
 import { SplitText, useMagnetic, prefersReducedMotion } from '../../lib/motion.jsx';
 import { useSite } from '../../lib/site.jsx';
-import { formatDate } from '../../lib/dates.js';
 
 // Petal positions of the stylised USask wheat sheaf, top to bottom.
 const PETALS = [
@@ -68,7 +65,7 @@ function UsaskWheatLeaf({ className = '', size = 360 }) {
   );
 }
 
-export default function HeroSection({ nextEvent }) {
+export default function HeroSection() {
   const sectionRef = useRef(null);
   const joinRef = useMagnetic(0.3);
   const { discordInvite } = useSite();
@@ -104,15 +101,6 @@ export default function HeroSection({ nextEvent }) {
       <div className="hero-content-wrapper">
         {/* Left Column: Title, Subtitle, Join CTA */}
         <div className="hero-text-column">
-          {nextEvent && (
-            <Link to={`/events/${nextEvent.slug}`} className="hero-next-chip">
-              <span className="hero-next-dot" />
-              <span className="hero-next-label">Next up</span>
-              <span className="hero-next-title">{nextEvent.title}</span>
-              <span className="hero-next-date">{formatDate(nextEvent.start_at, { weekday: false, year: false, short: true })}</span>
-            </Link>
-          )}
-
           <h1 className="hero-brand-title">
             <SplitText text="U of S UX" startDelay={150} stagger={90} />
             <br />
@@ -140,7 +128,6 @@ export default function HeroSection({ nextEvent }) {
                 <path d="M2 10H34M34 10L24 2M34 10L24 18" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
-            <Link to="/events" className="hero-secondary-link">See upcoming events</Link>
           </div>
         </div>
 
@@ -151,10 +138,6 @@ export default function HeroSection({ nextEvent }) {
           </div>
         </div>
       </div>
-
-      <a href="#about-uxco" className="hero-scroll-cue" aria-label="Scroll to learn more">
-        <ChevronDown size={22} />
-      </a>
     </section>
   );
 }
