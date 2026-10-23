@@ -213,3 +213,21 @@
     display: none;
   }
 }
+
+.about-pillars-grid > .reveal {
+  display: flex;
+}
+
+.about-pillars-grid > .reveal > .about-pillar-card {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .about-lead-heading {
+    font-size: clamp(24px, 7vw, 30px);
+  }
+  .about-quick-banner {
+    gap: 16px;
+    padding: 20px 16px;
+  }
+}

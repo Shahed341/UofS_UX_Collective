@@ -1,106 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, GraduationCap } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useApi } from '../../lib/api.js';
+import { prefersReducedMotion } from '../../lib/motion.jsx';
 import './ExecutiveShowcase.css';
 
-import shahedImg from '../../Images/Executive_team/Md Shahed, Web Developer.jpg';
-import kateImg from '../../Images/Executive_team/Kate Wright, Social Media Director.jpg';
-import ninaImg from '../../Images/Executive_team/Nina Sproule, Vice President.jpg';
-import palimaImg from '../../Images/Executive_team/Palima Shrestha, President.jpg';
-import jasonImg from '../../Images/Executive_team/Jason Monette, Treasurer.jpg';
-import ayodejiImg from '../../Images/Executive_team/Ayodeji Daramola, Events & Communications Director.jpg';
-import trushankImg from '../../Images/Executive_team/Trushank Lakdawala, Upper Year Representative.jpg';
-
-const EXECUTIVES = [
-  {
-    id: 'shahed',
-    name: 'Md Shahed',
-    pronouns: 'he/him',
-    role: 'Web Developer',
-    major: '4th Year Computer Science',
-    fact: 'Loves to film his life like a documentary! 🎥🎬',
-    img: shahedImg
-  },
-  {
-    id: 'kate',
-    name: 'Kate Wright',
-    pronouns: 'she/her',
-    role: 'Social Media Director',
-    major: '4th Year Interactive Systems Design',
-    fact: 'Designed the 2026 Nuit Blanche Saskatoon brand identity! 🎨🌃',
-    img: kateImg
-  },
-  {
-    id: 'nina',
-    name: 'Nina Sproule',
-    pronouns: 'she/her',
-    role: 'Vice President',
-    major: '4th Year Interactive Systems Design',
-    fact: 'Has over 3,000 hours in Solitaire! 🃏🕐',
-    img: ninaImg
-  },
-  {
-    id: 'palima',
-    name: 'Palima Shrestha',
-    pronouns: 'she/her',
-    role: 'President',
-    major: '4th Year Interactive Systems Design',
-    fact: 'Hiked to Machu Picchu this year! 🥾⛰️',
-    img: palimaImg,
-    isPresident: true
-  },
-  {
-    id: 'jason',
-    name: 'Jason Monette',
-    pronouns: 'he/him',
-    role: 'Treasurer',
-    major: '4th Year Software Engineering',
-    fact: 'Used to be a competitive dancer! 🕺',
-    img: jasonImg
-  },
-  {
-    id: 'ayodeji',
-    name: 'Ayodeji Daramola',
-    pronouns: 'he/him',
-    role: 'Events & Communications Director',
-    major: '3rd Year Computer Science',
-    fact: 'Enjoys photography and graphic design in his free time! 📸🎨',
-    img: ayodejiImg
-  },
-  {
-    id: 'trushank',
-    name: 'Trushank Lakdawala',
-    pronouns: 'he/him',
-    role: 'Upper Year Representative',
-    major: '4th Year Computer Science',
-    fact: 'Niche TikTok celebrity! 📱⭐',
-    img: trushankImg
-  }
-];
+const ROTATE_MS = 4500;
 
 export default function ExecutiveShowcase() {
-  // Center President by default (index 3)
-  const [activeIndex, setActiveIndex] = useState(3);
+  const { data: executives = [] } = useApi('/api/team', { initial: [] });
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [touchStartX, setTouchStartX] = useState(null);
   const [touchEndX, setTouchEndX] = useState(null);
 
-  const currentExec = EXECUTIVES[activeIndex];
-
-  // Auto-rotate pictures every 1 second (pauses gently when mouse hovers over showcase)
+  // Start centred on the club lead (president) once the team loads
   useEffect(() => {
-    if (isPaused) return;
+    const lead = executives.findIndex((e) => e.is_lead);
+    setActiveIndex(lead >= 0 ? lead : Math.floor(executives.length / 2));
+  }, [executives]);
+
+  // Auto-rotate slowly enough to read the fun fact; pauses on hover/focus and for reduced motion
+  useEffect(() => {
+    if (isPaused || executives.length < 2 || prefersReducedMotion()) return undefined;
     const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev < EXECUTIVES.length - 1 ? prev + 1 : 0));
-    }, 1000);
+      setActiveIndex((prev) => (prev < executives.length - 1 ? prev + 1 : 0));
+    }, ROTATE_MS);
     return () => clearInterval(timer);
-  }, [isPaused]);
+  }, [isPaused, executives.length]);
+
+  const currentExec = executives[activeIndex];
 
   const handlePrev = () => {
-    setActiveIndex((prev) => (prev > 0 ? prev - 1 : EXECUTIVES.length - 1));
+    setActiveIndex((prev) => (prev > 0 ? prev - 1 : executives.length - 1));
   };
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev < EXECUTIVES.length - 1 ? prev + 1 : 0));
+    setActiveIndex((prev) => (prev < executives.length - 1 ? prev + 1 : 0));
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') handlePrev();
+    if (e.key === 'ArrowRight') handleNext();
   };
 
   const minSwipeDistance = 40;
@@ -124,25 +64,35 @@ export default function ExecutiveShowcase() {
     }
   };
 
+  if (!currentExec) return null;
+
   return (
-    <div 
+    <div
       className="exec-showcase-wrapper"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={() => setIsPaused(false)}
+      onKeyDown={onKeyDown}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Executive team"
     >
       {/* Dynamic Header Info */}
-      <div className="exec-header-block">
+      <div className="exec-header-block" aria-live="polite">
         <h3 className="exec-active-name">{currentExec.name}</h3>
         <p className="exec-active-role">
           <span className="exec-role-highlight">{currentExec.role}</span>
           <span className="exec-role-sep">•</span>
-          <span>{currentExec.major}</span>
-          <span className="exec-pronouns-tag">({currentExec.pronouns})</span>
+          {currentExec.major && <span>{currentExec.major}</span>}
+          {currentExec.pronouns && <span className="exec-pronouns-tag">({currentExec.pronouns})</span>}
         </p>
 
-        <div className="exec-active-fact">
-          <span>✨ <strong>Fun Fact:</strong> {currentExec.fact}</span>
-        </div>
+        {currentExec.fact && (
+          <div className="exec-active-fact" key={currentExec.id}>
+            <span>✨ <strong>Fun Fact:</strong> {currentExec.fact}</span>
+          </div>
+        )}
       </div>
 
       {/* 3D Curved Perspective Cards Track with Infinite Circular Wrap */}
@@ -153,9 +103,9 @@ export default function ExecutiveShowcase() {
         onTouchEnd={onTouchEnd}
       >
         <div className="exec-cards-container">
-          {EXECUTIVES.map((exec, idx) => {
+          {executives.map((exec, idx) => {
             // Shortest circular wrap-around distance relative to activeIndex
-            const total = EXECUTIVES.length;
+            const total = executives.length;
             let diff = idx - activeIndex;
             const half = Math.floor(total / 2);
             while (diff > half) diff -= total;
@@ -208,7 +158,7 @@ export default function ExecutiveShowcase() {
               >
                 <div className="exec-card-inner">
                   <img
-                    src={exec.img}
+                    src={exec.image_url || '/logo.jpg'}
                     alt={`${exec.name} - ${exec.role}`}
                     className="exec-card-image"
                     loading="lazy"
@@ -233,7 +183,7 @@ export default function ExecutiveShowcase() {
         </button>
 
         <div className="exec-pagination-dots">
-          {EXECUTIVES.map((exec, idx) => (
+          {executives.map((exec, idx) => (
             <button
               key={exec.id}
               className={`exec-dot ${idx === activeIndex ? 'active' : ''}`}

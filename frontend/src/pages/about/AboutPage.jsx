@@ -1,23 +1,30 @@
 import React from 'react';
 import { Target, Users, Sparkles, Compass, ArrowUpRight } from 'lucide-react';
 import ExecutiveShowcase from '../../components/team/ExecutiveShowcase.jsx';
+import { Reveal, SplitText, TiltCard } from '../../lib/motion.jsx';
+import { useSite } from '../../lib/site.jsx';
 import './AboutPage.css';
 
 export default function AboutPage() {
+  const { stats, discordInvite } = useSite();
+
   return (
     <div className="about-page-wrapper">
       {/* 1. Header & Concise 3D Pillar Cards */}
       <div className="app-container page-padded" style={{ paddingBottom: '16px' }}>
         <div className="about-header-block">
-          <h1 className="about-lead-heading">
-            The University of Saskatchewan’s first student-led product & digital design community, educating and connecting creators since 2022.
-          </h1>
+          <SplitText
+            as="h1"
+            className="about-lead-heading"
+            stagger={28}
+            text={`The University of Saskatchewan’s first student-led product & digital design community, educating and connecting creators since ${stats.foundedYear}.`}
+          />
         </div>
 
         {/* 3D Pillars Grid with Sunset Palette & Minimal Text */}
         <div className="about-pillars-grid">
           {/* Card 1: Mission (3D Crimson Card) */}
-          <div className="about-pillar-card pillar-crimson">
+          <Reveal variant="flip" delay={0}><TiltCard className="about-pillar-card pillar-crimson">
             <div className="pillar-icon-box">
               <Sparkles size={22} color="#FFFFFF" />
             </div>
@@ -30,10 +37,10 @@ export default function AboutPage() {
               <span className="pillar-chip">🎨 Figma Sprints</span>
               <span className="pillar-chip">🚀 Portfolio Prep</span>
             </div>
-          </div>
+          </TiltCard></Reveal>
 
           {/* Card 2: Community (3D Sunset Coral/Orange Card) */}
-          <div className="about-pillar-card pillar-coral">
+          <Reveal variant="flip" delay={120}><TiltCard className="about-pillar-card pillar-coral">
             <div className="pillar-icon-box">
               <Users size={22} color="#FFFFFF" />
             </div>
@@ -42,14 +49,14 @@ export default function AboutPage() {
               100% open to all USask students across Computer Science, Design, Business, Arts, and Engineering. Zero prior experience needed to join.
             </p>
             <div className="pillar-chips">
-              <span className="pillar-chip">🤝 300+ Members</span>
+              <span className="pillar-chip">🤝 {stats.members}+ Members</span>
               <span className="pillar-chip">📍 USask Saskatoon</span>
               <span className="pillar-chip">🏛️ USSU Ratified</span>
             </div>
-          </div>
+          </TiltCard></Reveal>
 
           {/* Card 3: Collaborations (3D Sunset Amber Card) */}
-          <div className="about-pillar-card pillar-amber">
+          <Reveal variant="flip" delay={240}><TiltCard className="about-pillar-card pillar-amber">
             <div className="pillar-icon-box">
               <Compass size={22} color="#FFFFFF" />
             </div>
@@ -62,19 +69,19 @@ export default function AboutPage() {
               <span className="pillar-chip">🛡️ Cyber Club</span>
               <span className="pillar-chip">🎮 Game Dev</span>
             </div>
-          </div>
+          </TiltCard></Reveal>
         </div>
 
         {/* Quick Sunset Stats Banner */}
-        <div className="about-quick-banner">
+        <Reveal variant="up" className="about-quick-banner">
           <div className="quick-banner-item">
-            <span className="quick-banner-val">2022</span>
+            <span className="quick-banner-val">{stats.foundedYear}</span>
             <span className="quick-banner-lbl">Founded</span>
           </div>
           <div className="quick-banner-sep" />
           <div className="quick-banner-item">
-            <span className="quick-banner-val">300+</span>
-            <span className="quick-banner-lbl">Active Members</span>
+            <span className="quick-banner-val">{stats.members}+</span>
+            <span className="quick-banner-lbl">Discord Members</span>
           </div>
           <div className="quick-banner-sep" />
           <div className="quick-banner-item">
@@ -84,7 +91,7 @@ export default function AboutPage() {
           <div className="quick-banner-sep" />
           <div className="quick-banner-item">
             <a 
-              href="https://discord.gg/Fx7BUvzdzT" 
+              href={discordInvite} 
               target="_blank" 
               rel="noopener noreferrer"
               className="quick-banner-link"
@@ -93,7 +100,7 @@ export default function AboutPage() {
               <ArrowUpRight size={16} />
             </a>
           </div>
-        </div>
+        </Reveal>
       </div>
 
       {/* 2. Full-Width 3D Executive Leadership Showcase */}
