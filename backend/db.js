@@ -13,6 +13,8 @@ const dbConfig = {
   connectionLimit: 10,
   queueLimit: 0,
   connectTimeout: 10000,
+  // Return DATETIME columns as 'YYYY-MM-DD HH:MM:SS' strings in Saskatoon local time, untouched by JS timezones
+  dateStrings: true,
 };
 
 // Create connection pool
@@ -22,31 +24,21 @@ export const pool = mysql.createPool(dbConfig);
 export async function testConnection() {
   const startTime = Date.now();
   try {
-    const connection = await pool.getConnection();
-    const [versionRows] = await connection.query('SELECT VERSION() as version, DATABASE() as db_name, NOW() as server_time');
-    const [tablesRows] = await connection.query('SHOW TABLES');
-    const [countRows] = await connection.query('SELECT COUNT(*) as log_count FROM connection_logs');
-    
-    connection.release();
-    const latency = Date.now() - startTime;
+    const [versionRows] = await pool.query('SELECT VERSION() as version, DATABASE() as db_name, NOW() as server_time');
+    const [tablesRows] = await pool.query('SHOW TABLES');
 
     return {
       connected: true,
-      latencyMs: latency,
-      host: dbConfig.host,
+      latencyMs: Date.now() - startTime,
       database: versionRows[0]?.db_name || dbConfig.database,
       version: versionRows[0]?.version || 'Unknown',
-      serverTime: versionRows[0]?.server_time || new Date().toISOString(),
-      tablesCount: tablesRows.length,
+      serverTime: versionRows[0]?.server_time,
       tables: tablesRows.map(row => Object.values(row)[0]),
-      logCount: countRows[0]?.log_count || 0,
     };
   } catch (error) {
-    const latency = Date.now() - startTime;
     return {
       connected: false,
-      latencyMs: latency,
-      host: dbConfig.host,
+      latencyMs: Date.now() - startTime,
       database: dbConfig.database,
       error: error.message,
     };
